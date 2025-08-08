@@ -1,0 +1,47 @@
+export interface Coordinates {
+  id: string;
+  designation_fr?: string;
+  abbreviation?: string;
+  matricule?: string;
+  rib?: string;
+  email?: string;
+  adresse_fr?: string;
+  phone_1?: string;
+  phone_2?: string;
+  cover?: string;
+  site_web?: string;
+  facebook_link?: string;
+  youtube_link?: string;
+  favicon?: string;
+  logo?: string;
+  logo_facture?: string;
+  logo_footer?: string;
+  short_description_fr?: string;
+  description_fr?: string;
+  created_by?: string;
+  updated_by?: string;
+  created_at?: string;
+  updated_at?: string;
+  timbre?: string;
+  tva?: string;
+  short_description_ticket?: string;
+  footer_ticket?: string;
+  registre_commerce?: string;
+  note?: string;
+  twitter_link?: string;
+  instagram_link?: string;
+  linkedin_link?: string;
+  a_propos?: string;
+  frais_livraison?: string;
+  social_media_text_fr?: string;
+  newsletter_text_fr?: string;
+  store_text_fr?: string;
+  appstore_link?: string;
+  playstore_link?: string;
+  gelocalisation?: string;
+  copyright?: string;
+  whatsapp_link?: string;
+  tiktok_link?: string;
+  title_faq?: string;
+  _id?: string; // MongoDB document id
+}

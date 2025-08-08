@@ -1,0 +1,498 @@
+@tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+
+  :root {
+    --background: #ffffff;
+    --foreground: #000000;
+    --primary: #2563eb;
+    --secondary: #f1f5f9;
+    --accent: #e2e8f0;
+    --text: #1c274c;
+    --text-secondary: #8D93A5;
+    --border: #e2e8f0;
+    --card-bg: #ffffff;
+    --card-shadow: rgba(0, 0, 0, 0.1);
+    --input-bg: #F8F8F8;
+    --gray-1: #F8F8F8;
+    --gray-3: #E1E4EB;
+    --gray-4: #E1E4EB;
+    --dark: #1C274C;
+    --dark-3: #1C274C;
+    --dark-4: #8D93A5;
+    --blue: #2174F5;
+    --blue-dark: #2174F5;
+    --blue-light-4: #E5F0FF;
+  }
+
+  [data-theme="dark"] {
+    --background: #0f172a;
+    --foreground: #ffffff;
+    --primary: #3b82f6;
+    --secondary: #1e293b;
+    --accent: #334155;
+    --text: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border: #334155;
+    --card-bg: #1e293b;
+    --card-shadow: rgba(0, 0, 0, 0.3);
+    --input-bg: #1e293b;
+    --gray-1: #1e293b;
+    --gray-3: #334155;
+    --gray-4: #334155;
+    --dark: #f8fafc;
+    --dark-3: #f8fafc;
+    --dark-4: #94a3b8;
+    --blue: #3b82f6;
+    --blue-dark: #2563eb;
+    --blue-light-4: #1e40af;
+  }
+
+  @layer base {
+    html {
+      @apply scroll-smooth;
+    }
+
+    body {
+      @apply font-euclid-circular-a font-normal text-base relative z-1;
+      background-color: var(--background);
+      color: var(--text);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+  }
+
+  @layer components {
+    .dropdown {
+      @apply flex-col gap-0 min-w-max xl:w-[193px] mt-2 lg:mt-0 shadow-2 ease-in duration-200 py-2.5 rounded-md left-0 hidden
+      xl:translate-y-10 xl:opacity-0 xl:invisible xl:absolute xl:flex
+      xl:group-hover:opacity-100 xl:group-hover:visible;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+    }
+  }
+
+  @layer utilities {
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  }
+
+  /* third-party libraries CSS */
+  input[type='search']::-ms-clear,
+  input[type='search']::-ms-reveal {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  input[type='search']::-webkit-search-decoration,
+  input[type='search']::-webkit-search-cancel-button,
+  input[type='search']::-webkit-search-results-button,
+  input[type='search']::-webkit-search-results-decoration {
+    display: none;
+  }
+
+  .custom-search {
+    -webkit-border-radius: 0;
+    -webkit-border-top-right-radius: 5px;
+    -webkit-border-bottom-right-radius: 5px;
+  }
+
+  .custom-select select {
+    display: none;
+  }
+
+  .select-selected {
+    background-color: var(--gray-1);
+    border: 1px solid var(--gray-3);
+    border-right: 0;
+    color: var(--dark);
+    @apply rounded-l-[5px] cursor-pointer text-custom-sm py-[11px] pl-3.5 pr-8 relative;
+  }
+
+  .select-selected:after {
+    content: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5.00005 5.54998C4.88755 5.54998 4.7938 5.51248 4.70005 5.43748L0.387549 1.19998C0.218799 1.03123 0.218799 0.768726 0.387549 0.599976C0.556299 0.431226 0.818799 0.431226 0.987549 0.599976L5.00005 4.51873L9.01255 0.562476C9.1813 0.393726 9.4438 0.393726 9.61255 0.562476C9.7813 0.731226 9.7813 0.993726 9.61255 1.16248L5.30005 5.39998C5.2063 5.49373 5.11255 5.54998 5.00005 5.54998Z' fill='currentColor'/%3E%3C/svg%3E%0A");
+    @apply absolute top-1/2 -translate-y-1/2 right-4.5 ease-out duration-200;
+  }
+
+  .select-selected.select-arrow-active:after {
+    @apply rotate-180 mt-0.5;
+  }
+
+  .select-items div {
+    color: var(--dark-3);
+    @apply cursor-pointer text-custom-sm py-[7px] px-4.5;
+  }
+
+  .select-items {
+    background-color: var(--card-bg);
+    border: 1px solid var(--gray-3);
+    @apply absolute top-full left-0 right-0 z-99 shadow-2 rounded-md py-2.5 mt-1.5;
+  }
+
+  .select-hide {
+    display: none;
+  }
+
+  .select-items div:hover,
+  .same-as-selected {
+    background-color: var(--gray-1);
+    color: var(--dark);
+  }
+
+  .custom-select-2 .select-selected {
+    background-color: var(--background);
+    color: var(--dark-4);
+    @apply rounded-md !border-r py-1.5 pl-3 pr-9;
+  }
+
+  .custom-select-2 .select-selected:after {
+    content: url("data:image/svg+xml,%3Csvg width='14' height='8' viewBox='0 0 14 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.41444 1.03563L1.41443 1.03565L1.41725 1.0384L6.76725 6.2634L7.00126 6.49194L7.23418 6.26229L12.5842 0.987287L12.5842 0.987293L12.5858 0.985629C12.6807 0.890804 12.8196 0.890804 12.9144 0.985629C13.009 1.08018 13.0093 1.21861 12.9153 1.31341C12.915 1.31368 12.9147 1.31395 12.9144 1.31422L7.16652 6.96217L7.16651 6.96216L7.16444 6.96422C7.06814 7.06053 7.02327 7.06659 7.00015 7.06659C6.94122 7.06659 6.89018 7.05216 6.8204 6.99902L1.08502 1.36339C0.991024 1.26859 0.991301 1.13018 1.08585 1.03563C1.18067 0.940804 1.31962 0.940804 1.41444 1.03563Z' fill='currentColor' stroke='currentColor' stroke-width='0.666667'/%3E%3C/svg%3E%0A");
+    @apply right-3.5;
+  }
+
+  .custom-select-common .select-selected {
+    background-color: var(--gray-1);
+    color: var(--dark-4);
+    @apply rounded-md !border-r py-3 pl-5 pr-9 duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20;
+  }
+
+  .custom-select-common .select-selected:after {
+    content: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2.41469 5.03569L2.41467 5.03571L2.41749 5.03846L7.76749 10.2635L8.0015 10.492L8.23442 10.2623L13.5844 4.98735L13.5844 4.98735L13.5861 4.98569C13.6809 4.89086 13.8199 4.89087 13.9147 4.98569C14.0092 5.08024 14.0095 5.21864 13.9155 5.31345C13.9152 5.31373 13.915 5.31401 13.9147 5.31429L8.16676 10.9622L8.16676 10.9622L8.16469 10.9643C8.06838 11.0606 8.02352 11.0667 8.00039 11.0667C7.94147 11.0667 7.89042 11.0522 7.82064 10.9991L2.08526 5.36345C1.99127 5.26865 1.99154 5.13024 2.08609 5.03569C2.18092 4.94086 2.31986 4.94086 2.41469 5.03569Z' fill='currentColor' stroke='currentColor' stroke-width='0.666667'/%3E%3C/svg%3E%0A");
+    @apply right-4 block mt-1;
+  }
+
+  .custom-select-common .select-selected.select-arrow-active:after {
+    @apply -mt-0.5;
+  }
+
+  /* Carousel styles */
+  .hero-carousel .swiper-pagination-bullet {
+    @apply h-1 w-4 rounded-[11px];
+    background-color: var(--accent);
+  }
+
+  .hero-carousel .swiper-pagination-bullet-active {
+    @apply w-5.5;
+    background-color: var(--blue);
+  }
+
+  .hero-carousel .swiper-pagination {
+    @apply xl:!bottom-5;
+  }
+
+  .common-carousel .swiper-button-next:after,
+  .common-carousel .swiper-button-prev:after {
+    @apply hidden;
+  }
+
+  .common-carousel .swiper-button-next,
+  .common-carousel .swiper-button-prev {
+    background-color: var(--background);
+    border: 1px solid var(--gray-3);
+    color: var(--dark);
+    @apply !static h-9 w-9 rounded-lg m-0 ease-out duration-200;
+  }
+
+  .common-carousel .swiper-button-next:hover,
+  .common-carousel .swiper-button-prev:hover {
+    background-color: var(--blue);
+    color: var(--background);
+    border-color: var(--blue);
+  }
+
+  /* Image zoom */
+  .img-zoom-container img {
+    transition: 0.8s;
+  }
+  .img-zoom-container img:hover {
+    transform: scale(2) rotate(0deg);
+    transition: 0.8s;
+  }
+
+  /* Price slider */
+  .priceSlide .noUi-target {
+    @apply mb-5 mt-9 border-none bg-transparent shadow-none;
+  }
+
+  .priceSlide .noUi-connects {
+    @apply h-1 rounded-full;
+    background-color: var(--gray-3);
+  }
+
+  .priceSlide .noUi-connect {
+    @apply h-1 rounded-full;
+    background-color: var(--blue);
+  }
+
+  .priceSlide .noUi-horizontal .noUi-handle {
+    @apply -top-3 h-7 w-7 rounded-full;
+    background-color: var(--background);
+    border: 1px solid var(--gray-4);
+  }
+
+  .priceSlide .noUi-horizontal .noUi-handle::before {
+    @apply block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full;
+    background-color: var(--blue);
+  }
+
+  .priceSlide .noUi-tooltip {
+    @apply border-none p-0 bg-transparent text-custom-sm;
+    color: var(--dark-4);
+  }
+
+  /* Range slider */
+  .range-slider {
+    @apply w-full !h-[4px] rounded-md relative mb-3;
+    background-color: var(--blue);
+  }
+
+  .slider .thumb {
+    @apply w-6 h-6 rounded-full absolute -top-2;
+    background-color: var(--blue-dark);
+    border: 5px solid var(--blue-light-4);
+  }
+
+  .range-slider__thumb {
+    @apply !bg-white flex justify-center items-center !w-7 !h-7;
+    border: 1px solid var(--blue-light-4);
+  }
+
+  .range-slider__thumb::after {
+    content: "";
+    width: 16px;
+    height: 16px;
+    display: block;
+    border-radius: 100%;
+    position: absolute;
+    background-color: var(--blue);
+  }
+
+  .range-slider__range {
+    background-color: var(--blue);
+  }
+
+  .text-custom-color {
+    color: #ff4500;
+  }
+
+
+  /*
+
+  @media print {
+    body * { visibility: hidden !important; }
+    .invoice-print-area, .invoice-print-area * { visibility: visible !important; }
+    .invoice-print-area {
+      position: absolute !important;
+      left: 0; top: 0; width: 100vw !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; background: white !important; box-shadow: none !important;
+      z-index: 9999 !important;
+    }
+  }
+
+  @media print {
+    .invoice-print-area th,
+    .invoice-print-area .bg-\[\#FF4301\] {
+      background-color: #FF4301 !important;
+      color: #fff !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+  }
+  .invoice-print-area {
+      min-height: unset !important;
+      height: auto !important;
+      page-break-after: avoid !important;
+      page-break-before: avoid !important;
+      page-break-inside: avoid !important;
+      break-after: avoid-page !important;
+      break-before: avoid-page !important;
+      break-inside: avoid-page !important;
+      padding-bottom: 0 !important;
+      margin-bottom: 0 !important;
+    }
+    html, body {
+      min-height: unset !important;
+      height: auto !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    */
+
+    @media (max-width: 480px) {
+    body, html {
+      font-size: 15px;
+    }
+    .container, .max-w-screen-xl, .max-w-screen-lg, .max-w-screen-md, .max-w-screen-sm {
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+    }
+    h1, .text-4xl, .text-3xl, .text-2xl {
+      font-size: 1.3rem !important;
+    }
+    h2, .text-xl, .text-lg {
+      font-size: 1.1rem !important;
+    }
+    .btn, .button, .px-6, .py-3, .px-4, .py-2 {
+      padding: 0.4rem 0.7rem !important;
+      font-size: 0.98rem !important;
+    }
+    img, .w-full, .max-w-full, .object-cover, .object-contain {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+    .swiper, .carousel, .hero-carousel, .common-carousel {
+      min-width: 0 !important;
+      width: 100% !important;
+    }
+    table, .table, .overflow-x-auto {
+      display: block !important;
+      width: 100% !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
+    th, td {
+      font-size: 0.95rem !important;
+      padding: 0.4rem 0.3rem !important;
+    }
+    .form-control, input, select, textarea {
+      font-size: 1rem !important;
+      padding: 0.5rem 0.7rem !important;
+    }
+    .dropdown, .select-items {
+      min-width: 90vw !important;
+      left: 0 !important;
+      right: 0 !important;
+    }
+    .swiper-button-next, .swiper-button-prev {
+      width: 2.2rem !important;
+      height: 2.2rem !important;
+      font-size: 1.1rem !important;
+    }
+    .swiper-pagination {
+      bottom: 0.5rem !important;
+    }
+  }
+
+  @media print {
+    body * { visibility: hidden !important; }
+    .facture-print, .facture-print * { visibility: visible !important;
+    }
+    .facture-print {
+      position: absolute !important;
+      left: 0; top: 0;
+      width: 100vw !important;
+      min-width: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #fff !important;
+      box-shadow: none !important;
+      z-index: 9999 !important;
+      max-width: 800px !important;
+    }
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #fff !important;
+      min-height: 0 !important;
+      height: auto !important;
+    }
+  }
+
+  /*badge for the promotion*/
+
+    /* Alternative more intense flash */
+@keyframes intenseFlash {
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.8;
+    transform: scale(1.05);
+    background-color: #ea580c; /* orange-600 */
+  }
+}
+
+.intense-flashing-badge {
+  animation: intenseFlash 1s infinite;
+  background-color: #f97316;
+  color: white;
+  border-radius: 9999px;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.65rem;
+  font-weight: bold;
+  margin-left: 0.5rem;
+  display: inline-block;
+  vertical-align: middle;
+  box-shadow: 0 0 5px rgba(249, 115, 22, 0.5);
+}
+
+
+@media print {
+  .modal-overlay, .modal-close, .actions, .tab-bar, .fdtab-bar {
+    display: none !important;
+  }
+  /* Optionally, force the printable area to be full width and remove extra margins */
+  .modal-content, .document-print-area, .facture-print {
+    background: #fff !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    min-height: auto !important;
+    position: static !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}
+
+
+
+
+@media print {
+  .facture-print, .document-print-area {
+    margin: 0 auto !important;
+    padding: 0 16px !important;
+    max-width: 800px !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    border: none !important;
+    page-break-before: auto !important;
+    page-break-after: auto !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+}
+
+@media print {
+  /* ...existing facture-print rules... */
+
+  /* Force table head background and text color for print */
+  .facture-print th {
+    background: #FF4301 !important;
+    color: #fff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+

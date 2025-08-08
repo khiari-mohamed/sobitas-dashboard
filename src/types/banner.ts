@@ -1,0 +1,50 @@
+export interface Banner {
+  _id?: string;
+  id: string;
+  sous_categorie_id: string;
+  designation_fr: string;
+  cover: string;
+  qte: string;
+  prix_ht: string | null;
+  prix: string;
+  promo_ht: string | null;
+  promo: string;
+  description_fr: string;
+  publier: string;
+  created_by: string | null;
+  updated_by: string | null;
+  created_at: string;
+  updated_at: string;
+  code_product: string;
+  slug: string;
+  pack: string;
+  brand_id: string | null;
+  new_product: string;
+  best_seller: string;
+  gallery: string;
+  note: string;
+  meta_description_fr: string;
+  promo_expiration_date: string | null;
+  rupture: string;
+  alt_cover: string | null;
+  description_cover: string | null;
+  meta: string;
+  content_seo: string | null;
+  review: string | null;
+  aggregateRating: string | null;
+  nutrition_values: string;
+  questions: string;
+  zone1: string;
+  zone2: string;
+  zone3: string;
+  zone4: string;
+  aroma_ids: string[] | null;
+
+  // Banner-specific fields
+  title: string;
+  imageUrl: string;
+  linkUrl: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}

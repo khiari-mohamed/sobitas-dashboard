@@ -1,0 +1,44 @@
+/* Print styles for Ticket de Caisse (receipt) only */
+
+@media print {
+  @page {
+    size: 80mm 250mm;
+    margin: 0;
+  }
+  body {
+    background: white !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+  .ticket-paper-outer, .ticket-root {
+    display: block !important;
+    width: 80mm !important;
+    min-width: 80mm !important;
+    max-width: 80mm !important;
+    height: 250mm !important;
+    min-height: 250mm !important;
+    max-height: 250mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background: white !important;
+    box-shadow: none !important;
+    border: initial !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-before: avoid !important;
+    page-break-after: avoid !important;
+    overflow: hidden !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Ensure only the ticket is visible on print */
+  body > *:not(.ticket-paper-outer) {
+    display: none !important;
+  }
+  /* Hide any print-hide elements */
+  .print-hide {
+    display: none !important;
+  }
+}

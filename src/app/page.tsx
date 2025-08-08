@@ -1,103 +1,113 @@
-import Image from "next/image";
-
-export default function Home() {
+import { FileText, Users, Archive } from "lucide-react";
+import EspaceStatistiques from '@/components/EspaceStatistiques';
+export default function HomePage() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <section className="p-6">
+      <h1 className="text-2xl font-bold text-[#222A3F] mb-6">
+        Bienvenue sur le tableau de bord SOBITAS
+      </h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+      {/* Search Client History */}
+      <div className="bg-white p-6 rounded shadow-sm border mb-8">
+        <form className="flex flex-col md:flex-row md:items-center gap-4">
+          {/* Label */}
+          <label className="text-sm font-semibold text-black whitespace-nowrap">
+            Chercher l'historique de votre Client
+          </label>
+
+          {/* Input with up/down arrows */}
+          <div className="relative w-full md:w-[400px]">
+            <input
+              type="text"
+              placeholder="Numéro de téléphone"
+              className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1 text-gray-400">
+              <svg
+                className="w-3 h-3 hover:text-black cursor-pointer"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M5.23 12.21L10 7.44l4.77 4.77-1.06 1.06L10 9.56l-3.71 3.71-1.06-1.06z" />
+              </svg>
+              <svg
+                className="w-3 h-3 hover:text-black cursor-pointer"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M14.77 7.79L10 12.56 5.23 7.79l1.06-1.06L10 10.44l3.71-3.71 1.06 1.06z" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Button */}
+          <button
+            type="submit"
+            className="flex items-center gap-2 px-6 py-2 bg-[#FF6600] hover:bg-[#e65c00] text-white text-sm font-medium rounded transition"
           >
-            Read our docs
-          </a>
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1011.5 19.5a7.5 7.5 0 005.15-2.85z"
+              />
+            </svg>
+            Chercher
+          </button>
+        </form>
+      </div>
+
+      
+   {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Commandes */}
+        <div className="relative rounded overflow-hidden shadow bg-cover bg-center h-72" style={{ backgroundImage: "url('/commandes-bg.jpg')" }}>
+          <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-white text-center px-4">
+            <div className="bg-black bg-opacity-50 rounded-full p-4 mb-4">
+              <FileText className="w-10 h-10" />
+            </div>
+            <p className="text-2xl font-semibold mb-1">784</p>
+            <p className="text-sm mb-4">Nouvelle Commandes</p>
+            <button className="bg-sky-500 hover:bg-sky-600 text-white text-sm font-semibold px-4 py-2 rounded">
+              Consulter la liste des commandes
+            </button>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          {/* Clients */}
+        <div className="relative rounded overflow-hidden shadow bg-cover bg-center h-72" style={{ backgroundImage: "url('/clients-bg.jpg')" }}>
+          <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-white text-center px-4">
+            <div className="bg-black bg-opacity-50 rounded-full p-4 mb-4">
+              <Users className="w-10 h-10" />
+            </div>
+            <p className="text-2xl font-semibold mb-1">4408</p>
+            <p className="text-sm mb-4">Clients</p>
+            <button className="bg-sky-500 hover:bg-sky-600 text-white text-sm font-semibold px-4 py-2 rounded">
+              Consulter la liste des clients
+            </button>
+          </div>
+        </div> {/* Produits */}
+        <div className="relative rounded overflow-hidden shadow bg-cover bg-center h-72" style={{ backgroundImage: "url('/produits-bg.jpg')" }}>
+          <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-white text-center px-4">
+            <div className="bg-black bg-opacity-50 rounded-full p-4 mb-4">
+              <Archive className="w-10 h-10" />
+            </div>
+            <p className="text-2xl font-semibold mb-1">319</p>
+            <p className="text-sm mb-4">Produits</p>
+            <button className="bg-sky-500 hover:bg-sky-600 text-white text-sm font-semibold px-4 py-2 rounded">
+              Consulter la liste des produits
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Espace Statistiques */}
+      <EspaceStatistiques />
+    </section>
   );
 }

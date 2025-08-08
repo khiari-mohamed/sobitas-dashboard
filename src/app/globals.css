@@ -1,26 +1,54 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Print styles: hide global layout, show only document */
+@media print {
+  header, nav, aside, .sidebar, .topbar, .print-hide {
+    display: none !important;
+  }
+  /* Set exact print page size and remove browser margins */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  /* Main document print area (not ticket de caisse) */
+  .print-document, .print-area {
+    display: block !important;
+    width: 100% !important;
+    max-width: 210mm !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background: white !important;
+    box-shadow: none !important;
+    border: initial !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-before: auto !important;
+    page-break-after: auto !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  body {
+    background: white !important;
+    margin: 0 !important;
+    box-shadow: none !important;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+

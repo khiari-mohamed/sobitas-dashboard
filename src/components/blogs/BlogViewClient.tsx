@@ -1,0 +1,157 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { FaEdit, FaTrash, FaArrowLeft } from "react-icons/fa";
+import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
+import { getBlogs } from "@/services/blog.service";
+
+function renderHTML(html: string | null | undefined) {
+  if (!html) return <span className="text-gray-400">—</span>;
+  return <div dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
+function Divider() {
+  return <hr className="my-6 border-gray-200" />;
+}
+
+export default function BlogViewClient({ id }: { id: string }) {
+  const [blog, setBlog] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [showDelete, setShowDelete] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    getBlogs().then((blogs) => {
+      setBlog(blogs.find((b) => b._id === id));
+      setLoading(false);
+    });
+  }, [id]);
+
+  const handleDelete = () => {
+    setShowDelete(false);
+    // TODO: Replace with real delete logic
+    alert("Blog supprimé (placeholder)");
+  };
+
+  if (loading) {
+    return <div className="text-center py-12">Chargement...</div>;
+  }
+
+  if (!blog) {
+    return <div className="text-center py-12 text-red-500">Aucun blog trouvé.</div>;
+  }
+
+  const coverUrl = typeof blog.cover === "string"
+    ? (blog.cover.startsWith("http") ? blog.cover : "/uploads/" + blog.cover.replace(/^\/+/ , ""))
+    : blog.cover?.url
+    ? (blog.cover.url.startsWith("http") ? blog.cover.url : "/uploads/" + blog.cover.url.replace(/^\/+/ , ""))
+    : "/images/placeholder.png";
+
+  return (
+    <div className="bg-white p-8 shadow-xl w-full max-w-[1600px] mx-auto">
+      {/* Top Buttons */}
+      <div className="flex flex-wrap items-center gap-3 mb-8">
+        <Link
+          href={`/admin/blogs/${id}/edit`}
+          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded flex items-center gap-2 text-base"
+        >
+          <FaEdit /> Éditer
+        </Link>
+        <button
+          type="button"
+          onClick={() => setShowDelete(true)}
+          className="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded flex items-center gap-2 text-base"
+        >
+          <FaTrash /> Supprimer
+        </button>
+        <Link
+          href="/admin/blogs"
+          className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 px-6 rounded flex items-center gap-2 text-base"
+        >
+          <FaArrowLeft /> Retourner à la liste
+        </Link>
+      </div>
+      <ConfirmDeleteModal
+        open={showDelete}
+        onClose={() => setShowDelete(false)}
+        onConfirm={handleDelete}
+        productName={blog.title || blog.designation_fr}
+      />
+      {/* Désignation */}
+      <h2 className="text-3xl font-extrabold text-gray-800 mb-3">Désignation</h2>
+      <div className="text-2xl text-gray-900 mb-6 font-semibold">{blog.designation_fr || blog.title || "—"}</div>
+      <Divider />
+      {/* Couverture */}
+      <h3 className="text-2xl font-bold text-gray-700 mb-3">Couverture</h3>
+      <div className="flex flex-col items-center mb-6">
+        <div className="flex items-center justify-center" style={{ width: 660, height: 660 }}>
+          <Image
+            src={coverUrl}
+            alt={blog.title || blog.designation_fr || "Blog image"}
+            width={660}
+            height={660}
+            className="object-contain border w-full h-full"
+            style={{ maxWidth: 660, maxHeight: 660 }}
+          />
+        </div>
+      </div>
+      <Divider />
+      {/* Description */}
+      <h3 className="text-2xl font-bold text-gray-700 mb-3">Description</h3>
+      <div className="mb-6 text-lg leading-relaxed bg-gray-50 border p-4">
+        {renderHTML(blog.description)}
+      </div>
+      <Divider />
+      {/* Publier */}
+      <h3 className="text-2xl font-bold text-gray-700 mb-3">Publié</h3>
+      <div className="mb-6 text-lg">
+        {blog.publier === "1" ? (
+          <span className="text-white bg-teal-500 text-xs px-2 py-1">Oui</span>
+        ) : (
+          <span className="text-xs px-2 py-1 bg-blue-200 text-blue-700">Non</span>
+        )}
+      </div>
+      <Divider />
+      {/* Slug */}
+      <h3 className="text-2xl font-bold text-gray-700 mb-3">Slug</h3>
+      <div className="mb-6 text-lg">{blog.slug ?? "—"}</div>
+      <Divider />
+      {/* Alt Cover (SEO) */}
+      <h3 className="text-2xl font-bold text-gray-700 mb-3">Alt Cover (SEO)</h3>
+      <div className="mb-6 text-lg">{blog.alt_cover ?? "—"}</div>
+      <Divider />
+      {/* Description Cover (SEO) */}
+      <h3 className="text-2xl font-bold text-gray-700 mb-3">Description Cover (SEO)</h3>
+      <div className="mb-6 text-lg">{blog.description_cover ?? "—"}</div>
+      <Divider />
+      {/* Meta */}
+      <h3 className="text-2xl font-bold text-gray-700 mb-3">Meta ( name;content/name;content/name;content......)</h3>
+      <div className="mb-6 text-lg leading-relaxed bg-gray-50 border p-4">
+        {renderHTML(blog.meta)}
+      </div>
+      <Divider />
+      {/* Schema description (seo) */}
+      <h3 className="text-2xl font-bold text-gray-700 mb-3">Schema description (seo)</h3>
+      <div className="mb-6 text-lg leading-relaxed bg-gray-50 border p-4">
+        {renderHTML(blog.content_seo)}
+      </div>
+      <Divider />
+      {/* Review (seo) */}
+      <h3 className="text-2xl font-bold text-gray-700 mb-3">Review (seo)</h3>
+      <div className="mb-6 text-lg">{blog.review ?? "—"}</div>
+      <Divider />
+      {/* AggregateRating (seo) */}
+      <h3 className="text-2xl font-bold text-gray-700 mb-3">AggregateRating (seo)</h3>
+      <div className="mb-6 text-lg">{blog.aggregateRating ?? "—"}</div>
+      <Divider />
+      {/* Dates */}
+      <h3 className="text-2xl font-bold text-gray-700 mb-3">Créé le</h3>
+      <div className="mb-6 text-lg">{blog.createdAt || blog.created_at || "—"}</div>
+      <Divider />
+      <h3 className="text-2xl font-bold text-gray-700 mb-3">Modifié le</h3>
+      <div className="mb-6 text-lg">{blog.updatedAt || blog.updated_at || "—"}</div>
+    </div>
+  );
+}
