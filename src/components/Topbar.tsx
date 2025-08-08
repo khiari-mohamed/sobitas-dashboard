@@ -2,7 +2,9 @@
 
 import { Menu, X, User, Home, LogOut } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import authService from "@/services/auth";
 
 interface TopbarProps {
   sidebarOpen: boolean;
@@ -26,8 +28,21 @@ export default function Topbar({
   toggleCollapse,
   isCollapsed,
 }: TopbarProps) {
+  const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const handleLogout = async () => {
+    try {
+      await authService.adminLogout();
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force logout even if API call fails
+      authService.adminLogout();
+      router.push('/login');
+    }
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -136,6 +151,7 @@ export default function Topbar({
                 Accueil
               </Link>
               <button
+                onClick={handleLogout}
                 className="flex items-center justify-center gap-2 mt-2 px-4 py-2 text-white text-sm font-medium bg-[#FF4500] hover:bg-orange-600 transition-colors"
               >
                 <LogOut className="w-4 h-4" />
