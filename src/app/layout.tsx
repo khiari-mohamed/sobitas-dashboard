@@ -1,6 +1,6 @@
 import './globals.css';
 import type { ReactNode } from 'react';
-import LayoutShell from '@/components/LayoutShell';
+import ConditionalLayout from '@/components/ConditionalLayout';
 
 export const metadata = {
   title: 'Protein Admin',
@@ -10,8 +10,8 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="fr">
-      <body className="flex bg-gray-100">
-        <LayoutShell>{children}</LayoutShell>
+      <body>
+        <ConditionalLayout>{children}</ConditionalLayout>
       </body>
     </html>
   );

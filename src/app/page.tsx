@@ -4,16 +4,27 @@ import EspaceStatistiques from '@/components/EspaceStatistiques';
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "@/lib/axios";
+import authService from "@/services/auth";
 
 export default function HomePage() {
   const router = useRouter();
   const [searchPhone, setSearchPhone] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({
     orders: 0,
     clients: 0,
     products: 0
   });
+
+  useEffect(() => {
+    const token = authService.getToken();
+    if (!token) {
+      router.replace('/login');
+      return;
+    }
+    setIsLoading(false);
+  }, [router]);
 
   // Fetch dashboard stats
   useEffect(() => {
@@ -132,6 +143,14 @@ export default function HomePage() {
       setIsSearching(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-sky-500"></div>
+      </div>
+    );
+  }
 
   return (
     <section className="p-6">
