@@ -14,16 +14,17 @@ export interface LoginResponse {
 
 export const authService = {
   async adminLogin(credentials: LoginCredentials): Promise<LoginResponse> {
-    const response = await axios.post('/auth/admin/login', credentials);
+    const response = await axios.post('/admin/login', {
+      username: credentials.username,
+      password: credentials.password
+    });
     return response.data;
   },
 
   async adminLogout(): Promise<void> {
     const token = localStorage.getItem('admin_token');
     if (token) {
-      await axios.post('/auth/admin/logout', {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.get(`/admin/logout/${token}`);
     }
     localStorage.removeItem('admin_token');
     localStorage.removeItem('admin_username');
@@ -35,9 +36,7 @@ export const authService = {
     if (!token) return false;
 
     try {
-      await axios.get('/auth/admin/verify', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.get(`/admin/check-auth-status/${token}`);
       return true;
     } catch {
       localStorage.removeItem('admin_token');

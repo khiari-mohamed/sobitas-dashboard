@@ -7,12 +7,19 @@ import axios from '@/lib/axios';
 export default function LoginForm() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    username: '',
+    identifier: '',
     password: '',
     remember: false
   });
+  const [signupData, setSignupData] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isSignup, setIsSignup] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,11 +27,10 @@ export default function LoginForm() {
     setError('');
 
     try {
-      const response = await axios.post('/auth/admin/login', {
-        username: formData.username,
+      const response = await axios.post('/admin/login', {
+        identifier: formData.identifier,
         password: formData.password
       });
-
       if (response.data.token) {
         localStorage.setItem('admin_token', response.data.token);
         localStorage.setItem('admin_username', response.data.adminUsername);
@@ -46,13 +52,53 @@ export default function LoginForm() {
     }));
   };
 
+  const handleSignupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSignupData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSignupSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    if (signupData.password !== signupData.confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.post('/admin/register', {
+        username: signupData.username,
+        email: signupData.email,
+        password: signupData.password,
+        role: 'admin' // <-- Add this line
+      });
+
+      if (response.data.token) {
+        localStorage.setItem('admin_token', response.data.token);
+        localStorage.setItem('admin_username', response.data.adminUsername);
+        localStorage.setItem('admin_role', response.data.adminRole);
+        router.push('/');
+      }
+    } catch (error: any) {
+      setError(error.response?.data?.message || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex">
       {/* Left Column - Background Image */}
       <div 
         className="hidden lg:flex lg:w-3/5 relative bg-cover bg-center"
         style={{
-          backgroundImage: "url('https://admin.protein.tn/storage/app/public/settings/December2023/login-bg.jpg')"
+          backgroundImage: "url('/soitas.webp')"
         }}
       >
         {/* Bottom Left Branding */}
@@ -84,7 +130,7 @@ export default function LoginForm() {
           {/* Form Header */}
           <div className="mb-8">
             <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-6">
-              SIGN IN BELOW:
+              {isSignup ? 'CREATE ADMIN ACCOUNT:' : 'ADMIN LOGIN:'}
             </h3>
           </div>
 
@@ -95,58 +141,134 @@ export default function LoginForm() {
             </div>
           )}
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Username Input */}
-            <div>
-              <input
-                type="text"
-                name="username"
-                placeholder="Username"
-                value={formData.username}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-sky-500 focus:outline-none transition-colors"
-              />
-            </div>
+          {/* Login/Signup Form */}
+          {!isSignup ? (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Username Input */}
+              <div>
+                <input
+                  type="text"
+                  name="identifier"
+                  placeholder="Username or Email"
+                  value={formData.identifier}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-sky-500 focus:outline-none transition-colors"
+                />
+              </div>
 
-            {/* Password Input */}
-            <div>
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-sky-500 focus:outline-none transition-colors"
-              />
-            </div>
+              {/* Password Input */}
+              <div>
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-sky-500 focus:outline-none transition-colors"
+                />
+              </div>
 
-            {/* Remember Me */}
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                name="remember"
-                id="remember"
-                checked={formData.remember}
-                onChange={handleChange}
-                className="w-4 h-4 text-sky-500 border-gray-300 rounded focus:ring-sky-500"
-              />
-              <label htmlFor="remember" className="ml-2 text-sm text-gray-900">
-                Remember me
-              </label>
-            </div>
+              {/* Remember Me */}
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="remember"
+                  id="remember"
+                  checked={formData.remember}
+                  onChange={handleChange}
+                  className="w-4 h-4 text-sky-500 border-gray-300 rounded focus:ring-sky-500"
+                />
+                <label htmlFor="remember" className="ml-2 text-sm text-gray-900">
+                  Remember me
+                </label>
+              </div>
 
-            {/* Login Button */}
+              {/* Login Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-sky-500 hover:bg-sky-600 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'SIGNING IN...' : 'LOGIN'}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleSignupSubmit} className="space-y-6">
+              {/* Username Input */}
+              <div>
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="Username"
+                  value={signupData.username}
+                  onChange={handleSignupChange}
+                  required
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-sky-500 focus:outline-none transition-colors"
+                />
+              </div>
+
+              {/* Email Input */}
+              <div>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email"
+                  value={signupData.email}
+                  onChange={handleSignupChange}
+                  required
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-sky-500 focus:outline-none transition-colors"
+                />
+              </div>
+
+              {/* Password Input */}
+              <div>
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  value={signupData.password}
+                  onChange={handleSignupChange}
+                  required
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-sky-500 focus:outline-none transition-colors"
+                />
+              </div>
+
+              {/* Confirm Password Input */}
+              <div>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="Confirm Password"
+                  value={signupData.confirmPassword}
+                  onChange={handleSignupChange}
+                  required
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-sky-500 focus:outline-none transition-colors"
+                />
+              </div>
+
+              {/* Signup Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-sky-500 hover:bg-sky-600 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'CREATING ADMIN...' : 'SIGN UP'}
+              </button>
+            </form>
+          )}
+
+          {/* Toggle between Login/Signup */}
+          <div className="mt-6 text-center">
             <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-sky-500 hover:bg-sky-600 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              type="button"
+              onClick={() => setIsSignup(!isSignup)}
+              className="text-sky-500 hover:text-sky-600 text-sm font-medium"
             >
-              {loading ? 'SIGNING IN...' : 'LOGIN'}
+              {isSignup ? 'Already have an account? Sign In' : "Don't have an admin account? Sign Up"}
             </button>
-          </form>
+          </div>
         </div>
       </div>
     </div>

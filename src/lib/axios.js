@@ -1,9 +1,7 @@
 import axios from 'axios';
-import Cookies from 'js-cookie';
 
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL, 
-  withCredentials: true, 
+  baseURL: 'https://ecommercebackend-production-6915.up.railway.app',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -12,7 +10,7 @@ const axiosInstance = axios.create({
 
 // Request interceptor (adds auth token to headers)
 axiosInstance.interceptors.request.use((config) => {
-  const token = Cookies.get("store-auth-token"); // Get token from cookies
+  const token = localStorage.getItem('admin_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -25,7 +23,10 @@ axiosInstance.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       console.error('Unauthorized - Redirect to login');
-      // Optional: Clear user store or redirect
+      localStorage.removeItem('admin_token');
+      localStorage.removeItem('admin_username');
+      localStorage.removeItem('admin_role');
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
