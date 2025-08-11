@@ -1,135 +1,93 @@
-import axios, { AxiosRequestConfig } from "axios";
-import { useEffect, useState } from "react";
+const API_BASE_URL = 'http://localhost:3001';
 
-const BASE_URL = process.env.NEXT_PUBLIC_ANALYTICS_API_URL || "http://localhost:5000/analytics";
-
-/**
- * Generic fetcher for analytics endpoints.
- * @param endpoint - API endpoint (e.g. 'revenue-over-time')
- * @param params - Query parameters as object
- * @param config - Optional Axios config (headers, etc.)
- */
-async function fetchAnalytics<T = any>(
-  endpoint: string,
-  params: Record<string, any> = {},
-  config: AxiosRequestConfig = {}
-): Promise<T> {
+// Add error handling wrapper
+const apiCall = async (url: string) => {
   try {
-    const res = await axios.get(`${BASE_URL}/${endpoint}`, {
-      params,
-      ...config,
-    });
-    return res.data;
-  } catch (error: any) {
-    // Robust error handling
-    if (axios.isAxiosError(error)) {
-      // Optionally log or send to monitoring
-      throw new Error(
-        error.response?.data?.message ||
-        error.response?.statusText ||
-        "Analytics API error"
-      );
+    console.log('Calling API:', url);
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
-    throw new Error("Unknown analytics fetch error");
+    const data = await response.json();
+    console.log('API Response:', data);
+    return data;
+  } catch (error) {
+    console.error('API call failed:', url, error);
+    throw error;
   }
-}
+};
 
-// Specific analytics fetchers using the generic function
+export const fetchRevenueOverTime = async (params?: { 
+  timeFrame?: string; 
+  startDate?: string; 
+  endDate?: string; 
+}) => {
+  const queryParams = new URLSearchParams();
+  if (params?.timeFrame) queryParams.append('timeFrame', params.timeFrame);
+  if (params?.startDate) queryParams.append('startDate', params.startDate);
+  if (params?.endDate) queryParams.append('endDate', params.endDate);
+  
+  return apiCall(`${API_BASE_URL}/analytics/revenue-over-time?${queryParams}`);
+};
 
-export async function fetchRevenueOverTime(params = {}) {
-  const res = await axios.get(`${BASE_URL}/revenue-over-time`, { params });
-  let data = res.data;
-  if (!Array.isArray(data)) data = [];
-  return data.map((d: any, i: number) => ({
-    label: d.label || d.month || d.date || d._id || `M${i+1}`,
-    totalRevenue: d.totalRevenue || d.revenue || d.value || d.total || 0,
-    orderCount: d.orderCount || d.orders || d.users || d.count || 0,
-  }));
-}
+export const fetchYearOverYear = async () => {
+  return apiCall(`${API_BASE_URL}/analytics/year-over-year`);
+};
 
-export function fetchYearOverYear(params = {}, config = {}) {
-  return fetchAnalytics("year-over-year", params, config);
-}
+export const fetchCategoryPerformance = async (params?: { 
+  startDate?: string; 
+  endDate?: string; 
+}) => {
+  const queryParams = new URLSearchParams();
+  if (params?.startDate) queryParams.append('startDate', params.startDate);
+  if (params?.endDate) queryParams.append('endDate', params.endDate);
+  
+  return apiCall(`${API_BASE_URL}/analytics/category-performance?${queryParams}`);
+};
 
-export function fetchMonthlyEvolution(params = {}, config = {}) {
-  return fetchAnalytics("monthly-evolution", params, config);
-}
+export const fetchPromoCodeStats = async (params?: { 
+  startDate?: string; 
+  endDate?: string; 
+}) => {
+  const queryParams = new URLSearchParams();
+  if (params?.startDate) queryParams.append('startDate', params.startDate);
+  if (params?.endDate) queryParams.append('endDate', params.endDate);
+  
+  return apiCall(`${API_BASE_URL}/analytics/promo-code-stats?${queryParams}`);
+};
 
-export function fetchMostSoldProduct(params = {}, config = {}) {
-  return fetchAnalytics("most-sold", params, config);
-}
+export const fetchSalesByCountry = async () => {
+  return apiCall(`${API_BASE_URL}/analytics/sales-by-country`);
+};
 
-export function fetchBestDayForProduct(productId: string, params = {}, config = {}) {
-  return fetchAnalytics(`best-day/${productId}`, params, config);
-}
+export const fetchModuleStatistics = async (module: string, params?: {
+  startDate?: string;
+  endDate?: string;
+}) => {
+  const queryParams = new URLSearchParams();
+  queryParams.append('module', module);
+  if (params?.startDate) queryParams.append('startDate', params.startDate);
+  if (params?.endDate) queryParams.append('endDate', params.endDate);
 
-export function fetchHighestRevenueDay(params = {}, config = {}) {
-  return fetchAnalytics("highest-revenue-day", params, config);
-}
+  let endpoint = '';
+  switch (module) {
+    case 'Commande':
+      endpoint = '/analytics/revenue-over-time';
+      break;
+    case 'Facture TVA':
+      endpoint = '/analytics/revenue-over-time';
+      break;
+    case 'Produit':
+      endpoint = '/analytics/top-products';
+      break;
+    case 'User':
+      endpoint = '/analytics/recent-activity';
+      break;
+    default:
+      endpoint = '/analytics/revenue-over-time';
+  }
 
-export function fetchRevenueByBrand(params = {}, config = {}) {
-  return fetchAnalytics("revenue-by-brand", params, config);
-}
-
-export function fetchTopProducts(params = {}, config = {}) {
-  return fetchAnalytics("top-products", params, config);
-}
-
-export function fetchOrdersByCategory(params = {}, config = {}) {
-  return fetchAnalytics("orders-by-category", params, config);
-}
-
-export function fetchCategoryPerformance(params = {}, config = {}) {
-  return fetchAnalytics("category-performance", params, config);
-}
-
-export function fetchPromoCodeStats(params = {}, config = {}) {
-  return fetchAnalytics("promo-code-stats", params, config);
-}
-
-export function fetchSalesByCountry(params = {}, config = {}) {
-  return fetchAnalytics("sales-by-country", params, config);
-}
-
-export function fetchMargins(params = {}, config = {}) {
-  return fetchAnalytics("margins", params, config);
-}
-
-export function fetchFilterSales(params = {}, config = {}) {
-  return fetchAnalytics("filter-sales", params, config);
-}
-
-export function fetchSalesByBrand(params = {}, config = {}) {
-  return fetchAnalytics("sales-by-brand", params, config);
-}
-
-export function fetchDailySales(params = {}, config = {}) {
-  return fetchAnalytics("daily-sales", params, config);
-}
-
-export function fetchRecentActivity(params = {}, config = {}) {
-  return fetchAnalytics("recent-activity", params, config);
-}
-
-export { fetchAnalytics };
-
-/**
- * Custom hook to use revenue over time data
- * @param dateRange - The date range for the data
- */
-export function useRevenueOverTime(dateRange) {
-  const [salesData, setSalesData] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setLoading(true);
-    fetchRevenueOverTime({ range: dateRange })
-      .then((data) => {
-        setSalesData(data || []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [dateRange]);
-
-  return { salesData, loading };
-}
+  const response = await fetch(`${API_BASE_URL}${endpoint}?${queryParams}`);
+  if (!response.ok) throw new Error(`Failed to fetch ${module} statistics`);
+  return response.json();
+};

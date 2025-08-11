@@ -76,7 +76,7 @@ export default function LoginForm() {
         username: signupData.username,
         email: signupData.email,
         password: signupData.password,
-        role: 'admin' // <-- Add this line
+        role: 'admin'
       });
 
       if (response.data.token) {
@@ -103,9 +103,7 @@ export default function LoginForm() {
       >
         {/* Bottom Left Branding */}
         <div className="absolute bottom-8 left-8 flex items-center gap-3">
-          <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-xl">S</span>
-          </div>
+          <img src="/favicon.ico" alt="SOBITAS Logo" className="w-12 h-12 rounded-full" />
           <div>
             <h2 className="text-white font-bold text-xl">SOBITAS</h2>
             <p className="text-white text-sm opacity-90">Bienvenue dans l'espace administration</p>
@@ -118,9 +116,7 @@ export default function LoginForm() {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-xl">S</span>
-            </div>
+            <img src="/favicon.ico" alt="SOBITAS Logo" className="w-12 h-12 rounded-full" />
             <div>
               <h2 className="text-gray-900 font-bold text-xl">SOBITAS</h2>
               <p className="text-gray-600 text-sm">Administration</p>
@@ -130,13 +126,13 @@ export default function LoginForm() {
           {/* Form Header */}
           <div className="mb-8">
             <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-6">
-              {isSignup ? 'CREATE ADMIN ACCOUNT:' : 'ADMIN LOGIN:'}
+              {isSignup ? 'CRÉER UN COMPTE ADMIN:' : 'CONNEXION ADMIN:'}
             </h3>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700">
               {error}
             </div>
           )}
@@ -149,11 +145,11 @@ export default function LoginForm() {
                 <input
                   type="text"
                   name="identifier"
-                  placeholder="Username or Email"
+                  placeholder="Nom d'utilisateur ou Email"
                   value={formData.identifier}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-sky-500 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 border-2 border-gray-300 focus:border-sky-500 focus:outline-none transition-colors"
                 />
               </div>
 
@@ -162,11 +158,11 @@ export default function LoginForm() {
                 <input
                   type="password"
                   name="password"
-                  placeholder="Password"
+                  placeholder="Mot de passe"
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-sky-500 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 border-2 border-gray-300 focus:border-sky-500 focus:outline-none transition-colors"
                 />
               </div>
 
@@ -178,10 +174,10 @@ export default function LoginForm() {
                   id="remember"
                   checked={formData.remember}
                   onChange={handleChange}
-                  className="w-4 h-4 text-sky-500 border-gray-300 rounded focus:ring-sky-500"
+                  className="w-4 h-4 text-sky-500 border-gray-300 focus:ring-sky-500"
                 />
                 <label htmlFor="remember" className="ml-2 text-sm text-gray-900">
-                  Remember me
+                  Se souvenir de moi
                 </label>
               </div>
 
@@ -189,9 +185,9 @@ export default function LoginForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-sky-500 hover:bg-sky-600 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-sky-500 hover:bg-sky-600 text-white font-medium py-3 px-4 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'SIGNING IN...' : 'LOGIN'}
+                {loading ? 'CONNEXION...' : 'SE CONNECTER'}
               </button>
             </form>
           ) : (
@@ -201,11 +197,11 @@ export default function LoginForm() {
                 <input
                   type="text"
                   name="username"
-                  placeholder="Username"
+                  placeholder="Nom d'utilisateur"
                   value={signupData.username}
                   onChange={handleSignupChange}
                   required
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-sky-500 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 border-2 border-gray-300 focus:border-sky-500 focus:outline-none transition-colors"
                 />
               </div>
 
@@ -218,7 +214,7 @@ export default function LoginForm() {
                   value={signupData.email}
                   onChange={handleSignupChange}
                   required
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-sky-500 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 border-2 border-gray-300 focus:border-sky-500 focus:outline-none transition-colors"
                 />
               </div>
 
@@ -227,11 +223,11 @@ export default function LoginForm() {
                 <input
                   type="password"
                   name="password"
-                  placeholder="Password"
+                  placeholder="Mot de passe"
                   value={signupData.password}
                   onChange={handleSignupChange}
                   required
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-sky-500 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 border-2 border-gray-300 focus:border-sky-500 focus:outline-none transition-colors"
                 />
               </div>
 
@@ -240,11 +236,11 @@ export default function LoginForm() {
                 <input
                   type="password"
                   name="confirmPassword"
-                  placeholder="Confirm Password"
+                  placeholder="Confirmer le mot de passe"
                   value={signupData.confirmPassword}
                   onChange={handleSignupChange}
                   required
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-sky-500 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 border-2 border-gray-300 focus:border-sky-500 focus:outline-none transition-colors"
                 />
               </div>
 
@@ -252,9 +248,9 @@ export default function LoginForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-sky-500 hover:bg-sky-600 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-sky-500 hover:bg-sky-600 text-white font-medium py-3 px-4 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'CREATING ADMIN...' : 'SIGN UP'}
+                {loading ? 'CRÉATION...' : 'S\'INSCRIRE'}
               </button>
             </form>
           )}
@@ -266,7 +262,7 @@ export default function LoginForm() {
               onClick={() => setIsSignup(!isSignup)}
               className="text-sky-500 hover:text-sky-600 text-sm font-medium"
             >
-              {isSignup ? 'Already have an account? Sign In' : "Don't have an admin account? Sign Up"}
+              {isSignup ? 'Vous avez déjà un compte? Se connecter' : "Vous n'avez pas de compte admin? S'inscrire"}
             </button>
           </div>
         </div>

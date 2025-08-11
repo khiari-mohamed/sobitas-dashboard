@@ -14,12 +14,12 @@ interface TopbarProps {
 }
 
 const actionButtons = [
-  { label: "+ Ajouter Ticket", color: "bg-green-500", href: "#" },
-  { label: "+ Ajouter BC", color: "bg-sky-500", href: "#" },
-  { label: "+ Ajouter Facture (TVA)", color: "bg-red-600", href: "#" },
-  { label: "+ Ajouter Client", color: "bg-orange-400", href: "#" },
-  { label: "+ Ajouter Produit", color: "bg-amber-700", href: "#" },
-  { label: "+ Ajouter Blog", color: "bg-emerald-500", href: "#" },
+  { label: "+ Ajouter Ticket", color: "bg-green-500", href: "/admin/facture/new?component=ticket" },
+  { label: "+ Ajouter BC", color: "bg-sky-500", href: "/admin/facture/new?component=bon_commande" },
+  { label: "+ Ajouter Facture (TVA)", color: "bg-red-600", href: "/admin/facture/new?component=facture_tva" },
+  { label: "+ Ajouter Client", color: "bg-orange-400", href: "/admin/clients/new" },
+  { label: "+ Ajouter Produit", color: "bg-amber-700", href: "/admin/produits/new" },
+  { label: "+ Ajouter Blog", color: "bg-emerald-500", href: "/admin/blogs/new" },
 ];
 
 export default function Topbar({
