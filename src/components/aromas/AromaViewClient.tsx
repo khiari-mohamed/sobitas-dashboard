@@ -27,7 +27,7 @@ export default function AromaViewClient({ id }: { id: string }) {
   }
 
   return (
-    <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-[800px] mx-auto">
+    <div className="bg-white p-8 shadow-xl w-full max-w-screen-2xl mx-auto">
       <div className="flex flex-wrap items-center gap-3 mb-8">
         <button
           type="button"

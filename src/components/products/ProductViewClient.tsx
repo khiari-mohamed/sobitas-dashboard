@@ -96,7 +96,7 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
         productName={product.designation_fr || product.title || product.designation}
       />
 
-      <div className="bg-white rounded-xl shadow-lg p-10 w-full">
+      <div className="bg-white shadow-lg p-10 w-full max-w-screen-2xl mx-auto">
         {/* Désignation */}
         <h2 className="text-3xl font-extrabold text-gray-800 mb-3">Désignation</h2>
         <div className="text-2xl text-gray-900 mb-6 font-semibold">{product.designation_fr || product.title || product.designation || "—"}</div>
@@ -137,9 +137,19 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
         <div className="mb-6 text-lg">{subCategories.join(", ") || "—"}</div>
         <Divider />
 
+        {/* Sous-catégorie ID */}
+        <h3 className="text-2xl font-bold text-gray-700 mb-3">Sous-catégorie ID</h3>
+        <div className="mb-6 text-lg">{product.sous_categorie_id ?? product.sousCategorieId ?? "—"}</div>
+        <Divider />
+
         {/* Marque */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Marque</h3>
         <div className="mb-6 text-lg">{getBrand(product)}</div>
+        <Divider />
+
+        {/* Brand ID */}
+        <h3 className="text-2xl font-bold text-gray-700 mb-3">Brand ID</h3>
+        <div className="mb-6 text-lg">{product.brand_id ?? product.brandId ?? "—"}</div>
         <Divider />
 
         {/* Qte */}
@@ -152,9 +162,19 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
         <div className="mb-6 text-lg">{product.prix ?? product.price ?? "—"}</div>
         <Divider />
 
+        {/* Prix HT */}
+        <h3 className="text-2xl font-bold text-gray-700 mb-3">Prix HT</h3>
+        <div className="mb-6 text-lg">{product.prix_ht ?? product.prixHt ?? "—"}</div>
+        <Divider />
+
         {/* Promo */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Promo</h3>
         <div className="mb-6 text-lg">{product.promo ?? product.promoHt ?? product.oldPrice ?? "—"}</div>
+        <Divider />
+
+        {/* Promo HT */}
+        <h3 className="text-2xl font-bold text-gray-700 mb-3">Promo HT</h3>
+        <div className="mb-6 text-lg">{product.promo_ht ?? product.promoHt ?? "—"}</div>
         <Divider />
 
         {/* Date d'expiration du promo (Ventes Flash) */}
@@ -176,6 +196,10 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
 
         {/* Nutrition Values */}
         <LargeTextSection title="Nutrition Values" content={product.nutrition_values} />
+        <Divider />
+
+        {/* Content SEO */}
+        <LargeTextSection title="Content SEO" content={product.content_seo ?? product.contentSeo} />
         <Divider />
 
         {/* Publier */}
@@ -221,7 +245,33 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
             value={product.new_product === "1"}
             yes="Oui"
             no="Non"
-            yesClass="bg-teal-500 text-white"
+            yesClass="bg-orange-500 text-white"
+            noClass="bg-blue-200 text-blue-700"
+          />
+        </div>
+        <Divider />
+
+        {/* isFeatured */}
+        <h3 className="text-2xl font-bold text-gray-700 mb-3">isFeatured</h3>
+        <div className="mb-6 text-lg">
+          <Highlight
+            value={product.isFeatured === "1"}
+            yes="Oui"
+            no="Non"
+            yesClass="bg-purple-500 text-white"
+            noClass="bg-blue-200 text-blue-700"
+          />
+        </div>
+        <Divider />
+
+        {/* isNewArrival */}
+        <h3 className="text-2xl font-bold text-gray-700 mb-3">isNewArrival</h3>
+        <div className="mb-6 text-lg">
+          <Highlight
+            value={product.isNewArrival === "1"}
+            yes="Oui"
+            no="Non"
+            yesClass="bg-indigo-500 text-white"
             noClass="bg-blue-200 text-blue-700"
           />
         </div>
@@ -252,8 +302,34 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
             value={product.best_seller === "1"}
             yes="Oui"
             no="Non"
-            yesClass="bg-teal-500 text-white"
+            yesClass="bg-yellow-500 text-white"
             noClass="bg-blue-200 text-blue-700"
+          />
+        </div>
+        <Divider />
+
+        {/* bestSellerSection */}
+        <h3 className="text-2xl font-bold text-gray-700 mb-3">bestSellerSection</h3>
+        <div className="mb-6 text-lg">
+          <Highlight
+            value={product.bestSellerSection}
+            yes="Oui"
+            no="Non"
+            yesClass="bg-yellow-600 text-white"
+            noClass="bg-blue-200 text-blue-700"
+          />
+        </div>
+        <Divider />
+
+        {/* inStock */}
+        <h3 className="text-2xl font-bold text-gray-700 mb-3">inStock</h3>
+        <div className="mb-6 text-lg">
+          <Highlight
+            value={product.inStock}
+            yes="Oui"
+            no="Non"
+            yesClass="bg-green-500 text-white"
+            noClass="bg-red-200 text-red-700"
           />
         </div>
         <Divider />
@@ -320,6 +396,21 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
         <Divider />
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Tabilation Zone4</h3>
         <div className="mb-6 text-lg">{product.zone4 ?? "—"}</div>
+        <Divider />
+
+        {/* Créé le */}
+        <h3 className="text-2xl font-bold text-gray-700 mb-3">Créé le</h3>
+        <div className="mb-6 text-lg">{getDate(product, 'created_at')}</div>
+        <Divider />
+
+        {/* Créé par */}
+        <h3 className="text-2xl font-bold text-gray-700 mb-3">Créé par</h3>
+        <div className="mb-6 text-lg">{product.created_by ?? product.createdBy ?? "—"}</div>
+        <Divider />
+
+        {/* Modifié par */}
+        <h3 className="text-2xl font-bold text-gray-700 mb-3">Modifié par</h3>
+        <div className="mb-6 text-lg">{product.updated_by ?? product.updatedBy ?? "—"}</div>
       </div>
     </div>
   );

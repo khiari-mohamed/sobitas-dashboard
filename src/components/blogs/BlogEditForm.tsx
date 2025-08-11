@@ -81,7 +81,7 @@ export default function BlogEditForm({ id }: { id: string }) {
             type="text"
             name="designation_fr"
             className="w-full border p-4 text-base"
-            value={form.designation_fr}
+            value={form.designation_fr || ""}
             onChange={handleChange}
             required
           />
@@ -121,7 +121,7 @@ export default function BlogEditForm({ id }: { id: string }) {
           <select
             name="publier"
             className="w-full border p-4 text-base"
-            value={form.publier}
+            value={form.publier || "1"}
             onChange={handleChange}
           >
             <option value="1">Oui</option>
@@ -135,7 +135,7 @@ export default function BlogEditForm({ id }: { id: string }) {
             type="text"
             name="slug"
             className="w-full border p-4 text-base"
-            value={form.slug}
+            value={form.slug || ""}
             onChange={handleChange}
             required
           />
@@ -147,7 +147,7 @@ export default function BlogEditForm({ id }: { id: string }) {
             type="text"
             name="alt_cover"
             className="w-full border p-4 text-base"
-            value={form.alt_cover}
+            value={form.alt_cover || ""}
             onChange={handleChange}
           />
         </div>
@@ -157,7 +157,7 @@ export default function BlogEditForm({ id }: { id: string }) {
           <textarea
             name="description_cover"
             className="w-full border p-4 text-base"
-            value={form.description_cover}
+            value={form.description_cover || ""}
             onChange={handleChange}
             rows={2}
           />
@@ -168,7 +168,7 @@ export default function BlogEditForm({ id }: { id: string }) {
           <textarea
             name="meta"
             className="w-full border p-4 text-base"
-            value={form.meta}
+            value={form.meta || ""}
             onChange={handleChange}
             rows={2}
           />
@@ -188,7 +188,7 @@ export default function BlogEditForm({ id }: { id: string }) {
             type="text"
             name="review"
             className="w-full border p-4 text-base"
-            value={form.review}
+            value={form.review || ""}
             onChange={handleChange}
           />
         </div>
@@ -199,7 +199,7 @@ export default function BlogEditForm({ id }: { id: string }) {
             type="text"
             name="aggregateRating"
             className="w-full border p-4 text-base"
-            value={form.aggregateRating}
+            value={form.aggregateRating || ""}
             onChange={handleChange}
           />
         </div>

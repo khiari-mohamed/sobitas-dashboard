@@ -15,23 +15,32 @@ const emptyProduct = {
   designationFr: "",
   cover: "",
   subCategory: [] as string[],
+  sousCategorieId: "",
   brand: "",
+  brandId: "",
   qte: "",
   prix: "",
+  prixHt: "",
   promo: "",
+  promoHt: "",
   promoExpirationDate: "",
   metaDescriptionFr: "",
   descriptionFr: "",
   questions: "",
   nutritionValues: "",
+  contentSeo: "",
   publier: false,
   slug: "",
   pack: false,
   gallery: [] as File[],
   newProduct: false,
+  isFeatured: false,
+  isNewArrival: false,
   rupture: false,
   note: "",
   bestSeller: false,
+  bestSellerSection: false,
+  inStock: true,
   aromaIds: [],
   tags: "",
   meta: "",
@@ -45,6 +54,9 @@ const emptyProduct = {
   zone2: "",
   zone3: "",
   zone4: "",
+  createdAt: "",
+  createdBy: "",
+  updatedBy: "",
 };
 
 const generateRandomCode = () =>
@@ -264,7 +276,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   };
 
   return (
-    <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-[1800px] mx-auto">
+    <div className="bg-white p-8 shadow-xl w-full max-w-screen-2xl mx-auto">
       <div className="flex flex-wrap items-center gap-3 mb-8">
         <button
           type="button"
@@ -344,6 +356,15 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         </div>
         {/* --- RESTORE ALL OTHER FIELDS BELOW, UNCHANGED --- */}
         <div>
+          <label className="block text-xl font-semibold mb-2">Sous-catégorie ID</label>
+          <input
+            type="text"
+            className="w-full border p-4 rounded text-base"
+            value={form.sousCategorieId}
+            onChange={e => handleChange("sousCategorieId", e.target.value)}
+          />
+        </div>
+        <div>
           <label className="block text-xl font-semibold mb-2">Marque</label>
           <select
             className="w-full border p-4 rounded text-base mb-2"
@@ -361,6 +382,15 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             value={form.brand}
             onChange={e => handleChange("brand", e.target.value)}
             placeholder="Tapez ou collez une marque, ou sélectionnez ci-dessus"
+          />
+        </div>
+        <div>
+          <label className="block text-xl font-semibold mb-2">Brand ID</label>
+          <input
+            type="text"
+            className="w-full border p-4 rounded text-base"
+            value={form.brandId}
+            onChange={e => handleChange("brandId", e.target.value)}
           />
         </div>
         <div className="flex gap-4">
@@ -383,12 +413,32 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             />
           </div>
           <div className="flex-1">
+            <label className="block text-xl font-semibold mb-2">Prix HT</label>
+            <input
+              type="number"
+              className="w-full border p-4 rounded text-base"
+              value={form.prixHt}
+              onChange={e => handleChange("prixHt", e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="flex gap-4">
+          <div className="flex-1">
             <label className="block text-xl font-semibold mb-2">Promo</label>
             <input
               type="number"
               className="w-full border p-4 rounded text-base"
               value={form.promo}
               onChange={e => handleChange("promo", e.target.value)}
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block text-xl font-semibold mb-2">Promo HT</label>
+            <input
+              type="number"
+              className="w-full border p-4 rounded text-base"
+              value={form.promoHt}
+              onChange={e => handleChange("promoHt", e.target.value)}
             />
           </div>
         </div>
@@ -431,6 +481,14 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             value={form.nutritionValues}
             onChange={value => handleChange("nutritionValues", value)}
             label="Nutrition Values"
+          />
+        </div>
+        <div>
+          <Editor
+            key={form.contentSeo}
+            value={form.contentSeo}
+            onChange={value => handleChange("contentSeo", value)}
+            label="Content SEO"
           />
         </div>
         <div className="flex items-center gap-4">
@@ -480,6 +538,24 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           />
         </div>
         <div className="flex items-center gap-4">
+          <label className="text-xl font-semibold">isFeatured</label>
+          <input
+            type="checkbox"
+            checked={!!form.isFeatured}
+            onChange={e => handleChange("isFeatured", e.target.checked)}
+            className="w-5 h-5"
+          />
+        </div>
+        <div className="flex items-center gap-4">
+          <label className="text-xl font-semibold">isNewArrival</label>
+          <input
+            type="checkbox"
+            checked={!!form.isNewArrival}
+            onChange={e => handleChange("isNewArrival", e.target.checked)}
+            className="w-5 h-5"
+          />
+        </div>
+        <div className="flex items-center gap-4">
           <label className="text-xl font-semibold">Etat de stock (Rupture)</label>
           <input
             type="checkbox"
@@ -509,6 +585,24 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             type="checkbox"
             checked={!!form.bestSeller}
             onChange={e => handleChange("bestSeller", e.target.checked)}
+            className="w-5 h-5"
+          />
+        </div>
+        <div className="flex items-center gap-4">
+          <label className="text-xl font-semibold">bestSellerSection</label>
+          <input
+            type="checkbox"
+            checked={!!form.bestSellerSection}
+            onChange={e => handleChange("bestSellerSection", e.target.checked)}
+            className="w-5 h-5"
+          />
+        </div>
+        <div className="flex items-center gap-4">
+          <label className="text-xl font-semibold">inStock</label>
+          <input
+            type="checkbox"
+            checked={!!form.inStock}
+            onChange={e => handleChange("inStock", e.target.checked)}
             className="w-5 h-5"
           />
         </div>
@@ -625,6 +719,33 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             className="w-full border p-4 rounded text-base"
             value={form.zone4}
             onChange={e => handleChange("zone4", e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block text-xl font-semibold mb-2">Créé le</label>
+          <input
+            type="datetime-local"
+            className="w-full border p-4 rounded text-base"
+            value={form.createdAt}
+            onChange={e => handleChange("createdAt", e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block text-xl font-semibold mb-2">Créé par</label>
+          <input
+            type="text"
+            className="w-full border p-4 rounded text-base"
+            value={form.createdBy}
+            onChange={e => handleChange("createdBy", e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block text-xl font-semibold mb-2">Modifié par</label>
+          <input
+            type="text"
+            className="w-full border p-4 rounded text-base"
+            value={form.updatedBy}
+            onChange={e => handleChange("updatedBy", e.target.value)}
           />
         </div>
         <button

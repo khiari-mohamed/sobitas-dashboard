@@ -113,14 +113,8 @@ export default function ProductTable() {
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Search */}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <select className="border rounded px-3 py-2 text-sm w-full sm:w-60">
-          <option>Désignation</option>
-        </select>
-        <select className="border rounded px-3 py-2 text-sm w-full sm:w-40">
-          <option>contains</option>
-        </select>
         <div className="relative w-full sm:w-72">
           <input
             type="text"

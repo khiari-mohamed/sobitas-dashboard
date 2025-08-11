@@ -16,23 +16,32 @@ const FIELD_ORDER = [
   { key: "designation_fr", label: "Désignation", type: "input" },
   { key: "cover", label: "Image principale", type: "cover" },
   { key: "subCategory", label: "Sous-catégorie", type: "input" },
+  { key: "sous_categorie_id", label: "Sous-catégorie ID", type: "input" },
   { key: "brand", label: "Marque", type: "input" },
+  { key: "brand_id", label: "Brand ID", type: "input" },
   { key: "qte", label: "Quantité", type: "input", inputType: "number" },
   { key: "prix", label: "Prix", type: "input", inputType: "number" },
+  { key: "prix_ht", label: "Prix HT", type: "input", inputType: "number" },
   { key: "promo", label: "Promo", type: "input", inputType: "number" },
+  { key: "promo_ht", label: "Promo HT", type: "input", inputType: "number" },
   { key: "promo_expiration_date", label: "Date d'expiration promo", type: "input", inputType: "date" },
   { key: "meta_description_fr", label: "Meta Description", type: "richtext" },
   { key: "description_fr", label: "Description", type: "richtext" },
   { key: "questions", label: "Questions", type: "richtext" },
   { key: "nutrition_values", label: "Valeurs nutritionnelles", type: "richtext" },
+  { key: "content_seo", label: "Content SEO", type: "richtext" },
   { key: "publier", label: "Publier", type: "switch" },
   { key: "slug", label: "Slug", type: "input" },
   { key: "pack", label: "Pack", type: "switch" },
   { key: "gallery", label: "Galerie d’images", type: "gallery" },
   { key: "new_product", label: "Nouveau produit", type: "switch" },
+  { key: "isFeatured", label: "isFeatured", type: "switch" },
+  { key: "isNewArrival", label: "isNewArrival", type: "switch" },
   { key: "rupture", label: "Rupture de stock", type: "switch" },
   { key: "note", label: "Étoiles", type: "input", inputType: "number" },
   { key: "best_seller", label: "Meilleure vente", type: "switch" },
+  { key: "bestSellerSection", label: "bestSellerSection", type: "switch" },
+  { key: "inStock", label: "inStock", type: "switch" },
   { key: "aroma_ids", label: "Arômes", type: "input" },
   { key: "tags", label: "Tags", type: "input" },
   { key: "meta", label: "Balises Meta (name;content...)", type: "textarea" },
@@ -46,6 +55,9 @@ const FIELD_ORDER = [
   { key: "zone2", label: "Zone 2", type: "input" },
   { key: "zone3", label: "Zone 3", type: "input" },
   { key: "zone4", label: "Zone 4", type: "input" },
+  { key: "created_at", label: "Créé le", type: "input", inputType: "datetime-local" },
+  { key: "created_by", label: "Créé par", type: "input" },
+  { key: "updated_by", label: "Modifié par", type: "input" },
 ];
 
 interface ProductEditFormProps {
@@ -193,7 +205,7 @@ export default function ProductEditForm({ product, setProduct }: ProductEditForm
   };
 
   return (
-    <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-[1800px] mx-auto">
+    <div className="bg-white p-8 shadow-xl w-full max-w-screen-2xl mx-auto">
       <div className="flex flex-wrap items-center gap-3 mb-8">
         <button
           type="button"

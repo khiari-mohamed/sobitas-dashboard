@@ -81,7 +81,7 @@ export default function CategoryViewClient({ category, id }: { category: Categor
         onConfirm={handleDelete}
         productName={category.designation || category.designation_fr || category.title}
       />
-      <div className="bg-white rounded-xl shadow-lg p-10 w-full">
+      <div className="bg-white shadow-lg p-10 w-full max-w-screen-2xl mx-auto">
         <h2 className="text-3xl font-extrabold text-gray-800 mb-3">Couverture</h2>
         <div className="flex flex-col items-center mb-6">
           <div className="w-[300px] h-[300px] flex items-center justify-center">
