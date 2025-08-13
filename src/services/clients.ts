@@ -9,7 +9,7 @@ export async function fetchClients(): Promise<Client[]> {
 }
 
 export async function createClient(data: Partial<Client>) {
-  const res = await fetch(`${API_URL}/clients`, {
+  const res = await fetch(`${API_URL}/clients/guest`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),

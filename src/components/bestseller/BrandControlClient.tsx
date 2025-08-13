@@ -67,6 +67,7 @@ export default function BrandControlClient() {
       setBrands(brands.filter(b => b._id !== brand._id));
     } catch (err) {
       console.error(err);
+      alert('Erreur lors de la suppression de la marque');
     } finally {
       setUpdating(null);
     }

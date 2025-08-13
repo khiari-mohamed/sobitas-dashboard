@@ -14,9 +14,16 @@ export const getSubCategoriesByCategory = async (categoryId: string): Promise<Su
 };
 
 // Create a new subcategory
-export const createSubCategory = async (payload: Partial<SubCategory>) => {
-  const res = await axios.post('/admin/subcategories/new', payload);
-  return res.data;
+export const createSubCategory = async (payload: Partial<SubCategory> | FormData, isFormData = false) => {
+  if (isFormData) {
+    const res = await axios.post('/admin/subcategories/new', payload, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return res.data;
+  } else {
+    const res = await axios.post('/admin/subcategories/new', payload);
+    return res.data;
+  }
 };
 
 // Update a subcategory

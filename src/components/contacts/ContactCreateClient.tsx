@@ -2,14 +2,16 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import contactsService from "@/services/contacts";
-import { Contact } from "@/types/contacts";
+import { createClient } from "@/services/clients";
+import { Client } from "@/types/client";
 
-const initialForm: Omit<Contact, "_id" | "created_at" | "updated_at"> = {
-  id: "",
+const initialForm: Omit<Client, "_id" | "created_at" | "updated_at"> = {
   name: "",
   email: "",
-  message: "",
+  phone_1: "",
+  ville: "",
+  adresse: "",
+  subscriber: false,
 };
 
 export default function ContactCreateClient() {
@@ -27,36 +29,25 @@ export default function ContactCreateClient() {
     setLoading(true);
     setError(null);
     try {
-      await contactsService.createContact(form);
-      router.push("/admin/contact");
+      await createClient(form);
+      router.push("/admin/clients");
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Erreur lors de la création du contact.");
+      setError(err?.response?.data?.message || "Erreur lors de la création du client.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-white p-8 shadow-xl w-full max-w-[1600px] mx-auto">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Créer un contact</h1>
+    <div className="bg-white p-8 shadow-xl w-full max-w-screen-2xl mx-auto">
+      <h1 className="text-3xl font-bold text-gray-800 mb-8">Créer un client</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="p-6 bg-gray-50 border">
-          <label className="block text-lg font-semibold mb-2">ID</label>
-          <input
-            type="text"
-            name="id"
-            value={form.id}
-            onChange={handleChange}
-            className="w-full border p-4 text-base"
-            required
-          />
-        </div>
         <div className="p-6 bg-gray-50 border">
           <label className="block text-lg font-semibold mb-2">Nom</label>
           <input
             type="text"
             name="name"
-            value={form.name}
+            value={form.name || ""}
             onChange={handleChange}
             className="w-full border p-4 text-base"
             required
@@ -74,15 +65,46 @@ export default function ContactCreateClient() {
           />
         </div>
         <div className="p-6 bg-gray-50 border">
-          <label className="block text-lg font-semibold mb-2">Message</label>
-          <textarea
-            name="message"
-            value={form.message}
+          <label className="block text-lg font-semibold mb-2">Téléphone</label>
+          <input
+            type="text"
+            name="phone_1"
+            value={form.phone_1 || ""}
             onChange={handleChange}
             className="w-full border p-4 text-base"
-            rows={5}
-            required
           />
+        </div>
+        <div className="p-6 bg-gray-50 border">
+          <label className="block text-lg font-semibold mb-2">Ville</label>
+          <input
+            type="text"
+            name="ville"
+            value={form.ville || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+          />
+        </div>
+        <div className="p-6 bg-gray-50 border">
+          <label className="block text-lg font-semibold mb-2">Adresse</label>
+          <input
+            type="text"
+            name="adresse"
+            value={form.adresse || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+          />
+        </div>
+        <div className="p-6 bg-gray-50 border">
+          <label className="flex items-center text-lg font-semibold">
+            <input
+              type="checkbox"
+              name="subscriber"
+              checked={form.subscriber || false}
+              onChange={(e) => setForm({ ...form, subscriber: e.target.checked })}
+              className="mr-2"
+            />
+            Abonné
+          </label>
         </div>
         {error && <div className="text-red-600 font-semibold">{error}</div>}
         <button
@@ -90,7 +112,7 @@ export default function ContactCreateClient() {
           className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 text-xl disabled:opacity-50"
           disabled={loading}
         >
-          {loading ? "Création..." : "Créer le contact"}
+          {loading ? "Création..." : "Créer le client"}
         </button>
       </form>
     </div>

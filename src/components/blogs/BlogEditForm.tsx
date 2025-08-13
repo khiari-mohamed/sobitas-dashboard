@@ -130,14 +130,14 @@ export default function BlogEditForm({ id }: { id: string }) {
         </div>
         {/* Slug */}
         <div className="mb-6">
-          <label className="block text-xl font-semibold mb-2">Slug</label>
+          <label className="block text-xl font-semibold mb-2">Slug (optionnel)</label>
           <input
             type="text"
             name="slug"
             className="w-full border p-4 text-base"
             value={form.slug || ""}
             onChange={handleChange}
-            required
+            placeholder="Laissez vide pour génération automatique"
           />
         </div>
         {/* Alt Cover (SEO) */}

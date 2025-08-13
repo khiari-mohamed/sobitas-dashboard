@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createSubCategory } from "@/services/subcategories";
 import { getCategories } from "@/services/categories";
@@ -8,9 +9,11 @@ import RichTextEditor from "@/components/ui/RichTextEditor";
 
 const emptySubcategory: Partial<SubCategory> = {
   category: "",
+  designation: "",
   designation_fr: "",
   description_fr: "",
   slug: "",
+  cover: null as File | null,
   alt_cover: "",
   description_cove: "",
   meta: "",
@@ -31,6 +34,11 @@ export default function SubcategoryCreateClient() {
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setForm((prev) => ({ ...prev, cover: file }));
+  };
+
   useEffect(() => {
     getCategories().then(setCategories);
   }, []);
@@ -43,25 +51,34 @@ export default function SubcategoryCreateClient() {
     e.preventDefault();
     setLoading(true);
     try {
-      await createSubCategory({
-        category: typeof form.category === "string" ? form.category : (form.category as any)?._id || "",
-        designation_fr: form.designation_fr,
-        description_fr: form.description_fr,
-        slug: form.slug,
-        alt_cover: form.alt_cover,
-        description_cove: form.description_cove,
-        meta: form.meta,
-        content_seo: form.content_seo,
-        review: form.review,
-        aggregateRating: form.aggregateRating,
-        nutrition_values: form.nutrition_values,
-        questions: form.questions,
-        more_details: form.more_details,
-        zone1: form.zone1,
-        zone2: form.zone2,
-        zone3: form.zone3,
-      });
+      const categoryId = typeof form.category === "string" ? form.category : (form.category as any)?._id || "";
+      
+      // Always use JSON - no FormData issues
+      const { cover, ...jsonData } = {
+        name: form.designation_fr || form.designation || "Untitled",
+        categoryId: categoryId || null,
+        designation: form.designation || "",
+        designation_fr: form.designation_fr || "",
+        description_fr: form.description_fr || "",
+        slug: form.slug || (form.designation_fr ? form.designation_fr.toLowerCase().replace(/\s+/g, '-') : "untitled"),
+        alt_cover: form.alt_cover || "",
+        description_cove: form.description_cove || "",
+        meta: form.meta || "",
+        content_seo: form.content_seo || "",
+        review: form.review || "",
+        aggregateRating: form.aggregateRating || "",
+        nutrition_values: form.nutrition_values || "",
+        questions: form.questions || "",
+        more_details: form.more_details || "",
+        zone1: form.zone1 || "",
+        zone2: form.zone2 || "",
+        zone3: form.zone3 || "",
+      };
+      await createSubCategory(jsonData, false);
       router.push("/admin/subcategories");
+    } catch (error) {
+      console.error('Error creating subcategory:', error);
+      alert('Erreur lors de la création de la sous-catégorie');
     } finally {
       setLoading(false);
     }
@@ -77,13 +94,30 @@ export default function SubcategoryCreateClient() {
             className="w-full border p-4 rounded text-base"
             value={typeof form.category === "string" ? form.category : (form.category as any)?._id || ""}
             onChange={e => handleChange("category", e.target.value)}
-            required
           >
             <option value="">Sélectionner une catégorie...</option>
             {categories.map((cat) => (
               <option key={cat._id} value={cat._id}>{cat.designation_fr || cat.designation || cat.name}</option>
             ))}
           </select>
+        </div>
+        <div>
+          <label className="block text-xl font-semibold mb-2">Couverture</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="w-full border p-2 rounded text-base"
+          />
+          {form.cover && form.cover instanceof File && (
+            <div className="mt-2">
+              <img
+                src={URL.createObjectURL(form.cover)}
+                alt="Aperçu"
+                className="w-48 h-32 object-cover border rounded"
+              />
+            </div>
+          )}
         </div>
         <div>
           <label className="block text-xl font-semibold mb-2">Slug</label>
@@ -95,13 +129,21 @@ export default function SubcategoryCreateClient() {
           />
         </div>
         <div>
+          <label className="block text-xl font-semibold mb-2">Désignation</label>
+          <input
+            type="text"
+            className="w-full border p-4 rounded text-base"
+            value={form.designation || ''}
+            onChange={e => handleChange("designation", e.target.value)}
+          />
+        </div>
+        <div>
           <label className="block text-xl font-semibold mb-2">Désignation FR</label>
           <input
             type="text"
             className="w-full border p-4 rounded text-base"
             value={form.designation_fr}
             onChange={e => handleChange("designation_fr", e.target.value)}
-            required
           />
         </div>
         <RichTextEditor

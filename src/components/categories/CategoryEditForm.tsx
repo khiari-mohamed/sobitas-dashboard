@@ -102,14 +102,24 @@ export default function CategoryEditForm({ category }: { category: Category }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateCategory(form._id, form, image);
-    router.push("/admin/categories");
+    try {
+      await updateCategory(form._id, form, image);
+      router.push("/admin/categories");
+    } catch (error) {
+      console.error('Error updating category:', error);
+      alert('Error updating category. Please try again.');
+    }
   };
 
   const handleDelete = async () => {
     setShowDelete(false);
-    await deleteCategory(form._id);
-    router.push("/admin/categories");
+    try {
+      await deleteCategory(form._id);
+      router.push("/admin/categories");
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      alert('Error deleting category. Please try again.');
+    }
   };
 
   let mainImage = image

@@ -24,25 +24,28 @@ export default function SubcategoryEditForm({ subcategory }: { subcategory: SubC
     e.preventDefault();
     setLoading(true);
     try {
+      const categoryId = typeof form.category === "string" ? form.category : (form.category as any)?._id || "";
+      
       await updateSubCategory(subcategory._id, {
-        name: form.name || "",
-        category: typeof form.category === "string" ? form.category : (form.category as any)?._id || "",
-        designation_fr: form.designation_fr,
-        description_fr: form.description_fr,
-        slug: form.slug,
-        alt_cover: form.alt_cover,
-        description_cove: form.description_cove,
-        meta: form.meta,
-        content_seo: form.content_seo,
-        review: form.review,
-        aggregateRating: form.aggregateRating,
-        nutrition_values: form.nutrition_values,
-        questions: form.questions,
-        more_details: form.more_details,
-        zone1: form.zone1,
-        zone2: form.zone2,
-        zone3: form.zone3,
-      });
+        name: form.designation_fr || form.name || "Untitled",
+        categoryId: categoryId || null,
+        designation: form.designation || form.designation_fr || "",
+        designation_fr: form.designation_fr || "",
+        description_fr: form.description_fr || "",
+        slug: form.slug || "",
+        alt_cover: form.alt_cover || "",
+        description_cove: form.description_cove || "",
+        meta: form.meta || "",
+        content_seo: form.content_seo || "",
+        review: form.review || "",
+        aggregateRating: form.aggregateRating || "",
+        nutrition_values: form.nutrition_values || "",
+        questions: form.questions || "",
+        more_details: form.more_details || "",
+        zone1: form.zone1 || "",
+        zone2: form.zone2 || "",
+        zone3: form.zone3 || "",
+      } as any);
       router.push("/admin/subcategories");
     } finally {
       setLoading(false);

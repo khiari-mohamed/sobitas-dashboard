@@ -29,11 +29,11 @@ export const fetchAllBrandsForControl = async (): Promise<Brand[]> => {
 };
 
 export const updateBrandForControl = async (id: string, payload: Partial<Brand>) => {
-  const res = await axios.put(`/brands/update/${id}`, payload);
+  const res = await axios.put(`/brands/${id}`, payload);
   return res.data;
 };
 
 export const deleteBrandForControl = async (id: string) => {
-  const res = await axios.delete(`/brands/delete/${id}`);
+  const res = await axios.delete(`/brands/${id}`);
   return res.data;
 };

@@ -21,9 +21,15 @@ export default function AromaEditForm({ id }: { id: string }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await updateAroma(id, form);
-    setLoading(false);
-    router.push("/admin/aromas");
+    try {
+      await updateAroma(id, form);
+      router.push("/admin/aromas");
+    } catch (error) {
+      console.error('Error updating aroma:', error);
+      alert('Erreur lors de la modification de l\'arôme');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (initialLoading) {

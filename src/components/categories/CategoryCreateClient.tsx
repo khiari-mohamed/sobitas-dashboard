@@ -77,8 +77,14 @@ export default function CategoryCreateClient() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await createCategory(form, image);
-    router.push("/admin/categories");
+    try {
+      const result = await createCategory(form, image);
+      console.log('Category created successfully:', result);
+      router.push("/admin/categories");
+    } catch (error) {
+      console.error('Error creating category:', error);
+      alert('Error creating category. Please try again.');
+    }
   };
 
   const mainImage = image

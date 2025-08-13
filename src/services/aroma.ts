@@ -30,3 +30,8 @@ export const updateAroma = async (id: string, data: Partial<Aroma>): Promise<Aro
   const res = await axios.put(`/aromas/${id}`, data);
   return res.data;
 };
+
+export const deleteAroma = async (id: string) => {
+  const res = await axios.delete(`/aromas/${id}`);
+  return res.data;
+};

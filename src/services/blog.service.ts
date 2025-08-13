@@ -73,29 +73,29 @@ export const getBlogBySlug = async (slug: string): Promise<Blog | null> => {
 
 export const createBlog = async (payload: any, isFormData = false) => {
   if (isFormData) {
-    const response = await axios.post(`${API_URL}/new`, payload, {
+    const response = await axios.post(`${API_URL}/upload`, payload, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return response.data;
   } else {
-    const response = await axios.post(`${API_URL}/new`, payload);
+    const response = await axios.post(`${API_URL}`, payload);
     return response.data;
   }
 };
 
 export const updateBlog = async (id: string, payload: any, isFormData = false) => {
   if (isFormData) {
-    const response = await axios.put(`${API_URL}/update/${id}`, payload, {
+    const response = await axios.put(`${API_URL}/${id}`, payload, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return response.data;
   } else {
-    const response = await axios.put(`${API_URL}/update/${id}`, payload);
+    const response = await axios.put(`${API_URL}/${id}`, payload);
     return response.data;
   }
 };
 
 export const deleteBlog = async (id: string) => {
-  const response = await axios.delete(`${API_URL}/delete/${id}`);
+  const response = await axios.delete(`${API_URL}/${id}`);
   return response.data;
 };

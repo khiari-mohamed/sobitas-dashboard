@@ -8,6 +8,7 @@ import { FaMagic, FaTrash, FaArrowLeft } from "react-icons/fa";
 import { getAutofillTemplate } from "@/utils/productAutofillTemplates";
 import { fetchSubcategories } from "@/utils/fetchSubcategories";
 import { getAllBrands } from "@/utils/brands";
+import axios from "@/lib/axios";
 
 const Editor = dynamic(() => import("@/components/ui/RichTextEditor"), { ssr: false });
 
@@ -71,8 +72,9 @@ export default function ProductCreateClient() {
   const [allSubcategories, setAllSubcategories] = useState<{ _id: string; designation: string }[]>([]);
   const [allBrands, setAllBrands] = useState<{ _id: string; designation_fr: string }[]>([]);
   const [productDb, setProductDb] = useState<any[]>([]);
-  const fileInputRef = useRef(null);
-  const galleryInputRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchSubcategories().then((data) => {
@@ -241,9 +243,18 @@ const handleAutofill = (e: React.MouseEvent<HTMLButtonElement>) => {
  const handleReset = () => setForm(emptyProduct);
 
 const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  console.log('🔍 FRONTEND DEBUG - File change event:', e.target.files);
   if (e.target.files && e.target.files[0]) {
-    const fileUrl = URL.createObjectURL(e.target.files[0]);
+    const file = e.target.files[0];
+    console.log('🔍 FRONTEND DEBUG - File selected:', {
+      name: file.name,
+      size: file.size,
+      type: file.type
+    });
+    const fileUrl = URL.createObjectURL(file);
     setForm((prev) => ({ ...prev, cover: fileUrl }));
+  } else {
+    console.log('🔍 FRONTEND DEBUG - No file in change event');
   }
 };
 
@@ -275,6 +286,77 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, subCategory: values }));
   };
 
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    console.log('🔍 FRONTEND DEBUG - File input ref:', fileInputRef.current);
+    console.log('🔍 FRONTEND DEBUG - Files in input:', fileInputRef.current?.files);
+    console.log('🔍 FRONTEND DEBUG - Files length:', fileInputRef.current?.files?.length);
+    
+    const coverFile = fileInputRef.current?.files?.[0];
+    console.log('🔍 FRONTEND DEBUG - Cover file:', coverFile);
+    
+    if (coverFile) {
+      console.log('🔍 FRONTEND DEBUG - File details:', {
+        name: coverFile.name,
+        size: coverFile.size,
+        type: coverFile.type
+      });
+    } else {
+      console.log('🔍 FRONTEND DEBUG - No file detected!');
+    }
+    
+    // Always use FormData to handle both cases
+    const formData = new FormData();
+    
+    // Add all form fields
+    formData.append('designation', form.designationFr || 'Nouveau Produit');
+    formData.append('description', form.descriptionFr || 'Description du produit');
+    formData.append('prix', form.prix || '25');
+    formData.append('promo', form.promo || '20');
+    formData.append('smallDescription', form.metaDescriptionFr || 'Description courte');
+    formData.append('brand', form.brand || '');
+    formData.append('status', 'true');
+    formData.append('question', form.questions || '');
+    formData.append('venteflashDate', form.promoExpirationDate || '');
+    formData.append('codaBar', form.codeProduct || generateRandomCode());
+    formData.append('inStock', 'true');
+    formData.append('subCategoryIds', JSON.stringify(form.subCategory.length > 0 ? form.subCategory : []));
+    formData.append('features', JSON.stringify([]));
+    formData.append('nutritionalValues', JSON.stringify([]));
+    formData.append('variant', JSON.stringify([{
+      title: form.designationFr || 'Default',
+      inStock: true
+    }]));
+    if (form.subCategory.length > 0) {
+      formData.append('categoryId', form.subCategory[0]);
+    }
+    
+    // Add file if selected
+    if (coverFile) {
+      formData.append('file', coverFile);
+      console.log('🔍 FRONTEND DEBUG - File added to FormData:', coverFile.name);
+    } else {
+      console.log('🔍 FRONTEND DEBUG - No file to add to FormData');
+    }
+    
+    const response = await axios.post('/products/admin/new-with-file', formData);
+    
+    if (response.data.success) {
+      alert(coverFile ? 'Produit créé avec image avec succès!' : 'Produit créé avec succès!');
+      router.push('/produits');
+    }
+  } catch (error: any) {
+    console.error('Error creating product:', error);
+    alert('Erreur lors de la création: ' + (error.response?.data?.message || error.message));
+  }
+
+  setLoading(false);
+};
+
+
   return (
     <div className="bg-white p-8 shadow-xl w-full max-w-screen-2xl mx-auto">
       <div className="flex flex-wrap items-center gap-3 mb-8">
@@ -300,7 +382,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           <FaArrowLeft /> Retourner à la liste
         </button>
       </div>
-      <form className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block text-xl font-semibold mb-2">Désignation</label>
           <input
@@ -722,7 +804,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           />
         </div>
         <div>
-          <label className="block text-xl font-semibold mb-2">Créé le</label>
+          <label className="block text-xl font-semibold mb-2">Créé le (optionnel)</label>
           <input
             type="datetime-local"
             className="w-full border p-4 rounded text-base"
@@ -750,9 +832,10 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         </div>
         <button
           type="submit"
-          className="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded text-xl"
+          disabled={loading}
+          className="w-full mt-8 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-4 rounded text-xl"
         >
-          Créer le produit
+          {loading ? 'Création en cours...' : 'Créer le produit'}
         </button>
       </form>
     </div>

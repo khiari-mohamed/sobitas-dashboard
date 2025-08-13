@@ -47,9 +47,7 @@ function normalizeProduct(raw: any): Product {
     features: raw.features || [],
     aroma_ids: raw.aroma_ids || [],
     brand: raw.brand || "",
-    //smallDescription: raw.smallDescription || raw.meta_description_fr || "",
     smallDescription: raw.smallDescription || raw.description_cover || "",
-    //description: raw.description || "",
     description: raw.description || raw.description_fr || "",
     meta_description_fr: raw.meta_description_fr || "",
     category: raw.category || "",
@@ -58,37 +56,27 @@ function normalizeProduct(raw: any): Product {
     isFlashSale: raw.isFlashSale || false,
     discountPercentage: raw.discountPercentage || undefined,
     type: raw.type || "",
-    isNewProduct:
-      raw.isNewProduct !== undefined
-        ? raw.isNewProduct
-        : raw.isNewArrival !== undefined
-        ? raw.isNewArrival
-        : raw.new_product === "1",
-    isBestSeller:
-      raw.isBestSeller !== undefined
-        ? raw.isBestSeller
-        : raw.bestSellerSection !== undefined
-        ? raw.bestSellerSection
-        : raw.best_seller === "1",
+    isNewProduct: raw.isNewProduct !== undefined ? raw.isNewProduct : raw.isNewArrival !== undefined ? raw.isNewArrival : raw.new_product === "1",
+    isBestSeller: raw.isBestSeller !== undefined ? raw.isBestSeller : raw.bestSellerSection !== undefined ? raw.bestSellerSection : raw.best_seller === "1",
     isOutOfStock: raw.isOutOfStock ?? (raw.rupture === "1" ? true : false),
-    isPublished:
-      raw.isPublished !== undefined
-        ? raw.isPublished
-        : raw.publier === "1",
+    isPublished: raw.isPublished !== undefined ? raw.isPublished : raw.publier === "1",
     aggregateRating: raw.aggregateRating ?? (raw.note ? Number(raw.note) : undefined),
     promoExpirationDate: raw.promoExpirationDate ?? raw.promo_expiration_date ?? undefined,
     sous_categorie_id: raw.sous_categorie_id ?? raw.sousCategorieId ?? raw.subCategoryId ?? "",
     cover: raw.cover || raw.mainImage?.url || "",
     nutrition_values: raw.nutrition_values || "",
-questions: raw.questions || "",
-
-zone1: raw.zone1 || "",
-zone2: raw.zone2 || "",
-zone3: raw.zone3 || "",
-zone4: raw.zone4 || "",
-content_seo: raw.content_seo || raw.contentSeo || "",
-meta: raw.meta || "",
-pack: raw.pack || "",
+    questions: raw.questions || "",
+    zone1: raw.zone1 || "",
+    zone2: raw.zone2 || "",
+    zone3: raw.zone3 || "",
+    zone4: raw.zone4 || "",
+    content_seo: raw.content_seo || raw.contentSeo || "",
+    meta: raw.meta || "",
+    pack: raw.pack || "",
+    rupture: raw.rupture || false,
+    status: raw.status || true,
+    qte: raw.qte || 0,
+    quantity: raw.quantity || raw.qte || 0
   };
 }
 // Helper function to transform images with ID support
@@ -175,7 +163,7 @@ export async function getTopProductsFeature(): Promise<Product[]> {
     });
 
     const { products } = extractProductData(response.data);
-    const result = products.map(raw => {
+    const result = products.map((raw: any) => {
       const product = normalizeProduct(raw);
       return {
         ...product,
@@ -208,7 +196,7 @@ export async function getNewProductsFeature(): Promise<Product[]> {
     });
 
     const { products } = extractProductData(response.data);
-    const result = products.map(raw => {
+    const result = products.map((raw: any) => {
       const product = normalizeProduct(raw);
       return {
         ...product,
@@ -241,7 +229,7 @@ export async function getVenteFlashProductFeature(): Promise<FlashSaleProduct[]>
     });
 
     const { products } = extractProductData(response.data);
-    const result = products.map(raw => {
+    const result = products.map((raw: any) => {
       const product = normalizeProduct(raw);
       return {
         ...product,
@@ -283,7 +271,7 @@ export async function getMaterielDeMusculationProductFeature(): Promise<Product[
     });
 
     const { products } = extractProductData(response.data);
-    const result = products.map(raw => {
+    const result = products.map((raw: any) => {
       const product = normalizeProduct(raw);
       return {
         ...product,
@@ -361,7 +349,7 @@ export async function getProductListPage(query: string): Promise<{
 
     const { products, pagination } = extractProductData(productsData);
     const result = {
-      products: products.map(raw => {
+      products: products.map((raw: any) => {
         const product = normalizeProduct(raw);
         return {
           ...product,
@@ -422,7 +410,7 @@ export async function getRelatedProducts(categoryId: string): Promise<Product[]>
     });
 
     const { products } = extractProductData(response.data);
-    const result = products.map(raw => {
+    const result = products.map((raw: any) => {
       const product = normalizeProduct(raw);
       return {
         ...product,
@@ -458,7 +446,7 @@ export async function getLatestProducts(limit: number = 3): Promise<Product[]> {
     });
 
     const { products } = extractProductData(response.data);
-    const result = products.map(raw => {
+    const result = products.map((raw: any) => {
       const product = normalizeProduct(raw);
       return {
         ...product,
@@ -539,7 +527,7 @@ export async function updateProduct(productId: string, productData: any, mainIma
 }
 
 export async function deleteProduct(productId: string): Promise<void> {
-  await axiosInstance.delete(`/products/${productId}`);
+  await axiosInstance.delete(`/products/admin/delete/${productId}`);
 }
 
 /**

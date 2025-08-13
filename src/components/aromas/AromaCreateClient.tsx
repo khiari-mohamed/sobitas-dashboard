@@ -13,9 +13,15 @@ export default function AromaCreateClient() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await createAroma(form);
-    setLoading(false);
-    router.push("/admin/aromas");
+    try {
+      await createAroma(form);
+      router.push("/admin/aromas");
+    } catch (error) {
+      console.error('Error creating aroma:', error);
+      alert('Erreur lors de la création de l\'arôme');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -32,13 +38,13 @@ export default function AromaCreateClient() {
       <form onSubmit={handleSubmit}>
         <h1 className="text-3xl font-bold text-gray-800 mb-8">Ajouter un arôme</h1>
         <div className="mb-6">
-          <label className="block text-xl font-semibold mb-2">Custom ID</label>
+          <label className="block text-xl font-semibold mb-2">Custom ID (optionnel)</label>
           <input
             type="text"
             className="w-full border p-4 rounded text-base"
             value={form.id}
             onChange={e => setForm({ ...form, id: e.target.value })}
-            required
+            placeholder="Laissez vide pour génération automatique"
           />
         </div>
         <div className="mb-6">

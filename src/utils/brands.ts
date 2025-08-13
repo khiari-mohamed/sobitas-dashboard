@@ -11,16 +11,43 @@ export const getAllBrands = async (): Promise<Brand[]> => {
 };
 
 // Create a new brand
-export const createBrand = async (brand: Partial<Brand>): Promise<Brand> => {
-  // You may need to adjust the endpoint and payload as per your backend
-  const res = await axios.post("/brands", brand);
-  return res.data;
+export const createBrand = async (brand: Partial<Brand>, logoFile?: File | null): Promise<Brand> => {
+  if (logoFile) {
+    const formData = new FormData();
+    Object.entries(brand).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        formData.append(key, value as string);
+      }
+    });
+    formData.append('logo', logoFile);
+    const res = await axios.post("/brands", formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return res.data;
+  } else {
+    const res = await axios.post("/brands", brand);
+    return res.data;
+  }
 };
 
 // Update a brand
-export const updateBrand = async (id: string, brand: Partial<Brand>): Promise<Brand> => {
-  const res = await axios.put(`/brands/${id}`, brand);
-  return res.data;
+export const updateBrand = async (id: string, brand: Partial<Brand>, logoFile?: File | null): Promise<Brand> => {
+  if (logoFile) {
+    const formData = new FormData();
+    Object.entries(brand).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        formData.append(key, value as string);
+      }
+    });
+    formData.append('logo', logoFile);
+    const res = await axios.put(`/brands/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return res.data;
+  } else {
+    const res = await axios.put(`/brands/${id}`, brand);
+    return res.data;
+  }
 };
 
 // Delete a brand

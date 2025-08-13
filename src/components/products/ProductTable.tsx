@@ -9,6 +9,7 @@ import { fetchSubcategories } from "@/utils/fetchSubcategories";
 import { SubCategory } from "@/types/subcategory";
 import { FaSearch } from "react-icons/fa";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
+import { deleteProduct as deleteProductAPI } from "@/services/products";
 
 const defaultItemsPerPage = 10;
 
@@ -25,7 +26,6 @@ export default function ProductTable() {
   const [subcategories, setSubcategories] = useState<SubCategory[]>([]);
   const router = useRouter();
 
-  // Fetch products from backend with pagination and search
   useEffect(() => {
     let ignore = false;
     setLoading(true);
@@ -41,24 +41,20 @@ export default function ProductTable() {
     return () => { ignore = true; };
   }, [currentPage, itemsPerPage]);
 
-  // Fetch subcategories for mapping IDs to names
   useEffect(() => {
     fetchSubcategories().then(setSubcategories).catch(console.error);
   }, []);
 
-  // Reset to first page on search
   useEffect(() => {
     setCurrentPage(1);
   }, [search]);
 
-  // Filtering on frontend for search (optional: can be moved to backend if supported)
   const filtered = products.filter((p) =>
     (p.title || p.designation_fr || "")
       .toLowerCase()
       .includes(search.toLowerCase())
   );
 
-  // If search is empty, show all products from backend; if not, filter current page's products
   const paginated = search ? filtered : products;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + paginated.length, totalProducts);
@@ -68,11 +64,37 @@ export default function ProductTable() {
     setDeleteProduct(product);
   };
 
-  const handleConfirmDelete = () => {
-    // TODO: Replace with real delete logic
-    alert("Produit supprimé (placeholder): " + (deleteProduct?.title || deleteProduct?.designation_fr));
-    setDeleteProduct(null);
+  const handleConfirmDelete = async () => {
+    if (!deleteProduct) return;
+    try {
+      await deleteProductAPI(deleteProduct._id);
+      setProducts(prev => prev.filter(p => p._id !== deleteProduct._id));
+      setTotalProducts(prev => prev - 1);
+      setDeleteProduct(null);
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('Erreur lors de la suppression du produit');
+    }
   };
+
+  // --- IMAGE RESOLVER ---
+  function getProductImageUrl(product: Product) {
+    // Check mainImage.url first
+    if (product.mainImage?.url) {
+      if (/^https?:\/\//.test(product.mainImage.url)) {
+        return product.mainImage.url;
+      }
+      return "/" + product.mainImage.url.replace(/^\/+/, "");
+    }
+    // Then check cover
+    if (product.cover && /^https?:\/\//.test(product.cover)) {
+      return product.cover;
+    }
+    if (product.cover && product.cover.length > 0) {
+      return "/" + product.cover.replace(/^\/+/, "");
+    }
+    return "/images/placeholder.png";
+  }
 
   return (
     <div className="bg-white rounded shadow-sm p-4 w-full max-w-[1800px] mx-auto">
@@ -85,10 +107,17 @@ export default function ProductTable() {
       <ConfirmDeleteModal
         open={deleteSelectionOpen}
         onClose={() => setDeleteSelectionOpen(false)}
-        onConfirm={() => {
-          setProducts((prev) => prev.filter(p => !selectedIds.includes(p._id)));
-          setSelectedIds([]);
-          setDeleteSelectionOpen(false);
+        onConfirm={async () => {
+          try {
+            await Promise.all(selectedIds.map(id => deleteProductAPI(id)));
+            setProducts((prev) => prev.filter(p => !selectedIds.includes(p._id)));
+            setTotalProducts(prev => prev - selectedIds.length);
+            setSelectedIds([]);
+            setDeleteSelectionOpen(false);
+          } catch (error) {
+            console.error('Error deleting products:', error);
+            alert('Erreur lors de la suppression des produits');
+          }
         }}
         productName={selectedIds.length === 1
           ? (products.find(p => p._id === selectedIds[0])?.designation_fr || products.find(p => p._id === selectedIds[0])?.title || products.find(p => p._id === selectedIds[0])?.designation)
@@ -122,7 +151,7 @@ export default function ProductTable() {
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
-              setCurrentPage(1); // Reset to first page on search
+              setCurrentPage(1);
             }}
             className="px-3 py-2 border rounded w-full text-sm pr-10"
           />
@@ -184,11 +213,7 @@ export default function ProductTable() {
                 <td className="px-4 py-2">
                   <div className="flex justify-center items-center">
                     <Image
-                      src={
-                        product.cover
-                          ? "/" + product.cover.replace(/^\/+/ , "")
-                          : "/images/placeholder.png"
-                      }
+                      src={getProductImageUrl(product)}
                       alt="cover"
                       width={100}
                       height={100}
@@ -198,11 +223,9 @@ export default function ProductTable() {
                   </div>
                 </td>
                 <td className="px-4 py-2">
-                  {/* sous-catégories: show names, not IDs */}
                   {Array.isArray(product.subCategory) && product.subCategory.length > 0
                     ? product.subCategory.map((sc: any) => {
                         if (typeof sc === 'string') {
-                          // Try to find subcategory by ID
                           const found = subcategories.find(sub => sub._id === sc || sub.id === sc);
                           return found ? (found.designation_fr || found.designation || found.name || found.slug) : sc;
                         }

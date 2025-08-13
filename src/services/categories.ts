@@ -2,6 +2,7 @@ import axios from '@/lib/axios';
 import { isAxiosError } from 'axios';
 import { Category } from '@/types/category';
 export type { Category } from '@/types/category';
+
 export const getCategories = async (): Promise<Category[]> => {
   try {
     const { data } = await axios.get('/categories');
@@ -19,11 +20,9 @@ export const getCategories = async (): Promise<Category[]> => {
 export const getCategoryBySlug = async (slug: string): Promise<Category> => {
   try {
     const { data } = await axios.get(`/categories/slug/${slug}`);
-    
     if (!data) {
       throw new Error('Category not found');
     }
-
     // Build complete image URL if cover exists
     const coverUrl = data.cover 
       ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/storage/${data.cover}`
@@ -44,7 +43,6 @@ export const getCategoryBySlug = async (slug: string): Promise<Category> => {
   }
 };
 
-
 // =======================
 // === Dashboard Admin Functions (do not remove above) ===
 // =======================
@@ -53,38 +51,88 @@ export const getCategoryBySlug = async (slug: string): Promise<Category> => {
  * Create a new category (Dashboard/Admin only)
  */
 export const createCategory = async (categoryData: any, imageFile?: File | null) => {
-  const formData = new FormData();
-  formData.append("designation", categoryData.designation);
-  formData.append("slug", categoryData.slug);
-  if (imageFile) formData.append("image", imageFile);
+  try {
+    const formData = new FormData();
+    Object.keys(categoryData).forEach(key => {
+      const value = categoryData[key];
+      // Only send fields that are not empty, not null, not undefined
+      if (value !== undefined && value !== null && value !== "") {
+        formData.append(key, String(value));
+      }
+    });
+    if (imageFile) formData.append("file", imageFile);
 
-  const response = await axios.post("/categories/new", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return response.data;
+    // Do NOT set Content-Type header manually!
+    const response = await axios.post("/categories", formData);
+    return response.data;
+  } catch (error) {
+    console.error('Create category error:', error);
+    throw error;
+  }
 };
 
 /**
  * Update a category (Dashboard/Admin only)
  */
 export const updateCategory = async (id: string, categoryData: any, imageFile?: File | null) => {
-  const formData = new FormData();
-  formData.append("designation", categoryData.designation);
-  formData.append("slug", categoryData.slug);
-  if (imageFile) formData.append("image", imageFile);
-
-  const response = await axios.put(`/categories/update/${id}`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return response.data;
+  try {
+    console.log('Updating category:', id, categoryData, 'hasFile:', !!imageFile);
+    
+    if (imageFile) {
+      // If there's a file, use FormData with PUT
+      const formData = new FormData();
+      Object.keys(categoryData).forEach(key => {
+        const value = categoryData[key];
+        if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
+      formData.append("file", imageFile);
+      
+      console.log('Sending PUT request with file to:', `http://localhost:5000/categories/${id}`);
+      const response = await fetch(`http://localhost:5000/categories/${id}`, {
+        method: 'PUT',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Update response:', data);
+      return data;
+    } else {
+      // If no file, use FormData with PUT (same as with file but no file attached)
+      const formData = new FormData();
+      Object.keys(categoryData).forEach(key => {
+        const value = categoryData[key];
+        if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
+      
+      console.log('Sending PUT request without file via axios to:', `/categories/${id}`);
+      const response = await axios.put(`/categories/${id}`, formData);
+      
+      console.log('Update response:', response.data);
+      return response.data;
+    }
+  } catch (error: any) {
+    console.error('Update category error:', error);
+    throw error;
+  }
 };
-
 
 /**
  * Delete a category (Dashboard/Admin only)
  */
 export const deleteCategory = async (id: string) => {
-  await axios.delete(`/categories/delete/${id}`);
+  try {
+    const response = await axios.delete(`/categories/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Delete category error:', error);
+    throw error;
+  }
 };
-
-

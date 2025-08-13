@@ -7,6 +7,7 @@ import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 import { FaSearch } from "react-icons/fa";
 import { Category } from "@/types/category";
 import { getCategories } from "@/services/categories";
+import { deleteSubCategory } from "@/services/subcategories";
 
 function stripHtml(html: string): string {
   if (!html) return "";
@@ -20,6 +21,8 @@ function decodeHTMLEntities(text: string): string {
   return txt.value;
 }
 
+const defaultItemsPerPage = 10;
+
 export default function SubcategoryTable() {
   const [subcategories, setSubcategories] = useState<SubCategory[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -28,6 +31,9 @@ export default function SubcategoryTable() {
   const [deleteSelectionOpen, setDeleteSelectionOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage);
+  const [totalSubcategories, setTotalSubcategories] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -38,19 +44,34 @@ export default function SubcategoryTable() {
     ])
       .then(([subs, cats]) => {
         setSubcategories(subs);
+        setTotalSubcategories(subs.length);
         setCategories(cats);
       })
       .finally(() => setLoading(false));
   }, []);
 
+  // Reset to first page on search
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
   const handleDelete = (subcategory: SubCategory) => {
     setDeleteSubcategory(subcategory);
   };
 
-  const handleConfirmDelete = () => {
-    // TODO: Replace with real delete logic
-    alert("Sous-catégorie supprimée (placeholder): " + (deleteSubcategory?.designation_fr || deleteSubcategory?.designation || deleteSubcategory?.name));
-    setDeleteSubcategory(null);
+  const handleConfirmDelete = async () => {
+    if (!deleteSubcategory) return;
+    
+    try {
+      await deleteSubCategory(deleteSubcategory._id);
+      // Remove from local state
+      setSubcategories(prev => prev.filter(s => s._id !== deleteSubcategory._id));
+      setTotalSubcategories(prev => prev - 1);
+      setDeleteSubcategory(null);
+    } catch (error) {
+      console.error('Error deleting subcategory:', error);
+      alert('Erreur lors de la suppression de la sous-catégorie');
+    }
   };
 
   // Search and filter logic
@@ -59,6 +80,13 @@ export default function SubcategoryTable() {
       .toLowerCase()
       .includes(search.toLowerCase())
   );
+
+  // Pagination logic
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginated = search ? filtered : filtered.slice(startIndex, endIndex);
+  const totalPages = search ? 1 : Math.ceil(totalSubcategories / itemsPerPage);
+  const displayTotal = search ? filtered.length : totalSubcategories;
 
   return (
     <div className="bg-white rounded shadow-sm p-4 w-full max-w-[1800px] mx-auto">
@@ -71,10 +99,19 @@ export default function SubcategoryTable() {
       <ConfirmDeleteModal
         open={deleteSelectionOpen}
         onClose={() => setDeleteSelectionOpen(false)}
-        onConfirm={() => {
-          setSubcategories((prev) => prev.filter(s => !selectedIds.includes(s._id)));
-          setSelectedIds([]);
-          setDeleteSelectionOpen(false);
+        onConfirm={async () => {
+          try {
+            // Delete each selected subcategory from backend
+            await Promise.all(selectedIds.map(id => deleteSubCategory(id)));
+            // Remove from local state
+            setSubcategories((prev) => prev.filter(s => !selectedIds.includes(s._id)));
+            setTotalSubcategories(prev => prev - selectedIds.length);
+            setSelectedIds([]);
+            setDeleteSelectionOpen(false);
+          } catch (error) {
+            console.error('Error deleting subcategories:', error);
+            alert('Erreur lors de la suppression des sous-catégories');
+          }
         }}
         productName={selectedIds.length === 1
           ? (subcategories.find(s => s._id === selectedIds[0])?.designation_fr || subcategories.find(s => s._id === selectedIds[0])?.designation || subcategories.find(s => s._id === selectedIds[0])?.name)
@@ -112,12 +149,12 @@ export default function SubcategoryTable() {
               <th className="px-4 py-2">
                 <input
                   type="checkbox"
-                  checked={selectedIds.length > 0 && filtered.every(s => selectedIds.includes(s._id))}
+                  checked={selectedIds.length > 0 && paginated.every(s => selectedIds.includes(s._id))}
                   onChange={e => {
                     if (e.target.checked) {
-                      setSelectedIds(Array.from(new Set([...selectedIds, ...filtered.map(s => s._id)])));
+                      setSelectedIds(Array.from(new Set([...selectedIds, ...paginated.map(s => s._id)])));
                     } else {
-                      setSelectedIds(selectedIds.filter(id => !filtered.map(s => s._id).includes(id)));
+                      setSelectedIds(selectedIds.filter(id => !paginated.map(s => s._id).includes(id)));
                     }
                   }}
                 />
@@ -133,7 +170,7 @@ export default function SubcategoryTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {filtered.map((sub) => {
+            {paginated.map((sub) => {
               let categoryLabel = "";
               if (categories.length > 0 && sub.categorie_id) {
                 const found = categories.find(cat =>
@@ -201,7 +238,7 @@ export default function SubcategoryTable() {
                 </tr>
               );
             })}
-            {filtered.length === 0 && (
+            {paginated.length === 0 && (
               <tr>
                 <td colSpan={9} className="px-4 py-6 text-center text-gray-400">
                   Aucune sous-catégorie trouvée.
@@ -210,6 +247,45 @@ export default function SubcategoryTable() {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination footer */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mt-6 text-sm text-gray-600 w-full">
+        <div className="flex items-center gap-2 mb-2 sm:mb-0">
+          <span>Afficher</span>
+          <select
+            className="border rounded px-2 py-1 text-sm"
+            value={itemsPerPage}
+            onChange={e => {
+              setItemsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+          >
+            {[10, 15, 25, 50].map(n => (
+              <option key={n} value={n}>{n}</option>
+            ))}
+          </select>
+          <span>entrées par page</span>
+        </div>
+        <p>
+          Affichage {displayTotal === 0 ? 0 : (startIndex + 1)} à {displayTotal === 0 ? 0 : Math.min(startIndex + paginated.length, displayTotal)} de {displayTotal} entrées
+        </p>
+        <div className="mt-2 sm:mt-0 space-x-2">
+          <button
+            disabled={currentPage === 1 || loading}
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            ← Précédent
+          </button>
+          <button
+            disabled={currentPage >= totalPages || totalPages === 0 || loading}
+            onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            Suivant →
+          </button>
+        </div>
       </div>
     </div>
   );

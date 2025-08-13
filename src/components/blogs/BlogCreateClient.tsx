@@ -49,15 +49,17 @@ export default function BlogCreateClient() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const formData = new FormData();
-    Object.entries(form).forEach(([key, value]) => {
-      if (value !== null && value !== undefined) {
-        formData.append(key, value as any);
-      }
-    });
-    await createBlog(formData, true);
-    setLoading(false);
-    router.push("/admin/blogs");
+    try {
+      // Always use JSON - no FormData issues
+      const { cover, ...jsonData } = form;
+      await createBlog(jsonData, false);
+      router.push("/admin/blogs");
+    } catch (error) {
+      console.error('Error creating blog:', error);
+      alert('Erreur lors de la création du blog');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -129,14 +131,14 @@ export default function BlogCreateClient() {
         </div>
         {/* Slug */}
         <div className="mb-6">
-          <label className="block text-xl font-semibold mb-2">Slug</label>
+          <label className="block text-xl font-semibold mb-2">Slug (optionnel)</label>
           <input
             type="text"
             name="slug"
             className="w-full border p-4 text-base"
             value={form.slug}
             onChange={handleChange}
-            required
+            placeholder="Laissez vide pour génération automatique"
           />
         </div>
         {/* Alt Cover (SEO) */}

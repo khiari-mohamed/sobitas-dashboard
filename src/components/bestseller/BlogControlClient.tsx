@@ -76,6 +76,7 @@ export default function BlogControlClient() {
       setBlogs(blogs.filter(b => b._id !== blog._id));
     } catch (err) {
       console.error(err);
+      alert('Erreur lors de la suppression du blog');
     } finally {
       setUpdating(null);
     }

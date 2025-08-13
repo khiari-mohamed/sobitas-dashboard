@@ -11,9 +11,11 @@ export default function BrandCreatePage() {
   const handleSubmit = async (brand: any, logoFile?: File | null) => {
     setLoading(true);
     try {
-      // If you want to handle logo upload, do it here
-      await createBrand(brand);
+      await createBrand(brand, logoFile);
       router.push("/admin/brands");
+    } catch (error) {
+      console.error('Error creating brand:', error);
+      alert('Erreur lors de la création de la marque');
     } finally {
       setLoading(false);
     }

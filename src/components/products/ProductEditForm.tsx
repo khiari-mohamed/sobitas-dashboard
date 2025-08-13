@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { FaEye, FaTrash, FaArrowLeft, FaMagic } from "react-icons/fa";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 import { getAutofillTemplate } from "@/utils/productAutofillTemplates";
+import axios from "@/lib/axios";
 
 // Dynamically load TinyMCE editor (client only)
 const Editor = dynamic(() => import("@/components/ui/RichTextEditor"), { ssr: false });
@@ -72,6 +73,7 @@ export default function ProductEditForm({ product, setProduct }: ProductEditForm
   const fileInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const [showDelete, setShowDelete] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
 
   const handleDelete = () => {
     setShowDelete(false);
@@ -100,10 +102,85 @@ export default function ProductEditForm({ product, setProduct }: ProductEditForm
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // 🔁 TODO: Send to backend
-    console.log("Submitting", form);
+    setLoading(true);
+    
+    try {
+      const hasFiles = form.newCover || (form.newGallery && form.newGallery.length > 0);
+      
+      if (hasFiles) {
+        // Use FormData for file uploads
+        const formData = new FormData();
+        formData.append('designation', form.designation_fr || '');
+        formData.append('description', form.description_fr || '');
+        formData.append('price', String(form.prix || 0));
+        formData.append('oldPrice', String(form.promo || 0));
+        formData.append('inStock', String(form.inStock || true));
+        formData.append('status', String(form.publier === '1' || form.publier === true));
+        formData.append('brand', form.brand || '');
+        formData.append('codaBar', form.code_product || '');
+        formData.append('smallDescription', form.meta_description_fr || '');
+        formData.append('question', form.questions || '');
+        formData.append('venteflashDate', form.promo_expiration_date || '');
+        formData.append('subCategoryIds', JSON.stringify([]));
+        formData.append('nutritionalValues', JSON.stringify([]));
+        formData.append('variant', JSON.stringify([{title: form.designation_fr || 'Default', inStock: true}]));
+        
+        const features = [];
+        if (form.new_product === '1' || form.new_product === true) features.push('new-product');
+        if (form.best_seller === '1' || form.best_seller === true) features.push('best-seller');
+        if (form.pack === '1' || form.pack === true) features.push('pack');
+        formData.append('features', JSON.stringify(features));
+        
+        if (form.newCover) formData.append('mainImage', form.newCover);
+        if (form.newGallery && form.newGallery.length > 0) {
+          form.newGallery.forEach((file: File) => formData.append('images', file));
+        }
+        
+        const response = await axios.put(`/products/admin/update/${product._id || product.id}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        
+        if (response.data) {
+          alert('Produit mis à jour avec succès!');
+          router.push('/produits');
+        }
+      } else {
+        // Use JSON for text-only updates - match DTO exactly
+        const payload = {
+          designation: form.designation_fr || '',
+          description: form.description_fr || '',
+          prix: form.prix || 0,
+          promo: form.promo || 0,
+          smallDescription: form.meta_description_fr || '',
+          brand: form.brand || '',
+          status: form.publier === '1' || form.publier === true,
+          question: form.questions || '',
+          venteflashDate: form.promo_expiration_date || '',
+          codaBar: form.code_product || '',
+          inStock: form.inStock !== false,
+          subCategoryIds: [],
+          nutritionalValues: [],
+          variant: [{title: form.designation_fr || 'Default', inStock: true}],
+          features: []
+        };
+        
+        const response = await axios.put(`/products/admin/update/${product._id || product.id}`, payload, {
+          headers: { 'Content-Type': 'application/json' },
+        });
+        
+        if (response.data) {
+          alert('Produit mis à jour avec succès!');
+          router.push('/produits');
+        }
+      }
+    } catch (error: any) {
+      console.error('Error updating product:', error);
+      alert('Erreur lors de la mise à jour: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const mainImage =
@@ -220,9 +297,10 @@ export default function ProductEditForm({ product, setProduct }: ProductEditForm
         {FIELD_ORDER.map(renderField)}
         <button
           type="submit"
-          className="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded text-xl"
+          disabled={loading}
+          className="w-full mt-8 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-4 rounded text-xl"
         >
-          Enregistrer les modifications
+          {loading ? 'Enregistrement...' : 'Enregistrer les modifications'}
         </button>
       </form>
     </div>
