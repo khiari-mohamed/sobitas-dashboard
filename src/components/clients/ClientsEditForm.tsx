@@ -64,7 +64,6 @@ export default function ClientsEditForm({ id }: { id: string }) {
             className="w-full border p-4 text-base"
             value={form.name || ""}
             onChange={handleChange}
-            required
           />
         </div>
         <div className="mb-6">
@@ -75,7 +74,6 @@ export default function ClientsEditForm({ id }: { id: string }) {
             className="w-full border p-4 text-base"
             value={form.email || ""}
             onChange={handleChange}
-            required
           />
         </div>
         <div className="mb-6">

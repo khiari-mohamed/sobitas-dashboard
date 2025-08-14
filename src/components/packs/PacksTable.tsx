@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { fetchAllPacks, deletePack } from "@/services/pack";
+import { fetchAllPacks, deletePack, bulkDeletePacks } from "@/services/pack";
 import { Pack } from "@/types/pack";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 import { FaSearch } from "react-icons/fa";
@@ -60,24 +60,34 @@ export default function PacksTable() {
       try {
         await deletePack(deletePackId);
         setPacks((prev) => prev.filter(p => p._id !== deletePackId));
-        setDeletePackId(null);
+        setSelectedIds((prev) => prev.filter(id => id !== deletePackId));
       } catch (error) {
         console.error("Error deleting pack:", error);
+        alert('Erreur lors de la suppression du pack');
       }
+      setDeletePackId(null);
     }
   };
 
   const handleConfirmDeleteSelection = async () => {
     try {
-      for (const id of selectedIds) {
-        await deletePack(id);
+      // Try bulk delete first
+      try {
+        await bulkDeletePacks(selectedIds);
+      } catch (bulkError) {
+        console.warn('Bulk delete failed, falling back to individual deletes:', bulkError);
+        // Fallback to individual deletes
+        for (const id of selectedIds) {
+          await deletePack(id);
+        }
       }
       setPacks((prev) => prev.filter(p => !p._id || !selectedIds.includes(p._id)));
       setSelectedIds([]);
-      setDeleteSelectionOpen(false);
     } catch (error) {
       console.error("Error deleting packs:", error);
+      alert('Erreur lors de la suppression des packs');
     }
+    setDeleteSelectionOpen(false);
   };
 
   const getPackImage = (pack: Pack, index: number) => {

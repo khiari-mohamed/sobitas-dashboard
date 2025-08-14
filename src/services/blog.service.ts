@@ -71,27 +71,57 @@ export const getBlogBySlug = async (slug: string): Promise<Blog | null> => {
   }
 };
 
-export const createBlog = async (payload: any, isFormData = false) => {
-  if (isFormData) {
-    const response = await axios.post(`${API_URL}/upload`, payload, {
-      headers: { "Content-Type": "multipart/form-data" },
+export const createBlog = async (blogData: any, imageFile?: File | null) => {
+  try {
+    // Always use FormData to handle both cases
+    const formData = new FormData();
+    
+    // Add all form fields
+    Object.keys(blogData).forEach(key => {
+      const value = blogData[key];
+      if (value !== undefined && value !== null && value !== "") {
+        formData.append(key, String(value));
+      }
     });
+    
+    // Add file if provided
+    if (imageFile) {
+      formData.append("file", imageFile);
+    }
+
+    // Use the working endpoint
+    const response = await axios.post(`${API_URL}/admin/new-with-file`, formData);
     return response.data;
-  } else {
-    const response = await axios.post(`${API_URL}`, payload);
-    return response.data;
+  } catch (error) {
+    console.error('Create blog error:', error);
+    throw error;
   }
 };
 
-export const updateBlog = async (id: string, payload: any, isFormData = false) => {
-  if (isFormData) {
-    const response = await axios.put(`${API_URL}/${id}`, payload, {
-      headers: { "Content-Type": "multipart/form-data" },
+export const updateBlog = async (id: string, blogData: any, imageFile?: File | null) => {
+  try {
+    // Always use FormData to handle both cases
+    const formData = new FormData();
+    
+    // Add all form fields
+    Object.keys(blogData).forEach(key => {
+      const value = blogData[key];
+      if (value !== undefined && value !== null) {
+        formData.append(key, String(value));
+      }
     });
+    
+    // Add file if provided
+    if (imageFile) {
+      formData.append("file", imageFile);
+    }
+
+    // Use the working endpoint
+    const response = await axios.put(`${API_URL}/admin/update-with-file/${id}`, formData);
     return response.data;
-  } else {
-    const response = await axios.put(`${API_URL}/${id}`, payload);
-    return response.data;
+  } catch (error) {
+    console.error('Update blog error:', error);
+    throw error;
   }
 };
 

@@ -50,9 +50,18 @@ export default function BrandTable() {
     setDeleteBrand(brand);
   };
 
-  const handleConfirmDelete = () => {
-    // TODO: Replace with real delete logic
-    alert("Marque supprimée (placeholder): " + (deleteBrand?.designation_fr));
+  const handleConfirmDelete = async () => {
+    if (deleteBrand) {
+      try {
+        const { deleteBrand: deleteBrandService } = await import('@/utils/brands');
+        await deleteBrandService(deleteBrand._id);
+        setBrands((prev) => prev.filter(b => b._id !== deleteBrand._id));
+        setSelectedIds((prev) => prev.filter(id => id !== deleteBrand._id));
+      } catch (error) {
+        console.error('Error deleting brand:', error);
+        alert('Erreur lors de la suppression de la marque');
+      }
+    }
     setDeleteBrand(null);
   };
 
@@ -67,9 +76,18 @@ export default function BrandTable() {
       <ConfirmDeleteModal
         open={deleteSelectionOpen}
         onClose={() => setDeleteSelectionOpen(false)}
-        onConfirm={() => {
-          setBrands((prev) => prev.filter(b => !selectedIds.includes(b._id)));
-          setSelectedIds([]);
+        onConfirm={async () => {
+          try {
+            const { deleteBrand: deleteBrandService } = await import('@/utils/brands');
+            for (const id of selectedIds) {
+              await deleteBrandService(id);
+            }
+            setBrands((prev) => prev.filter(b => !selectedIds.includes(b._id)));
+            setSelectedIds([]);
+          } catch (error) {
+            console.error('Error deleting brands:', error);
+            alert('Erreur lors de la suppression des marques');
+          }
           setDeleteSelectionOpen(false);
         }}
         productName={selectedIds.length === 1
@@ -157,19 +175,27 @@ export default function BrandTable() {
                   <div className="flex justify-center items-center">
                     <Image
                       src={
-                        brand.logo
-                          ? brand.logo.startsWith("http")
-                            ? brand.logo
-                            : brand.logo.startsWith("/dashboard/")
-                              ? brand.logo
-                              : "/dashboard/" + (brand.logo.startsWith("/") ? brand.logo.slice(1) : brand.logo)
-                          : "/images/placeholder.png"
+                        // Priority 1: New uploaded images (start with /brands/)
+                        brand.logo && brand.logo.startsWith('/brands/')
+                          ? brand.logo
+                        // Priority 2: HTTP URLs
+                        : brand.logo && brand.logo.startsWith('http')
+                          ? brand.logo
+                        // Priority 3: Old dashboard format (brands/April2025/file.webp)
+                        : brand.logo && brand.logo !== ""
+                          ? brand.logo.startsWith('/') ? brand.logo : `/dashboard/${brand.logo}`
+                        // Fallback: Placeholder
+                        : "/images/placeholder.png"
                       }
                       alt={brand.designation_fr || "Logo"}
                       width={48}
                       height={48}
                       className="rounded object-contain border border-gray-200 shadow"
                       style={{ width: 48, height: 48 }}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "/images/placeholder.png";
+                      }}
                     />
                   </div>
                 </td>

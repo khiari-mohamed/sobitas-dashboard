@@ -51,7 +51,6 @@ export default function ClientsCreateClient() {
             className="w-full border p-4 text-base"
             value={form.name}
             onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-            required
           />
         </div>
         <div className="mb-6">
@@ -62,7 +61,6 @@ export default function ClientsCreateClient() {
             className="w-full border p-4 text-base"
             value={form.email}
             onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-            required
           />
         </div>
         <div className="mb-6">

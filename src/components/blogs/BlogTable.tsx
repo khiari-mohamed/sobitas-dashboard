@@ -46,15 +46,33 @@ export default function BlogTable() {
     setDeleteBlog(blog);
   };
 
-  const handleConfirmDelete = () => {
-    setBlogs((prev) => prev.filter(b => b._id !== deleteBlog?._id));
-    setSelectedIds((prev) => prev.filter(id => id !== deleteBlog?._id));
+  const handleConfirmDelete = async () => {
+    if (deleteBlog) {
+      try {
+        const { deleteBlog: deleteBlogService } = await import('@/services/blog.service');
+        await deleteBlogService(deleteBlog._id);
+        setBlogs((prev) => prev.filter(b => b._id !== deleteBlog._id));
+        setSelectedIds((prev) => prev.filter(id => id !== deleteBlog._id));
+      } catch (error) {
+        console.error('Error deleting blog:', error);
+        alert('Erreur lors de la suppression du blog');
+      }
+    }
     setDeleteBlog(null);
   };
 
-  const handleBulkDelete = () => {
-    setBlogs((prev) => prev.filter(b => !selectedIds.includes(b._id)));
-    setSelectedIds([]);
+  const handleBulkDelete = async () => {
+    try {
+      const { deleteBlog: deleteBlogService } = await import('@/services/blog.service');
+      for (const id of selectedIds) {
+        await deleteBlogService(id);
+      }
+      setBlogs((prev) => prev.filter(b => !selectedIds.includes(b._id)));
+      setSelectedIds([]);
+    } catch (error) {
+      console.error('Error deleting blogs:', error);
+      alert('Erreur lors de la suppression des blogs');
+    }
     setDeleteSelectionOpen(false);
   };
 
@@ -159,17 +177,27 @@ export default function BlogTable() {
                   <div className="flex justify-center items-center">
                     <Image
                       src={
-                        typeof blog.cover === "string"
-                          ? (blog.cover.startsWith("http") ? blog.cover : "/uploads/" + blog.cover.replace(/^\/+/ , ""))
-                          : blog.cover?.url
-                          ? (blog.cover.url.startsWith("http") ? blog.cover.url : "/uploads/" + blog.cover.url.replace(/^\/+/ , ""))
-                          : "/images/placeholder.png"
+                        // Priority 1: New uploaded images (start with /blogs/)
+                        typeof blog.cover === "string" && blog.cover.startsWith('/blogs/')
+                          ? blog.cover
+                        // Priority 2: Object format with URL
+                        : typeof blog.cover === "object" && blog.cover?.url
+                          ? blog.cover.url.startsWith("http") ? blog.cover.url : blog.cover.url
+                        // Priority 3: Old uploads format (articles/February2025/file.webp)
+                        : typeof blog.cover === "string" && blog.cover !== ""
+                          ? blog.cover.startsWith('/') ? blog.cover : `/uploads/${blog.cover}`
+                        // Fallback: Placeholder
+                        : "/images/placeholder.png"
                       }
                       alt="cover"
                       width={100}
                       height={100}
                       className="rounded object-contain border border-gray-200 shadow"
                       style={{ width: 100, height: 100 }}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "/images/placeholder.png";
+                      }}
                     />
                   </div>
                 </td>

@@ -64,15 +64,33 @@ export default function ClientsTable() {
     setDeleteClient(client);
   };
 
-  const handleConfirmDelete = () => {
-    setClients((prev) => prev.filter(c => c._id !== deleteClient?._id));
-    setSelectedIds((prev) => prev.filter(id => id !== deleteClient?._id));
+  const handleConfirmDelete = async () => {
+    if (deleteClient) {
+      try {
+        const { deleteClient: deleteClientService } = await import('@/services/clients');
+        await deleteClientService(deleteClient._id);
+        setClients((prev) => prev.filter(c => c._id !== deleteClient._id));
+        setSelectedIds((prev) => prev.filter(id => id !== deleteClient._id));
+      } catch (error) {
+        console.error('Error deleting client:', error);
+        alert('Erreur lors de la suppression du client');
+      }
+    }
     setDeleteClient(null);
   };
 
-  const handleBulkDelete = () => {
-    setClients((prev) => prev.filter(c => !selectedIds.includes(c._id)));
-    setSelectedIds([]);
+  const handleBulkDelete = async () => {
+    try {
+      const { deleteClient: deleteClientService } = await import('@/services/clients');
+      for (const id of selectedIds) {
+        await deleteClientService(id);
+      }
+      setClients((prev) => prev.filter(c => !selectedIds.includes(c._id)));
+      setSelectedIds([]);
+    } catch (error) {
+      console.error('Error deleting clients:', error);
+      alert('Erreur lors de la suppression des clients');
+    }
     setDeleteSelectionOpen(false);
   };
 

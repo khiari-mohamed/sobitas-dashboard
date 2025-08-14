@@ -29,10 +29,16 @@ export default function BrandViewClient({ id }: { id: string }) {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     setShowDelete(false);
-    // TODO: Replace with real delete logic
-    alert("Marque supprimée (placeholder)");
+    try {
+      const { deleteBrand } = await import('@/utils/brands');
+      await deleteBrand(id);
+      router.push('/admin/brands');
+    } catch (error) {
+      console.error('Error deleting brand:', error);
+      alert('Erreur lors de la suppression de la marque');
+    }
   };
 
   if (loading || !brand) {
@@ -78,19 +84,27 @@ export default function BrandViewClient({ id }: { id: string }) {
           <div className="w-[735px] h-[212px] flex items-center justify-center">
             <Image
               src={
-                brand.logo
-                  ? brand.logo.startsWith("http")
-                    ? brand.logo
-                    : brand.logo.startsWith("/dashboard/")
-                      ? brand.logo
-                      : "/dashboard/" + (brand.logo.startsWith("/") ? brand.logo.slice(1) : brand.logo)
-                  : "/images/placeholder.png"
+                // Priority 1: New uploaded images (start with /brands/)
+                brand.logo && brand.logo.startsWith('/brands/')
+                  ? brand.logo
+                // Priority 2: HTTP URLs
+                : brand.logo && brand.logo.startsWith('http')
+                  ? brand.logo
+                // Priority 3: Old dashboard format (brands/April2025/file.webp)
+                : brand.logo && brand.logo !== ""
+                  ? brand.logo.startsWith('/') ? brand.logo : `/dashboard/${brand.logo}`
+                // Fallback: Placeholder
+                : "/images/placeholder.png"
               }
               alt={brand.designation_fr || "Logo"}
               width={735}
               height={212}
               className="object-contain border rounded w-full h-full"
               style={{ maxWidth: 735, maxHeight: 212 }}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "/images/placeholder.png";
+              }}
             />
           </div>
         </div>

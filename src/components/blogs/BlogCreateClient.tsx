@@ -50,9 +50,8 @@ export default function BlogCreateClient() {
     e.preventDefault();
     setLoading(true);
     try {
-      // Always use JSON - no FormData issues
-      const { cover, ...jsonData } = form;
-      await createBlog(jsonData, false);
+      const { cover, ...blogData } = form;
+      await createBlog(blogData, cover);
       router.push("/admin/blogs");
     } catch (error) {
       console.error('Error creating blog:', error);

@@ -9,7 +9,7 @@ export async function fetchClients(): Promise<Client[]> {
 }
 
 export async function createClient(data: Partial<Client>) {
-  const res = await fetch(`${API_URL}/clients/guest`, {
+  const res = await fetch(`${API_URL}/clients/admin/new-with-data`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -40,6 +40,14 @@ export async function sendBulkSmsToClients(phones: string[], message: string) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ to: phones, message }),
+  });
+  return res.json();
+}
+
+export async function deleteClient(id: string) {
+  const res = await fetch(`${API_URL}/clients/${id}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
   });
   return res.json();
 }

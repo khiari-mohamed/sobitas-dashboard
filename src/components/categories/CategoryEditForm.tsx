@@ -124,10 +124,16 @@ export default function CategoryEditForm({ category }: { category: Category }) {
 
   let mainImage = image
     ? URL.createObjectURL(image)
-    : form.id && form.id !== ""
+    : // Priority 1: New uploaded images (start with /categories/)
+      form.cover && form.cover.startsWith('/categories/')
+      ? form.cover
+      // Priority 2: SVG icons by ID
+      : form.id && form.id !== ""
       ? `/images/categories/${form.id}.svg`
-      : form.cover
+      // Priority 3: Old PNG images by cover filename
+      : form.cover && form.cover !== ""
       ? `/images/categories/${form.cover.split('/').pop()}`
+      // Fallback: Placeholder
       : "/images/placeholder.png";
 
   let mainImageListeProduits = imageListeProduits
@@ -179,7 +185,10 @@ export default function CategoryEditForm({ category }: { category: Category }) {
             className="border rounded object-contain"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              if (form.cover) {
+              // Try fallbacks in order
+              if (form.id && form.id !== "") {
+                target.src = `/images/categories/${form.id}.svg`;
+              } else if (form.cover && form.cover !== "") {
                 target.src = `/images/categories/${form.cover.split('/').pop()}`;
               } else {
                 target.src = "/images/placeholder.png";

@@ -50,15 +50,33 @@ export default function AromaTable() {
     setDeleteAroma(aroma);
   };
 
-  const handleConfirmDelete = () => {
-    setAromas((prev) => prev.filter(a => a._id !== deleteAroma?._id));
-    setSelectedIds((prev) => prev.filter(id => id !== deleteAroma?._id));
+  const handleConfirmDelete = async () => {
+    if (deleteAroma) {
+      try {
+        const { deleteAroma: deleteAromaService } = await import('@/services/aroma');
+        await deleteAromaService(deleteAroma._id);
+        setAromas((prev) => prev.filter(a => a._id !== deleteAroma._id));
+        setSelectedIds((prev) => prev.filter(id => id !== deleteAroma._id));
+      } catch (error) {
+        console.error('Error deleting aroma:', error);
+        alert('Erreur lors de la suppression de l\'arôme');
+      }
+    }
     setDeleteAroma(null);
   };
 
-  const handleBulkDelete = () => {
-    setAromas((prev) => prev.filter(a => !selectedIds.includes(a._id)));
-    setSelectedIds([]);
+  const handleBulkDelete = async () => {
+    try {
+      const { deleteAroma: deleteAromaService } = await import('@/services/aroma');
+      for (const id of selectedIds) {
+        await deleteAromaService(id);
+      }
+      setAromas((prev) => prev.filter(a => !selectedIds.includes(a._id)));
+      setSelectedIds([]);
+    } catch (error) {
+      console.error('Error deleting aromas:', error);
+      alert('Erreur lors de la suppression des arômes');
+    }
     setDeleteSelectionOpen(false);
   };
 

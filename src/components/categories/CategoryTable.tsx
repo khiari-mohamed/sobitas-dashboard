@@ -154,10 +154,16 @@ export default function CategoryTable() {
                 <td className="px-4 py-2">
                   <Image
                     src={
-                      cat.id && cat.id !== ""
+                      // Priority 1: New uploaded images (start with /categories/)
+                      cat.cover && cat.cover.startsWith('/categories/')
+                        ? cat.cover
+                        // Priority 2: SVG icons by ID
+                        : cat.id && cat.id !== ""
                         ? `/images/categories/${cat.id}.svg`
-                        : cat.cover
+                        // Priority 3: Old PNG images by cover filename
+                        : cat.cover && cat.cover !== ""
                         ? `/images/categories/${cat.cover.split('/').pop()}`
+                        // Fallback: Placeholder
                         : "/images/placeholder.png"
                     }
                     alt={cat.designation || cat.designation_fr || cat.title || "Category"}
@@ -166,7 +172,10 @@ export default function CategoryTable() {
                     className="rounded object-contain border border-gray-200 shadow"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      if (cat.cover) {
+                      // Try fallbacks in order
+                      if (cat.id && cat.id !== "") {
+                        target.src = `/images/categories/${cat.id}.svg`;
+                      } else if (cat.cover && cat.cover !== "") {
                         target.src = `/images/categories/${cat.cover.split('/').pop()}`;
                       } else {
                         target.src = "/images/placeholder.png";

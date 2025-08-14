@@ -55,23 +55,23 @@ export default function CommandeEditForm({ id }: { id: string }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
               <label className="block mb-2 font-semibold">Nom</label>
-              <input type="text" name="nom" value={form.nom || ""} onChange={handleChange} required className="w-full border p-3 rounded" />
+              <input type="text" name="nom" value={form.nom || ""} onChange={handleChange} className="w-full border p-3 rounded" />
             </div>
             <div>
               <label className="block mb-2 font-semibold">Prénom</label>
-              <input type="text" name="prenom" value={form.prenom || ""} onChange={handleChange} required className="w-full border p-3 rounded" />
+              <input type="text" name="prenom" value={form.prenom || ""} onChange={handleChange} className="w-full border p-3 rounded" />
             </div>
             <div>
               <label className="block mb-2 font-semibold">Email</label>
-              <input type="email" name="email" value={form.email || ""} onChange={handleChange} required className="w-full border p-3 rounded" />
+              <input type="email" name="email" value={form.email || ""} onChange={handleChange} className="w-full border p-3 rounded" />
             </div>
             <div>
               <label className="block mb-2 font-semibold">Téléphone</label>
-              <input type="text" name="phone" value={form.phone || ""} onChange={handleChange} required className="w-full border p-3 rounded" />
+              <input type="text" name="phone" value={form.phone || ""} onChange={handleChange} className="w-full border p-3 rounded" />
             </div>
             <div>
               <label className="block mb-2 font-semibold">Pays</label>
-              <input type="text" name="pays" value={form.pays || "Tunisie"} onChange={handleChange} required className="w-full border p-3 rounded" />
+              <input type="text" name="pays" value={form.pays || "Tunisie"} onChange={handleChange} className="w-full border p-3 rounded" />
             </div>
             <div>
               <label className="block mb-2 font-semibold">Localité (facturation)</label>
@@ -211,11 +211,11 @@ export default function CommandeEditForm({ id }: { id: string }) {
             </div>
             <div>
               <label className="block mb-2 font-semibold">Total HT</label>
-              <input type="number" name="prix_ht" value={form.prix_ht || ""} onChange={handleChange} required className="w-full border p-3 rounded" />
+              <input type="number" name="prix_ht" value={form.prix_ht || ""} onChange={handleChange} className="w-full border p-3 rounded" />
             </div>
             <div>
               <label className="block mb-2 font-semibold">Total TTC</label>
-              <input type="number" name="prix_ttc" value={form.prix_ttc || ""} onChange={handleChange} required className="w-full border p-3 rounded" />
+              <input type="number" name="prix_ttc" value={form.prix_ttc || ""} onChange={handleChange} className="w-full border p-3 rounded" />
             </div>
             <div>
               <label className="block mb-2 font-semibold">Note</label>

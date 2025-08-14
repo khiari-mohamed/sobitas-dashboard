@@ -34,6 +34,7 @@ export default function PacksCreateClient() {
   const [form, setForm] = useState<Partial<Pack>>(initialState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -48,7 +49,7 @@ export default function PacksCreateClient() {
     setLoading(true);
     setError(null);
     try {
-      await createPack(form as Pack);
+      await createPack(form, selectedFile || undefined);
       router.push("/admin/packs");
     } catch (err: any) {
       setError(err.message || "Erreur lors de la création du pack");
@@ -63,11 +64,11 @@ export default function PacksCreateClient() {
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-8">
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Désignation</label>
-          <input type="text" name="designation_fr" value={form.designation_fr || ""} onChange={handleChange} className="w-full border p-4 text-base" required />
+          <input type="text" name="designation_fr" value={form.designation_fr || ""} onChange={handleChange} className="w-full border p-4 text-base" />
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Prix</label>
-          <input type="number" name="prix" value={form.prix || ""} onChange={handleChange} className="w-full border p-4 text-base" required />
+          <input type="number" name="prix" value={form.prix || ""} onChange={handleChange} className="w-full border p-4 text-base" />
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Promo</label>
@@ -75,7 +76,7 @@ export default function PacksCreateClient() {
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Quantité</label>
-          <input type="number" name="qte" value={form.qte || ""} onChange={handleChange} className="w-full border p-4 text-base" required />
+          <input type="number" name="qte" value={form.qte || ""} onChange={handleChange} className="w-full border p-4 text-base" />
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Couverture</label>
@@ -84,6 +85,8 @@ export default function PacksCreateClient() {
             <input type="file" accept="image/*" onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) {
+                setSelectedFile(file);
+                // Show preview
                 const reader = new FileReader();
                 reader.onload = () => {
                   setForm({ ...form, cover: reader.result as string });
@@ -140,35 +143,35 @@ export default function PacksCreateClient() {
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Publier</label>
-          <select name="publier" value={form.publier || "1"} onChange={handleChange} className="w-full border p-4 text-base" required>
+          <select name="publier" value={form.publier || "1"} onChange={handleChange} className="w-full border p-4 text-base">
             <option value="1">Publié</option>
             <option value="0">Non publié</option>
           </select>
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Pack</label>
-          <select name="pack" value={form.pack || "1"} onChange={handleChange} className="w-full border p-4 text-base" required>
+          <select name="pack" value={form.pack || "1"} onChange={handleChange} className="w-full border p-4 text-base">
             <option value="1">Oui</option>
             <option value="0">Non</option>
           </select>
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Nouveau produit</label>
-          <select name="new_product" value={form.new_product || "0"} onChange={handleChange} className="w-full border p-4 text-base" required>
+          <select name="new_product" value={form.new_product || "0"} onChange={handleChange} className="w-full border p-4 text-base">
             <option value="1">Oui</option>
             <option value="0">Non</option>
           </select>
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Meilleure vente</label>
-          <select name="best_seller" value={form.best_seller || "0"} onChange={handleChange} className="w-full border p-4 text-base" required>
+          <select name="best_seller" value={form.best_seller || "0"} onChange={handleChange} className="w-full border p-4 text-base">
             <option value="1">Oui</option>
             <option value="0">Non</option>
           </select>
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Rupture de stock</label>
-          <select name="rupture" value={form.rupture || "0"} onChange={handleChange} className="w-full border p-4 text-base" required>
+          <select name="rupture" value={form.rupture || "0"} onChange={handleChange} className="w-full border p-4 text-base">
             <option value="1">Oui</option>
             <option value="0">Non</option>
           </select>

@@ -31,30 +31,37 @@ export default function BlogEditForm({ id }: { id: string }) {
     setForm((prev: any) => ({ ...prev, cover: file }));
   };
 
-  // Compute preview URL for cover image
+  // Compute preview URL for cover image (same logic as table)
   let coverPreview = "/images/placeholder.png";
   if (form?.cover) {
-    if (typeof form.cover === "string") {
-      coverPreview = form.cover.startsWith("http") ? form.cover : "/uploads/" + form.cover.replace(/^\/+/ , "");
-    } else if (form.cover.url) {
-      coverPreview = form.cover.url.startsWith("http") ? form.cover.url : "/uploads/" + form.cover.url.replace(/^\/+/ , "");
-    } else if (form.cover instanceof File) {
+    if (form.cover instanceof File) {
       coverPreview = URL.createObjectURL(form.cover);
+    } else if (typeof form.cover === "string" && form.cover.startsWith('/blogs/')) {
+      // New uploaded images
+      coverPreview = form.cover;
+    } else if (typeof form.cover === "object" && form.cover?.url) {
+      // Object format
+      coverPreview = form.cover.url.startsWith("http") ? form.cover.url : form.cover.url;
+    } else if (typeof form.cover === "string" && form.cover !== "") {
+      // Old uploads format
+      coverPreview = form.cover.startsWith('/') ? form.cover : `/uploads/${form.cover}`;
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const formData = new FormData();
-    Object.entries(form).forEach(([key, value]) => {
-      if (value !== null && value !== undefined) {
-        formData.append(key, value as any);
-      }
-    });
-    await updateBlog(id, formData, true);
-    setLoading(false);
-    router.push("/admin/blogs");
+    try {
+      const { cover, ...blogData } = form;
+      const imageFile = cover instanceof File ? cover : null;
+      await updateBlog(id, blogData, imageFile);
+      router.push("/admin/blogs");
+    } catch (error) {
+      console.error('Error updating blog:', error);
+      alert('Erreur lors de la mise à jour du blog');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (initialLoading || !form) {

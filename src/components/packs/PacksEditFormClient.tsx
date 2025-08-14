@@ -13,6 +13,7 @@ export default function PacksEditForm({ id }: { id: string }) {
   const [form, setForm] = useState<Partial<Pack>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
     const fetchPack = async () => {
@@ -42,7 +43,7 @@ export default function PacksEditForm({ id }: { id: string }) {
     setLoading(true);
     setError(null);
     try {
-      await updatePack(id, form);
+      await updatePack(id, form, selectedFile || undefined);
       router.push("/admin/packs");
     } catch (err: any) {
       setError(err.message || "Erreur lors de la mise à jour du pack");
@@ -57,35 +58,75 @@ export default function PacksEditForm({ id }: { id: string }) {
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-8">
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Désignation</label>
-          <input type="text" name="designation_fr" value={form.designation_fr || ""} onChange={handleChange} className="w-full border p-4 text-base" required />
+          <input
+            type="text"
+            name="designation_fr"
+            value={form.designation_fr || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+          />
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Prix</label>
-          <input type="number" name="prix" value={form.prix || ""} onChange={handleChange} className="w-full border p-4 text-base" required />
+          <input
+            type="number"
+            name="prix"
+            value={form.prix || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+          />
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Promo</label>
-          <input type="number" name="promo" value={form.promo || ""} onChange={handleChange} className="w-full border p-4 text-base" />
+          <input
+            type="number"
+            name="promo"
+            value={form.promo || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+          />
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Quantité</label>
-          <input type="number" name="qte" value={form.qte || ""} onChange={handleChange} className="w-full border p-4 text-base" required />
+          <input
+            type="number"
+            name="qte"
+            value={form.qte || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+          />
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Couverture</label>
           <div className="space-y-2">
-            <input type="text" name="cover" value={form.cover || ""} onChange={handleChange} className="w-full border p-4 text-base" placeholder="Chemin de l'image" />
-            <input type="file" accept="image/*" onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                const reader = new FileReader();
-                reader.onload = () => {
-                  setForm({ ...form, cover: reader.result as string });
-                };
-                reader.readAsDataURL(file);
-              }
-            }} className="w-full border p-2 text-base" />
-            <p className="text-sm text-gray-500">Vous pouvez soit saisir un chemin d'image, soit télécharger un fichier</p>
+            <input
+              type="text"
+              name="cover"
+              value={form.cover || ""}
+              onChange={handleChange}
+              className="w-full border p-4 text-base"
+              placeholder="Chemin de l'image"
+            />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setSelectedFile(file);
+                  // Show preview
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    setForm({ ...form, cover: reader.result as string });
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+              className="w-full border p-2 text-base"
+            />
+            <p className="text-sm text-gray-500">
+              Vous pouvez soit saisir un chemin d'image, soit télécharger un fichier
+            </p>
           </div>
         </div>
         <div className="mb-6">
@@ -118,7 +159,12 @@ export default function PacksEditForm({ id }: { id: string }) {
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Statut</label>
-          <select name="status" value={form.status || ""} onChange={handleChange} className="w-full border p-4 text-base" required>
+          <select
+            name="status"
+            value={form.status || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+          >
             <option value="">Sélectionner un statut</option>
             <option value="active">Actif</option>
             <option value="inactive">Inactif</option>
@@ -126,7 +172,12 @@ export default function PacksEditForm({ id }: { id: string }) {
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Publier</label>
-          <select name="publier" value={form.publier || ""} onChange={handleChange} className="w-full border p-4 text-base" required>
+          <select
+            name="publier"
+            value={form.publier || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+          >
             <option value="">Sélectionner</option>
             <option value="1">Oui</option>
             <option value="0">Non</option>
@@ -134,10 +185,18 @@ export default function PacksEditForm({ id }: { id: string }) {
         </div>
         {error && <div className="text-red-500 mb-4">{error}</div>}
         <div className="flex gap-4">
-          <button type="submit" disabled={loading} className="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 disabled:opacity-50">
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 disabled:opacity-50"
+          >
             {loading ? "Mise à jour..." : "Mettre à jour"}
           </button>
-          <button type="button" onClick={() => router.push("/admin/packs")} className="bg-gray-500 text-white px-6 py-3 rounded hover:bg-gray-600">
+          <button
+            type="button"
+            onClick={() => router.push("/admin/packs")}
+            className="bg-gray-500 text-white px-6 py-3 rounded hover:bg-gray-600"
+          >
             Annuler
           </button>
         </div>

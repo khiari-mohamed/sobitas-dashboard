@@ -12,41 +12,55 @@ export const getAllBrands = async (): Promise<Brand[]> => {
 
 // Create a new brand
 export const createBrand = async (brand: Partial<Brand>, logoFile?: File | null): Promise<Brand> => {
-  if (logoFile) {
+  try {
+    // Always use FormData to handle both cases
     const formData = new FormData();
+    
+    // Add all form fields
     Object.entries(brand).forEach(([key, value]) => {
-      if (value !== null && value !== undefined) {
+      if (value !== null && value !== undefined && value !== "") {
         formData.append(key, value as string);
       }
     });
-    formData.append('logo', logoFile);
-    const res = await axios.post("/brands", formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+    
+    // Add file if provided
+    if (logoFile) {
+      formData.append('file', logoFile);
+    }
+
+    // Use the working endpoint
+    const res = await axios.post("/brands/admin/new-with-file", formData);
     return res.data;
-  } else {
-    const res = await axios.post("/brands", brand);
-    return res.data;
+  } catch (error) {
+    console.error('Create brand error:', error);
+    throw error;
   }
 };
 
 // Update a brand
 export const updateBrand = async (id: string, brand: Partial<Brand>, logoFile?: File | null): Promise<Brand> => {
-  if (logoFile) {
+  try {
+    // Always use FormData to handle both cases
     const formData = new FormData();
+    
+    // Add all form fields
     Object.entries(brand).forEach(([key, value]) => {
       if (value !== null && value !== undefined) {
         formData.append(key, value as string);
       }
     });
-    formData.append('logo', logoFile);
-    const res = await axios.put(`/brands/${id}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+    
+    // Add file if provided
+    if (logoFile) {
+      formData.append('file', logoFile);
+    }
+
+    // Use the working endpoint
+    const res = await axios.put(`/brands/admin/update-with-file/${id}`, formData);
     return res.data;
-  } else {
-    const res = await axios.put(`/brands/${id}`, brand);
-    return res.data;
+  } catch (error) {
+    console.error('Update brand error:', error);
+    throw error;
   }
 };
 

@@ -91,19 +91,30 @@ export default function BrandCreateEditForm({ initialBrand, mode, onSubmit, load
             <div className="mt-2 flex items-center">
               <Image
                 src={
-                  logoPreview
-                    ? logoPreview.startsWith("http")
-                      ? logoPreview
-                      : logoPreview.startsWith("/dashboard/")
-                        ? logoPreview
-                        : "/dashboard/" + (logoPreview.startsWith("/") ? logoPreview.slice(1) : logoPreview)
-                    : "/images/placeholder.png"
+                  // If it's a File object URL, use it directly
+                  logoPreview && logoPreview.startsWith('blob:')
+                    ? logoPreview
+                  // Priority 1: New uploaded images (start with /brands/)
+                  : logoPreview && logoPreview.startsWith('/brands/')
+                    ? logoPreview
+                  // Priority 2: HTTP URLs
+                  : logoPreview && logoPreview.startsWith('http')
+                    ? logoPreview
+                  // Priority 3: Old dashboard format (brands/April2025/file.webp)
+                  : logoPreview && logoPreview !== ""
+                    ? logoPreview.startsWith('/') ? logoPreview : `/dashboard/${logoPreview}`
+                  // Fallback: Placeholder
+                  : "/images/placeholder.png"
                 }
                 alt="Logo preview"
                 width={200}
                 height={62}
                 className="object-contain border rounded"
                 style={{ width: 200, height: 62, background: "#fff", border: "1px solid #eee" }}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "/images/placeholder.png";
+                }}
               />
             </div>
           )}
