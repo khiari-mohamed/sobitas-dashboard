@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-// import { createPage } from "@/services/page"; // To be implemented
+import { createPage } from "@/services/page";
 import { Page } from "@/types/page";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 
@@ -31,7 +31,10 @@ export default function PagesCreateClient() {
     setLoading(true);
     setError(null);
     try {
-      // await createPage(form);
+      const cleanData = Object.fromEntries(
+        Object.entries(form).filter(([_, value]) => value !== undefined && value !== '')
+      );
+      await createPage(cleanData);
       router.push("/admin/pages");
     } catch (err: any) {
       setError(err.message || "Erreur lors de la création de la page");
@@ -53,7 +56,6 @@ export default function PagesCreateClient() {
             value={form.title || ""}
             onChange={handleChange}
             className="w-full border p-4 text-base"
-            required
           />
         </div>
         {/* Slug */}

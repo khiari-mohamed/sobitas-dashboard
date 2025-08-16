@@ -173,7 +173,18 @@ export default function ServicesTable() {
                 </td>
                 <td className="px-4 py-2">{s.designation_fr}</td>
                 <td className="px-4 py-2">{s.description_fr}</td>
-                <td className="px-4 py-2">{s.icon ? <img src={`/${s.icon}`} alt="icon" width={100} height={100} className="object-contain border rounded" /> : "—"}</td>
+                <td className="px-4 py-2">{s.icon ? (() => {
+                  // Handle different path formats
+                  let iconPath;
+                  if (s.icon.startsWith('/')) {
+                    iconPath = s.icon; // New format: /produits/août2025/file.jpg
+                  } else if (s.icon.includes('/')) {
+                    iconPath = `/${s.icon}`; // Old format: services/September2023/file.png
+                  } else {
+                    iconPath = `/produits/${s.icon}`; // Just filename: file.jpg
+                  }
+                  return <img src={iconPath} alt="icon" width={100} height={100} className="object-contain border rounded" />;
+                })() : "—"}</td>
                 <td className="px-4 py-2">{s.created_at ? new Date(s.created_at).toLocaleString() : "—"}</td>
                 <td className="px-4 py-2">{s.updated_at ? new Date(s.updated_at).toLocaleString() : "—"}</td>
                 <td className="px-4 py-2 space-x-1">

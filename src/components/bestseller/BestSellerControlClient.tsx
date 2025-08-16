@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { fetchAllBestSellers, updateBestSeller, deleteBestSeller } from "@/services/bestseller";
-import { BestSeller } from "@/types/bestseller";
+import { fetchAllBestSellers, updateBestSeller, deleteBestSeller, getBestSellerConfig, updateBestSellerConfig, updateBestSellerOrder } from "@/services/bestseller";
+import { BestSeller, BestSellerConfig } from "@/types/bestseller";
 import dynamic from "next/dynamic";
 
 const Editor = dynamic(() => import("@/components/ui/RichTextEditor"), { ssr: false });
@@ -14,27 +14,52 @@ export default function BestSellerControlClient() {
   const [updating, setUpdating] = useState<string | null>(null);
   const [editingProduct, setEditingProduct] = useState<BestSeller | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [maxDisplay, setMaxDisplay] = useState(4);
+  const [saving, setSaving] = useState(false);
+  
+  // Configuration state
   const [sectionTitle, setSectionTitle] = useState("Meilleures ventes");
   const [sectionDescription, setSectionDescription] = useState("Découvrez nos meilleures ventes du moment sur une sélection de produits !");
+  const [maxDisplay, setMaxDisplay] = useState(4);
   const [showOnFrontend, setShowOnFrontend] = useState(true);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
-        const data = await fetchAllBestSellers();
-        const productsArray = Array.isArray(data) ? data : [];
+        // Fetch products
+        const productsData = await fetchAllBestSellers();
+        const productsArray = Array.isArray(productsData) ? productsData : [];
         setProducts(productsArray);
-        setDisplayedProducts(productsArray.filter(p => p.publier === "1").slice(0, maxDisplay));
+        
+        // Fetch configuration
+        const config = await getBestSellerConfig();
+        setSectionTitle(config.sectionTitle || "Meilleures ventes");
+        setSectionDescription(config.sectionDescription || "Découvrez nos meilleures ventes du moment sur une sélection de produits !");
+        setMaxDisplay(config.maxDisplay || 4);
+        setShowOnFrontend(config.showOnFrontend !== false);
+        
+        // Apply order if exists
+        if (config.productOrder && config.productOrder.length > 0) {
+          const orderedProducts = [];
+          const productMap = new Map(productsArray.map(p => [p._id!, p]));
+          
+          for (const id of config.productOrder) {
+            if (productMap.has(id)) {
+              orderedProducts.push(productMap.get(id)!);
+              productMap.delete(id);
+            }
+          }
+          orderedProducts.push(...Array.from(productMap.values()));
+          setProducts(orderedProducts);
+        }
+        
       } catch (err) {
         console.error(err);
         setProducts([]);
-        setDisplayedProducts([]);
       } finally {
         setLoading(false);
       }
     };
-    fetchProducts();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -43,12 +68,51 @@ export default function BestSellerControlClient() {
     }
   }, [products, maxDisplay]);
 
-  const moveProduct = (fromIndex: number, toIndex: number) => {
+  const updateConfig = (updates: Partial<BestSellerConfig>) => {
+    if (updates.sectionTitle !== undefined) setSectionTitle(updates.sectionTitle);
+    if (updates.sectionDescription !== undefined) setSectionDescription(updates.sectionDescription);
+    if (updates.maxDisplay !== undefined) setMaxDisplay(updates.maxDisplay);
+    if (updates.showOnFrontend !== undefined) setShowOnFrontend(updates.showOnFrontend);
+  };
+
+  const saveConfig = async () => {
+    setSaving(true);
+    try {
+      await updateBestSellerConfig({
+        sectionTitle,
+        sectionDescription,
+        maxDisplay,
+        showOnFrontend,
+        productOrder: products.map(p => p._id!).filter(Boolean)
+      });
+      // Clear frontend cache
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('products-top-products');
+      }
+    } catch (error) {
+      console.error('Error saving config:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const moveProduct = async (fromIndex: number, toIndex: number) => {
     if (toIndex < 0 || toIndex >= products.length) return;
     const newProducts = [...products];
     const [movedProduct] = newProducts.splice(fromIndex, 1);
     newProducts.splice(toIndex, 0, movedProduct);
     setProducts(newProducts);
+    
+    // Save new order
+    try {
+      await updateBestSellerOrder(newProducts.map(p => p._id!).filter(Boolean));
+      // Clear frontend cache
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('products-top-products');
+      }
+    } catch (error) {
+      console.error('Error updating order:', error);
+    }
   };
 
   const handleQuickEdit = (field: string, value: string | number, product: BestSeller) => {
@@ -57,6 +121,10 @@ export default function BestSellerControlClient() {
     updateBestSeller(product._id, { ...product, [field]: value })
       .then(() => {
         setProducts(products.map(p => p._id === product._id ? { ...p, [field]: value } : p));
+        // Clear frontend cache
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('products-top-products');
+        }
       })
       .catch(console.error)
       .finally(() => setUpdating(null));
@@ -122,7 +190,7 @@ export default function BestSellerControlClient() {
             <input
               type="text"
               value={sectionTitle}
-              onChange={(e) => setSectionTitle(e.target.value)}
+              onChange={(e) => updateConfig({ sectionTitle: e.target.value })}
               className="w-full border p-2 rounded"
             />
           </div>
@@ -130,7 +198,7 @@ export default function BestSellerControlClient() {
             <label className="block text-sm font-medium mb-2">Nombre de produits à afficher</label>
             <select
               value={maxDisplay}
-              onChange={(e) => setMaxDisplay(Number(e.target.value))}
+              onChange={(e) => updateConfig({ maxDisplay: Number(e.target.value) })}
               className="w-full border p-2 rounded"
             >
               <option value={2}>2 produits</option>
@@ -148,20 +216,27 @@ export default function BestSellerControlClient() {
           <label className="block text-sm font-medium mb-2">Description de la section</label>
           <textarea
             value={sectionDescription}
-            onChange={(e) => setSectionDescription(e.target.value)}
+            onChange={(e) => updateConfig({ sectionDescription: e.target.value })}
             className="w-full border p-2 rounded h-20"
           />
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between">
           <label className="flex items-center">
             <input
               type="checkbox"
               checked={showOnFrontend}
-              onChange={(e) => setShowOnFrontend(e.target.checked)}
+              onChange={(e) => updateConfig({ showOnFrontend: e.target.checked })}
               className="mr-2"
             />
             Afficher la section sur le frontend
           </label>
+          <button
+            onClick={saveConfig}
+            disabled={saving}
+            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+          >
+            {saving ? 'Sauvegarde...' : 'Sauvegarder la configuration'}
+          </button>
         </div>
       </div>
 
@@ -177,11 +252,11 @@ export default function BestSellerControlClient() {
             <p className="text-gray-600">{sectionDescription}</p>
           </div>
           <div className={`grid gap-4 ${
-            maxDisplay === 2 ? 'grid-cols-1 sm:grid-cols-2' :
-            maxDisplay === 3 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' :
-            maxDisplay <= 4 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' :
-            maxDisplay <= 6 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6' :
-            'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+            displayedProducts.length === 1 ? 'grid-cols-1 max-w-sm mx-auto' :
+            displayedProducts.length === 2 ? 'grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto' :
+            displayedProducts.length === 3 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto' :
+            displayedProducts.length >= 4 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' :
+            'grid-cols-1'
           }`}>
             {displayedProducts.map((product, idx) => {
               const prixNum = Number(product.prix) || 0;
@@ -208,11 +283,11 @@ export default function BestSellerControlClient() {
                   <div className="text-center">
                     {hasPromo ? (
                       <div className="flex items-center justify-center gap-2">
-                        <span className="text-orange-600 font-bold">{product.promo} TND</span>
-                        <span className="text-gray-500 line-through text-sm">{product.prix} TND</span>
+                        <span className="text-orange-600 font-bold">{promoNum} TND</span>
+                        <span className="text-gray-500 line-through text-sm">{prixNum} TND</span>
                       </div>
                     ) : (
-                      <span className="text-orange-600 font-bold">{product.prix} TND</span>
+                      <span className="text-orange-600 font-bold">{prixNum} TND</span>
                     )}
                   </div>
                 </div>
@@ -368,7 +443,7 @@ export default function BestSellerControlClient() {
                   <label className="block text-sm font-medium mb-1">Quantité</label>
                   <input
                     type="number"
-                    value={editingProduct.qte}
+                    value={editingProduct.qte || ""}
                     onChange={(e) => setEditingProduct({...editingProduct, qte: e.target.value})}
                     className="w-full border p-2 rounded"
                   />

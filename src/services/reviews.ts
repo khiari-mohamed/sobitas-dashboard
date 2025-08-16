@@ -8,8 +8,11 @@ export async function getReviewsByProduct(productId: string): Promise<Review[]> 
   return data;
 }
 
-export async function postReview(review: Partial<Review>): Promise<Review> {
-  const { data } = await axiosInstance.post<Review>(RESOURCE, review);
+export async function postReview(review: any): Promise<Review> {
+  const cleanData = Object.fromEntries(
+    Object.entries(review).filter(([_, value]) => value !== undefined && value !== '')
+  );
+  const { data } = await axiosInstance.post<Review>(RESOURCE, cleanData);
   return data;
 }
 
@@ -23,13 +26,26 @@ export const fetchReviewById = async (id: string): Promise<Review> => {
   return data;
 };
 
-export const createReview = async (review: Omit<Review, '_id'>): Promise<Review> => {
-  const { data } = await axiosInstance.post<Review>(RESOURCE, review);
+export const createReview = async (review: any): Promise<Review> => {
+  const cleanData = Object.fromEntries(
+    Object.entries(review).filter(([_, value]) => value !== undefined && value !== '')
+  );
+  const { data } = await axiosInstance.post<Review>(RESOURCE, cleanData);
   return data;
 };
 
-export const updateReview = async (id: string, review: Partial<Review>): Promise<Review> => {
-  const { data } = await axiosInstance.patch<Review>(`${RESOURCE}/${id}`, review);
+export const updateReview = async (id: string, review: any): Promise<Review> => {
+  const cleanData = Object.fromEntries(
+    Object.entries(review).filter(([key, value]) => 
+      value !== undefined && 
+      value !== '' && 
+      key !== '_id' && 
+      key !== '__v' && 
+      key !== 'createdAt' && 
+      key !== 'updatedAt'
+    )
+  );
+  const { data } = await axiosInstance.put<Review>(`${RESOURCE}/${id}`, cleanData);
   return data;
 };
 

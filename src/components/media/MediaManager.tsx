@@ -39,9 +39,13 @@ export default function MediaManager() {
   // Fetch media for selected folder
   useEffect(() => {
     if (selectedFolder) {
+      console.log('Fetching media for folder:', selectedFolder);
       setLoading(true);
       mediaService.fetchMediaByFolder(selectedFolder)
-        .then(setMediaList)
+        .then(data => {
+          console.log('Media fetched for folder', selectedFolder, ':', data);
+          setMediaList(data);
+        })
         .finally(() => setLoading(false));
     } else {
       setMediaList([]);
@@ -108,7 +112,8 @@ export default function MediaManager() {
     if (selectedMediaIds.length !== 1) return;
     const media = mediaList.find(m => m.id === selectedMediaIds[0]);
     if (!media) return;
-    setCroppingImage(`/${media.id.replace(/^public[\\/]/, '')}`);
+    const imagePath = media.id.startsWith('/produits') ? media.id : media.id.startsWith('public/') ? `/${media.id.replace('public/', 'uploads/')}` : media.id.startsWith('/') ? media.id : `/uploads/${media.id}`;
+    setCroppingImage(imagePath);
     setCropModalOpen(true);
     setRotation(0);
     setZoom(1);
@@ -220,13 +225,16 @@ export default function MediaManager() {
       return <div className="col-span-full text-center text-gray-400 py-12">Aucun média dans ce dossier.</div>;
     }
 
+    // Debug logging
+    console.log('Media list:', mediaList.map(m => ({ id: m.id, generatedPath: m.id.startsWith('public/') ? `/${m.id.replace('public/', '')}` : m.id.startsWith('/') ? m.id : `/${m.id}` })));
+
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
         {mediaList.map(media => (
           <div key={media.id} className={`bg-gray-50 border rounded p-4 flex flex-col items-center ${selectMode && selectedMediaIds.includes(media.id) ? 'ring-2 ring-blue-500' : ''}`}>
             <div className="w-full flex items-center justify-center bg-white border mb-2" style={{ width: 360, height: 200, maxWidth: '100%' }}>
               <img
-                src={`/${media.id.replace(/^public[\\/]/, '')}`}
+                src={media.id.startsWith('/produits') ? media.id : media.id.startsWith('public/') ? `/${media.id.replace('public/', 'uploads/')}` : media.id.startsWith('/') ? media.id : `/uploads/${media.id}`}
                 alt={media.id}
                 className="object-contain"
                 style={{

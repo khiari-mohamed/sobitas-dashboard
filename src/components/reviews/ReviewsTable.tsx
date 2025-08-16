@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getAllReviews } from "@/services/reviews";
+import { getAllReviews, deleteReview } from "@/services/reviews";
 import { Review } from "@/types/reviews";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 import { FaSearch } from "react-icons/fa";
@@ -59,19 +59,27 @@ export default function ReviewsTable() {
 
   const handleConfirmDelete = async () => {
     if (deleteReviewId) {
-      // TODO: Implement delete API call
-      setReviews((prev) => prev.filter(r => r._id !== deleteReviewId));
-      setDeleteReviewId(null);
+      try {
+        await deleteReview(deleteReviewId);
+        setReviews((prev) => prev.filter(r => r._id !== deleteReviewId));
+        setDeleteReviewId(null);
+      } catch (error) {
+        console.error('Error deleting review:', error);
+      }
     }
   };
 
   const handleConfirmDeleteSelection = async () => {
-    for (const id of selectedIds) {
-      // TODO: Implement delete API call
+    try {
+      for (const id of selectedIds) {
+        await deleteReview(id);
+      }
+      setReviews((prev) => prev.filter(r => !r._id || !selectedIds.includes(r._id)));
+      setSelectedIds([]);
+      setDeleteSelectionOpen(false);
+    } catch (error) {
+      console.error('Error deleting reviews:', error);
     }
-    setReviews((prev) => prev.filter(r => !r._id || !selectedIds.includes(r._id)));
-    setSelectedIds([]);
-    setDeleteSelectionOpen(false);
   };
 
   const renderStars = (stars: string | number) => {

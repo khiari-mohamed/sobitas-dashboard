@@ -43,12 +43,12 @@ export default function NewsletterCreateClient() {
         {/* ID */}
         <div className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">ID</h2>
-          <input type="text" name="id" value={form.id || ""} onChange={handleChange} className="w-full border p-4 text-lg" required />
+          <input type="text" name="id" value={form.id || ""} onChange={handleChange} className="w-full border p-4 text-lg" />
         </div>
         {/* Email */}
         <div className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Email</h2>
-          <input type="email" name="email" value={form.email || ""} onChange={handleChange} className="w-full border p-4 text-lg" required />
+          <input type="email" name="email" value={form.email || ""} onChange={handleChange} className="w-full border p-4 text-lg"/>
         </div>
         {/* created_at (readonly) */}
         <div className="mb-10">

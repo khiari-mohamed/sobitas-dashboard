@@ -39,7 +39,12 @@ export default function FaqsCreateClient() {
     setLoading(true);
     setError(null);
     try {
-      await createFaq(form);
+      const submitData = {
+        ...(form.id && { id: form.id }),
+        ...(form.question && { question: form.question }),
+        ...(form.answer && { answer: form.answer })
+      };
+      await createFaq(submitData);
       router.push("/admin/faqs");
     } catch (err: any) {
       setError(err.message || "Erreur lors de la création de la FAQ");
@@ -74,7 +79,6 @@ export default function FaqsCreateClient() {
             value={form.question}
             onChange={handleChange}
             className="w-full border p-4 text-base"
-            required
           />
         </div>
         {/* Answer */}

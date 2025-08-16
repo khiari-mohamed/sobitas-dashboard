@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { getAllReviews } from "@/services/reviews";
+import { getAllReviews, updateReview } from "@/services/reviews";
 import { Review } from "@/types/reviews";
 
 const Editor = dynamic(() => import("@/components/ui/RichTextEditor"), { ssr: false });
@@ -20,7 +20,14 @@ export default function ReviewsEditForm({ id }: { id: string }) {
         const reviews = await getAllReviews();
         const review = reviews.find(r => r._id === id);
         if (review) {
-          setForm(review);
+          // Add missing fields that might not be in aggregated data
+          const fullReview = {
+            ...review,
+            id: review._id, // Use _id as id for updates
+            user_id: review.user_id || '',
+            product_id: review.product_id || ''
+          };
+          setForm(fullReview);
         }
       } catch (err) {
         console.error(err);
@@ -42,9 +49,12 @@ export default function ReviewsEditForm({ id }: { id: string }) {
     setLoading(true);
     setError(null);
     try {
-      // TODO: Implement update API call
-      console.log("Updating review:", form);
-      router.push("/admin/reviews");
+      if (form.id) {
+        await updateReview(form.id, form);
+        router.push("/admin/reviews");
+      } else {
+        setError("ID manquant pour la mise à jour");
+      }
     } catch (err: any) {
       setError(err.message || "Erreur lors de la mise à jour de l'avis");
     } finally {
@@ -62,15 +72,15 @@ export default function ReviewsEditForm({ id }: { id: string }) {
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">ID Utilisateur</label>
-          <input type="text" name="user_id" value={form.user_id || ""} onChange={handleChange} className="w-full border p-4 text-base" required />
+          <input type="text" name="user_id" value={form.user_id || ""} onChange={handleChange} className="w-full border p-4 text-base" />
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">ID Produit</label>
-          <input type="text" name="product_id" value={form.product_id || ""} onChange={handleChange} className="w-full border p-4 text-base" required />
+          <input type="text" name="product_id" value={form.product_id || ""} onChange={handleChange} className="w-full border p-4 text-base" />
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Étoiles</label>
-          <select name="stars" value={form.stars || "5"} onChange={handleChange} className="w-full border p-4 text-base" required>
+          <select name="stars" value={form.stars || "5"} onChange={handleChange} className="w-full border p-4 text-base">
             <option value="1">1 étoile</option>
             <option value="2">2 étoiles</option>
             <option value="3">3 étoiles</option>
@@ -80,14 +90,14 @@ export default function ReviewsEditForm({ id }: { id: string }) {
         </div>
         <div className="mb-6">
           <Editor
-            value={form.comment || ""}
+            value={form.comment === null ? "" : (form.comment || "")}
             onChange={handleCommentChange}
             label="Commentaire"
           />
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Publier</label>
-          <select name="publier" value={form.publier || "1"} onChange={handleChange} className="w-full border p-4 text-base" required>
+          <select name="publier" value={form.publier || "1"} onChange={handleChange} className="w-full border p-4 text-base">
             <option value="1">Publié</option>
             <option value="0">Non publié</option>
           </select>

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 import { FaSearch } from "react-icons/fa"
 
-import emailService from "@/services/email";
+import emailService, { fetchEmailTemplates, deleteEmailTemplate } from "@/services/email";
 
 type TestEmailModalProps = {
   open: boolean;
@@ -95,19 +95,19 @@ export default function EmailTemplatesTable() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // useEffect(() => {
-  //   let ignore = false;
-  //   setLoading(true);
-  //   fetchEmailTemplates()
-  //     .then((data) => {
-  //       if (!ignore) {
-  //         setTemplates(data);
-  //       }
-  //     })
-  //     .catch(console.error)
-  //     .finally(() => setLoading(false));
-  //   return () => { ignore = true; };
-  // }, []);
+  useEffect(() => {
+    let ignore = false;
+    setLoading(true);
+    fetchEmailTemplates()
+      .then((data) => {
+        if (!ignore) {
+          setTemplates(data);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+    return () => { ignore = true; };
+  }, []);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -131,19 +131,27 @@ export default function EmailTemplatesTable() {
 
   const handleConfirmDelete = async () => {
     if (deleteTemplateId) {
-      // await deleteEmailTemplate(deleteTemplateId);
-      setTemplates((prev) => prev.filter(t => t.id !== deleteTemplateId));
-      setDeleteTemplateId(null);
+      try {
+        await deleteEmailTemplate(deleteTemplateId);
+        setTemplates((prev) => prev.filter(t => t.id !== deleteTemplateId));
+        setDeleteTemplateId(null);
+      } catch (error) {
+        console.error('Error deleting template:', error);
+      }
     }
   };
 
   const handleConfirmDeleteSelection = async () => {
-    // for (const id of selectedIds) {
-    //   await deleteEmailTemplate(id);
-    // }
-    setTemplates((prev) => prev.filter(t => !selectedIds.includes(t.id)));
-    setSelectedIds([]);
-    setDeleteSelectionOpen(false);
+    try {
+      for (const id of selectedIds) {
+        await deleteEmailTemplate(id);
+      }
+      setTemplates((prev) => prev.filter(t => !selectedIds.includes(t.id)));
+      setSelectedIds([]);
+      setDeleteSelectionOpen(false);
+    } catch (error) {
+      console.error('Error deleting templates:', error);
+    }
   };
 
   return (

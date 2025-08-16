@@ -105,7 +105,7 @@ export default function CoordinatesCreateClient() {
         {/* ID */}
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">ID</label>
-          <input type="text" name="id" value={form.id || ""} onChange={handleChange} className="w-full border p-4 text-base" required />
+          <input type="text" name="id" value={form.id || ""} onChange={handleChange} className="w-full border p-4 text-base" />
         </div>
         {/* Désignation */}
         <div className="mb-6">

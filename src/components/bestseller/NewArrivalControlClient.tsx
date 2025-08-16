@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { fetchAllNewArrivals, updateNewArrival, deleteNewArrival } from "@/services/newarrival";
+import { fetchAllNewArrivals, updateNewArrival, deleteNewArrival, getNewArrivalConfig, updateNewArrivalConfig, updateNewArrivalOrder } from "@/services/newarrival";
 import { NewArrival } from "@/types/newarrival";
 import dynamic from "next/dynamic";
 
@@ -14,27 +14,52 @@ export default function NewArrivalControlClient() {
   const [updating, setUpdating] = useState<string | null>(null);
   const [editingProduct, setEditingProduct] = useState<NewArrival | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [maxDisplay, setMaxDisplay] = useState(8);
+  const [saving, setSaving] = useState(false);
+  
+  // Configuration state
   const [sectionTitle, setSectionTitle] = useState("Nouveautés");
   const [sectionDescription, setSectionDescription] = useState("Découvrez nos nouveaux produits fraîchement arrivés !");
+  const [maxDisplay, setMaxDisplay] = useState(100);
   const [showOnFrontend, setShowOnFrontend] = useState(true);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
-        const data = await fetchAllNewArrivals();
-        const productsArray = Array.isArray(data) ? data : [];
+        // Fetch products
+        const productsData = await fetchAllNewArrivals();
+        const productsArray = Array.isArray(productsData) ? productsData : [];
         setProducts(productsArray);
-        setDisplayedProducts(productsArray.filter(p => p.publier === "1").slice(0, maxDisplay));
+        
+        // Fetch configuration
+        const config = await getNewArrivalConfig();
+        setSectionTitle(config.sectionTitle || "Nouveautés");
+        setSectionDescription(config.sectionDescription || "Découvrez nos nouveaux produits fraîchement arrivés !");
+        setMaxDisplay(config.maxDisplay || 100);
+        setShowOnFrontend(config.showOnFrontend !== false);
+        
+        // Apply order if exists
+        if (config.productOrder && config.productOrder.length > 0) {
+          const orderedProducts = [];
+          const productMap = new Map(productsArray.map(p => [p._id!, p]));
+          
+          for (const id of config.productOrder) {
+            if (productMap.has(id)) {
+              orderedProducts.push(productMap.get(id)!);
+              productMap.delete(id);
+            }
+          }
+          orderedProducts.push(...Array.from(productMap.values()));
+          setProducts(orderedProducts);
+        }
+        
       } catch (err) {
         console.error(err);
         setProducts([]);
-        setDisplayedProducts([]);
       } finally {
         setLoading(false);
       }
     };
-    fetchProducts();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -43,12 +68,52 @@ export default function NewArrivalControlClient() {
     }
   }, [products, maxDisplay]);
 
-  const moveProduct = (fromIndex: number, toIndex: number) => {
+  const updateConfig = (updates: Partial<any>) => {
+    if (updates.sectionTitle !== undefined) setSectionTitle(updates.sectionTitle);
+    if (updates.sectionDescription !== undefined) setSectionDescription(updates.sectionDescription);
+    if (updates.maxDisplay !== undefined) setMaxDisplay(updates.maxDisplay);
+    if (updates.showOnFrontend !== undefined) setShowOnFrontend(updates.showOnFrontend);
+  };
+
+  const saveConfig = async () => {
+    setSaving(true);
+    try {
+      await updateNewArrivalConfig({
+        sectionTitle,
+        sectionDescription,
+        maxDisplay,
+        showOnFrontend,
+        productOrder: products.map(p => p._id!).filter(Boolean)
+      });
+      // Clear frontend cache and trigger refresh
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('products-new-products');
+        localStorage.setItem('new-arrivals-updated', Date.now().toString());
+      }
+    } catch (error) {
+      console.error('Error saving config:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const moveProduct = async (fromIndex: number, toIndex: number) => {
     if (toIndex < 0 || toIndex >= products.length) return;
     const newProducts = [...products];
     const [movedProduct] = newProducts.splice(fromIndex, 1);
     newProducts.splice(toIndex, 0, movedProduct);
     setProducts(newProducts);
+    
+    // Save new order
+    try {
+      await updateNewArrivalOrder(newProducts.map(p => p._id!).filter(Boolean));
+      // Clear frontend cache
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('products-new-products');
+      }
+    } catch (error) {
+      console.error('Error updating order:', error);
+    }
   };
 
   const handleQuickEdit = (field: string, value: string | number, product: NewArrival) => {
@@ -57,6 +122,10 @@ export default function NewArrivalControlClient() {
     updateNewArrival(product._id, { ...product, [field]: value })
       .then(() => {
         setProducts(products.map(p => p._id === product._id ? { ...p, [field]: value } : p));
+        // Clear frontend cache
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('products-new-products');
+        }
       })
       .catch(console.error)
       .finally(() => setUpdating(null));
@@ -122,7 +191,7 @@ export default function NewArrivalControlClient() {
             <input
               type="text"
               value={sectionTitle}
-              onChange={(e) => setSectionTitle(e.target.value)}
+              onChange={(e) => updateConfig({ sectionTitle: e.target.value })}
               className="w-full border p-2 rounded"
             />
           </div>
@@ -130,7 +199,7 @@ export default function NewArrivalControlClient() {
             <label className="block text-sm font-medium mb-2">Nombre de produits à afficher</label>
             <select
               value={maxDisplay}
-              onChange={(e) => setMaxDisplay(Number(e.target.value))}
+              onChange={(e) => updateConfig({ maxDisplay: Number(e.target.value) })}
               className="w-full border p-2 rounded"
             >
               <option value={2}>2 produits</option>
@@ -148,20 +217,27 @@ export default function NewArrivalControlClient() {
           <label className="block text-sm font-medium mb-2">Description de la section</label>
           <textarea
             value={sectionDescription}
-            onChange={(e) => setSectionDescription(e.target.value)}
+            onChange={(e) => updateConfig({ sectionDescription: e.target.value })}
             className="w-full border p-2 rounded h-20"
           />
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between">
           <label className="flex items-center">
             <input
               type="checkbox"
               checked={showOnFrontend}
-              onChange={(e) => setShowOnFrontend(e.target.checked)}
+              onChange={(e) => updateConfig({ showOnFrontend: e.target.checked })}
               className="mr-2"
             />
             Afficher la section sur le frontend
           </label>
+          <button
+            onClick={saveConfig}
+            disabled={saving}
+            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+          >
+            {saving ? 'Sauvegarde...' : 'Sauvegarder la configuration'}
+          </button>
         </div>
       </div>
 
@@ -177,12 +253,11 @@ export default function NewArrivalControlClient() {
             <p className="text-gray-600">{sectionDescription}</p>
           </div>
           <div className={`grid gap-4 ${
-            maxDisplay === 2 ? 'grid-cols-1 sm:grid-cols-2' :
-            maxDisplay === 3 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' :
-            maxDisplay <= 4 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' :
-            maxDisplay <= 6 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6' :
-            maxDisplay <= 8 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' :
-            'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+            displayedProducts.length === 1 ? 'grid-cols-1 max-w-sm mx-auto' :
+            displayedProducts.length === 2 ? 'grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto' :
+            displayedProducts.length === 3 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto' :
+            displayedProducts.length >= 4 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' :
+            'grid-cols-1'
           }`}>
             {displayedProducts.map((product, idx) => {
               const prixNum = Number(product.prix) || 0;

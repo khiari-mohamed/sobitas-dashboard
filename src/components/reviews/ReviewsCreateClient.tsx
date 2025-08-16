@@ -57,15 +57,15 @@ export default function ReviewsCreateClient() {
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">ID Utilisateur</label>
-          <input type="text" name="user_id" value={form.user_id || ""} onChange={handleChange} className="w-full border p-4 text-base" required />
+          <input type="text" name="user_id" value={form.user_id || ""} onChange={handleChange} className="w-full border p-4 text-base" />
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">ID Produit</label>
-          <input type="text" name="product_id" value={form.product_id || ""} onChange={handleChange} className="w-full border p-4 text-base" required />
+          <input type="text" name="product_id" value={form.product_id || ""} onChange={handleChange} className="w-full border p-4 text-base" />
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Étoiles</label>
-          <select name="stars" value={form.stars || "5"} onChange={handleChange} className="w-full border p-4 text-base" required>
+          <select name="stars" value={form.stars || "5"} onChange={handleChange} className="w-full border p-4 text-base">
             <option value="1">1 étoile</option>
             <option value="2">2 étoiles</option>
             <option value="3">3 étoiles</option>
@@ -82,7 +82,7 @@ export default function ReviewsCreateClient() {
         </div>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Publier</label>
-          <select name="publier" value={form.publier || "1"} onChange={handleChange} className="w-full border p-4 text-base" required>
+          <select name="publier" value={form.publier || "1"} onChange={handleChange} className="w-full border p-4 text-base">
             <option value="1">Publié</option>
             <option value="0">Non publié</option>
           </select>

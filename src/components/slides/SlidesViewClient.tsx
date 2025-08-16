@@ -46,7 +46,7 @@ export default function SlidesViewClient({ id }: { id: string }) {
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Image (cover)</label>
           {slide.cover ? (
-            <img src={`/${slide.cover}`} alt="cover" width={200} height={100} className="object-contain border rounded" />
+            <img src={slide.cover.startsWith('/') ? slide.cover : `/${slide.cover}`} alt="cover" width={200} height={100} className="object-contain border rounded" />
           ) : <div className="w-full border p-4 text-base bg-gray-100 rounded">—</div>}
         </div>
         <div className="mb-6">

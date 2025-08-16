@@ -176,7 +176,7 @@ export default function SlidesTable() {
                 <td className="px-4 py-2 text-blue-600 underline cursor-pointer" onClick={() => router.push(`/admin/slides/${s.id}/view`)}>
                   {s.id}
                 </td>
-                <td className="px-4 py-2">{s.cover ? <img src={`/${s.cover}`} alt="slide cover" width={200} height={100} className="object-contain border rounded" /> : "—"}</td>
+                <td className="px-4 py-2">{s.cover ? <img src={s.cover.startsWith('/') ? s.cover : `/${s.cover}`} alt="slide cover" width={200} height={100} className="object-contain border rounded" /> : "—"}</td>
                 <td className="px-4 py-2">{s.designation_fr || "—"}</td>
                 <td className="px-4 py-2 max-w-[200px] truncate" title={s.description_fr || ""}>{s.description_fr || "—"}</td>
                 <td className="px-4 py-2">{s.btn_text_fr || "—"}</td>

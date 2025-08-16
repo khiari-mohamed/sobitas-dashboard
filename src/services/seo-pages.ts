@@ -14,13 +14,26 @@ export const fetchSeoPageById = async (id: string): Promise<SeoPage> => {
   return data;
 };
 
-export const createSeoPage = async (seoPage: Omit<SeoPage, '_id'>): Promise<SeoPage> => {
-  const { data } = await axiosInstance.post<SeoPage>(RESOURCE, seoPage);
+export const createSeoPage = async (seoPage: any): Promise<SeoPage> => {
+  const cleanData = Object.fromEntries(
+    Object.entries(seoPage).filter(([_, value]) => value !== undefined && value !== '')
+  );
+  const { data } = await axiosInstance.post<SeoPage>(RESOURCE, cleanData);
   return data;
 };
 
-export const updateSeoPage = async (id: string, seoPage: Partial<SeoPage>): Promise<SeoPage> => {
-  const { data } = await axiosInstance.patch<SeoPage>(`${RESOURCE}/${id}`, seoPage);
+export const updateSeoPage = async (id: string, seoPage: any): Promise<SeoPage> => {
+  const cleanData = Object.fromEntries(
+    Object.entries(seoPage).filter(([key, value]) => 
+      value !== undefined && 
+      value !== '' && 
+      key !== '_id' && 
+      key !== '__v' && 
+      key !== 'createdAt' && 
+      key !== 'updatedAt'
+    )
+  );
+  const { data } = await axiosInstance.put<SeoPage>(`${RESOURCE}/${id}`, cleanData);
   return data;
 };
 

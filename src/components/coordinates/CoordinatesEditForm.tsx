@@ -69,9 +69,18 @@ export default function CoordinatesEditForm({ id }: { id: string }) {
     fetchCoordinateById(id)
       .then((coordinate) => {
         setForm(coordinate);
-        if (coordinate.logo) setLogoPreview(`/${coordinate.logo}`);
-        if (coordinate.logo_facture) setLogoFacturePreview(`/${coordinate.logo_facture}`);
-        if (coordinate.logo_footer) setLogoFooterPreview(`/${coordinate.logo_footer}`);
+        if (coordinate.logo) {
+          const logoPath = coordinate.logo.startsWith('/') ? coordinate.logo : `/${coordinate.logo}`;
+          setLogoPreview(logoPath);
+        }
+        if (coordinate.logo_facture) {
+          const logoFacturePath = coordinate.logo_facture.startsWith('/') ? coordinate.logo_facture : `/${coordinate.logo_facture}`;
+          setLogoFacturePreview(logoFacturePath);
+        }
+        if (coordinate.logo_footer) {
+          const logoFooterPath = coordinate.logo_footer.startsWith('/') ? coordinate.logo_footer : `/${coordinate.logo_footer}`;
+          setLogoFooterPreview(logoFooterPath);
+        }
       })
       .catch(() => setError("Coordonnée introuvable"))
       .finally(() => setLoading(false));

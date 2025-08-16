@@ -52,12 +52,12 @@ export default function SeoPagesCreateClient() {
         {/* ID */}
         <div className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">ID</h2>
-          <input type="text" name="id" value={form.id || ""} onChange={handleChange} className="w-full border p-4 text-lg" required />
+          <input type="text" name="id" value={form.id || ""} onChange={handleChange} className="w-full border p-4 text-lg" />
         </div>
         {/* Page */}
         <div className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Page</h2>
-          <input type="text" name="page" value={form.page || ""} onChange={handleChange} className="w-full border p-4 text-lg" required />
+          <input type="text" name="page" value={form.page || ""} onChange={handleChange} className="w-full border p-4 text-lg" />
         </div>
         {/* Meta */}
         <div className="mb-10 col-span-1 md:col-span-2">

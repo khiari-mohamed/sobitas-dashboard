@@ -1,42 +1,81 @@
-import axios from "@/lib/axios";
-import { BestSeller } from "@/types/bestseller";
+import axiosInstance from '../lib/axios';
 
-// Fetch all best seller products
-export const fetchAllBestSellers = async (): Promise<BestSeller[]> => {
+export interface BestSeller {
+  _id?: string;
+  designation_fr: string;
+  prix: number;
+  promo?: number;
+  qte: string;
+  publier: string;
+  cover?: string;
+  slug?: string;
+  description_fr?: string;
+  description_cover?: string;
+}
+
+export interface BestSellerConfig {
+  sectionTitle: string;
+  sectionDescription: string;
+  maxDisplay: number;
+  showOnFrontend: boolean;
+  productOrder: string[];
+}
+
+export async function fetchAllBestSellers(): Promise<BestSeller[]> {
   try {
-    const res = await axios.get("/products");
-    console.log("API Response:", res.data);
-    
-    // Handle different response structures
-    if (res.data?.data?.products && Array.isArray(res.data.data.products)) {
-      return res.data.data.products as BestSeller[];
-    }
-    if (res.data?.data && Array.isArray(res.data.data)) {
-      return res.data.data as BestSeller[];
-    }
-    if (Array.isArray(res.data)) {
-      return res.data as BestSeller[];
-    }
-    if (res.data?.products && Array.isArray(res.data.products)) {
-      return res.data.products as BestSeller[];
-    }
-    
-    console.log("No products found in response");
-    return [];
+    const response = await axiosInstance.get('/products/store/top');
+    return response.data?.data || response.data?.products || [];
   } catch (error) {
-    console.error("Error fetching best sellers:", error);
+    console.error('Error fetching best sellers:', error);
     return [];
   }
-};
+}
 
-// Update a best seller product
-export const updateBestSeller = async (id: string, payload: Partial<BestSeller>) => {
-  const res = await axios.patch(`/products/${id}`, payload);
-  return res.data;
-};
+export async function updateBestSeller(id: string, data: Partial<BestSeller>): Promise<any> {
+  try {
+    const response = await axiosInstance.put(`/products/admin/update/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating best seller:', error);
+    throw error;
+  }
+}
 
-// Delete a best seller product
-export const deleteBestSeller = async (id: string) => {
-  const res = await axios.delete(`/products/${id}`);
-  return res.data;
-};
+export async function deleteBestSeller(id: string): Promise<void> {
+  try {
+    await axiosInstance.delete(`/products/admin/delete/${id}`);
+  } catch (error) {
+    console.error('Error deleting best seller:', error);
+    throw error;
+  }
+}
+
+export async function getBestSellerConfig(): Promise<BestSellerConfig> {
+  try {
+    const response = await axiosInstance.get('/products/admin/bestseller-config');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching best seller config:', error);
+    throw error;
+  }
+}
+
+export async function updateBestSellerConfig(config: Partial<BestSellerConfig>): Promise<any> {
+  try {
+    const response = await axiosInstance.post('/products/admin/bestseller-config', config);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating best seller config:', error);
+    throw error;
+  }
+}
+
+export async function updateBestSellerOrder(productOrder: string[]): Promise<any> {
+  try {
+    const response = await axiosInstance.put('/products/admin/bestseller-order', { productOrder });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating best seller order:', error);
+    throw error;
+  }
+}

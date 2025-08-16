@@ -22,7 +22,7 @@ const initialState: Partial<Slide> = {
 
 export default function SlidesEditForm({ id }: { id: string }) {
   const router = useRouter();
-  const [form, setForm] = useState<Partial<Slide>>(initialState);
+  const [form, setForm] = useState<any>(initialState);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -32,7 +32,10 @@ export default function SlidesEditForm({ id }: { id: string }) {
     fetchSlideById(id)
       .then((slide) => {
         setForm(slide);
-        if (slide.cover) setCoverPreview(`/${slide.cover}`);
+        if (slide.cover) {
+          const coverPath = slide.cover.startsWith('/') ? slide.cover : `/${slide.cover}`;
+          setCoverPreview(coverPath);
+        }
       })
       .catch(() => setError("Slide introuvable"))
       .finally(() => setLoading(false));
@@ -45,8 +48,7 @@ export default function SlidesEditForm({ id }: { id: string }) {
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      // You must upload the file and set the returned URL/path as cover
-      setForm({ ...form, cover: file.name }); // TEMP: just set file name for now
+      setForm({ ...form, cover: file });
       const reader = new FileReader();
       reader.onload = () => {
         setCoverPreview(reader.result as string);

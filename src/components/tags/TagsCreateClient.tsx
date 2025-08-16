@@ -43,12 +43,12 @@ export default function TagsCreateClient() {
         {/* ID */}
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">ID</label>
-          <input type="text" name="id" value={form.id || ""} onChange={handleChange} className="w-full border p-4 text-base" required />
+          <input type="text" name="id" value={form.id || ""} onChange={handleChange} className="w-full border p-4 text-base" />
         </div>
         {/* Désignation */}
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Désignation</label>
-          <input type="text" name="designation_fr" value={form.designation_fr || ""} onChange={handleChange} className="w-full border p-4 text-base" required />
+          <input type="text" name="designation_fr" value={form.designation_fr || ""} onChange={handleChange} className="w-full border p-4 text-base" />
         </div>
         {/* created_at (readonly) */}
         <div className="mb-6">

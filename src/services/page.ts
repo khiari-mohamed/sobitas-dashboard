@@ -15,3 +15,18 @@ export const fetchPageById = async (id: string): Promise<Page> => {
   const res = await axios.get(`/pages/${id}`);
   return res.data.data;
 };
+
+export const createPage = async (pageData: any): Promise<Page> => {
+  const res = await axios.post('/pages', pageData);
+  return res.data.data;
+};
+
+export const updatePage = async (id: string, pageData: any): Promise<Page> => {
+  const res = await axios.put(`/pages/${id}`, pageData);
+  return res.data.data;
+};
+
+export const deletePage = async (id: string): Promise<string> => {
+  const res = await axios.delete(`/pages/${id}`);
+  return res.data.message;
+};

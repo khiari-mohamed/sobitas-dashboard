@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getAllPayments } from "@/services/payments";
+import { getAllPayments, deletePayment } from "@/services/payments";
 import { Payment } from "@/types/payments";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 import { FaSearch } from "react-icons/fa";
@@ -70,19 +70,25 @@ export default function PaymentsTable() {
 
   const handleConfirmDelete = async () => {
     if (deletePaymentId) {
-      // TODO: Implement delete API call
-      setPayments((prev) => prev.filter(p => p._id !== deletePaymentId));
-      setDeletePaymentId(null);
+      try {
+        await deletePayment(deletePaymentId);
+        setPayments((prev) => prev.filter(p => p._id !== deletePaymentId));
+        setDeletePaymentId(null);
+      } catch (error) {
+        console.error('Error deleting payment:', error);
+      }
     }
   };
 
   const handleConfirmDeleteSelection = async () => {
-    for (const id of selectedIds) {
-      // TODO: Implement delete API call
+    try {
+      await Promise.all(selectedIds.map(id => deletePayment(id)));
+      setPayments((prev) => prev.filter(p => !p._id || !selectedIds.includes(p._id)));
+      setSelectedIds([]);
+      setDeleteSelectionOpen(false);
+    } catch (error) {
+      console.error('Error deleting payments:', error);
     }
-    setPayments((prev) => prev.filter(p => !p._id || !selectedIds.includes(p._id)));
-    setSelectedIds([]);
-    setDeleteSelectionOpen(false);
   };
 
   const getStatusBadge = (status: string) => {
@@ -131,12 +137,7 @@ export default function PaymentsTable() {
       <div className="flex flex-col sm:flex-row gap-3 mb-4 items-start sm:items-center">
         <h2 className="text-xl font-semibold text-gray-700">Paiements</h2>
         <div className="flex flex-wrap gap-2 ml-auto">
-          <button
-            className="bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-2 rounded"
-            onClick={() => router.push('/admin/payments/new')}
-          >
-            + Ajouter nouveau
-          </button>
+   
           <button
             className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded"
             onClick={handleExport}
@@ -233,12 +234,7 @@ export default function PaymentsTable() {
                   >
                     👁 Vue
                   </button>
-                  <button
-                    className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
-                    onClick={() => router.push(`/admin/payments/${payment._id}/edit`)}
-                  >
-                    ✏️ Éditer
-                  </button>
+  
                   <button
                     className="bg-red-500 text-white px-2 py-1 rounded text-xs"
                     onClick={() => payment._id && handleDelete(payment._id)}

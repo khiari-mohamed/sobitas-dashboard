@@ -43,5 +43,11 @@ export interface Pack {
     url: string;
     img_id: string;
   };
+  displayOrder?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  designation?: string;
+  price?: number;
+  oldPrice?: number;
   [key: string]: any;
 }

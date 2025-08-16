@@ -100,3 +100,14 @@ export const bulkDeletePacks = async (ids: string[]) => {
   }
 };
 
+// Get frontend pack configuration
+export const getFrontendPackConfig = async () => {
+  try {
+    const res = await axios.get('/admin/packs/frontend/config');
+    return res.data;
+  } catch (error: any) {
+    console.error('Frontend config error:', error.response?.data || error.message);
+    throw error;
+  }
+};
+

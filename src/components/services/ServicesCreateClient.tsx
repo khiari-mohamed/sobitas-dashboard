@@ -17,7 +17,7 @@ const initialState: Partial<ServiceItem> = {
 
 export default function ServicesCreateClient() {
   const router = useRouter();
-  const [form, setForm] = useState<Partial<ServiceItem>>(initialState);
+  const [form, setForm] = useState<any>(initialState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [iconPreview, setIconPreview] = useState<string | null>(null);
@@ -30,7 +30,7 @@ export default function ServicesCreateClient() {
   const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setForm({ ...form, icon: file.name }); // TEMP: just set file name for now
+      setForm({ ...form, icon: file });
       const reader = new FileReader();
       reader.onload = () => {
         setIconPreview(reader.result as string);
@@ -60,12 +60,12 @@ export default function ServicesCreateClient() {
         {/* ID */}
         <div className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">ID</h2>
-          <input type="text" name="id" value={form.id || ""} onChange={handleChange} className="w-full border p-4 text-lg" required />
+          <input type="text" name="id" value={form.id || ""} onChange={handleChange} className="w-full border p-4 text-lg" />
         </div>
         {/* Désignation */}
         <div className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Désignation</h2>
-          <input type="text" name="designation_fr" value={form.designation_fr || ""} onChange={handleChange} className="w-full border p-4 text-lg" required />
+          <input type="text" name="designation_fr" value={form.designation_fr || ""} onChange={handleChange} className="w-full border p-4 text-lg" />
         </div>
         {/* Description (RichTextEditor) */}
         <div className="mb-10 col-span-1 md:col-span-2">

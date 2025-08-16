@@ -26,7 +26,7 @@ const initialState: Partial<Annonce> = {
 
 export default function AnnouncesEditForm({ id }: { id: string }) {
   const router = useRouter();
-  const [form, setForm] = useState<Partial<Annonce>>(initialState);
+  const [form, setForm] = useState<any>(initialState);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [imagePreviews, setImagePreviews] = useState<{ [key: string]: string | null }>({});
@@ -39,11 +39,13 @@ export default function AnnouncesEditForm({ id }: { id: string }) {
         // Set previews for existing images
         [1,2,3,4,5,6].forEach(n => {
           if (annonce[`image_${n}` as keyof Annonce]) {
-            setImagePreviews(prev => ({ ...prev, [`image_${n}`]: `/${annonce[`image_${n}` as keyof Annonce]}` }));
+            const imagePath = (annonce[`image_${n}` as keyof Annonce] as string).startsWith('/') ? (annonce[`image_${n}` as keyof Annonce] as string) : `/${annonce[`image_${n}` as keyof Annonce]}`;
+            setImagePreviews(prev => ({ ...prev, [`image_${n}`]: imagePath }));
           }
         });
         if (annonce.products_default_cover) {
-          setImagePreviews(prev => ({ ...prev, products_default_cover: `/${annonce.products_default_cover}` }));
+          const coverPath = annonce.products_default_cover.startsWith('/') ? annonce.products_default_cover : `/${annonce.products_default_cover}`;
+          setImagePreviews(prev => ({ ...prev, products_default_cover: coverPath }));
         }
       })
       .catch(() => setError("Annonce introuvable"))

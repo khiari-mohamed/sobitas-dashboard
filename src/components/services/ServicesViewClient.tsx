@@ -53,9 +53,18 @@ export default function ServicesViewClient({ id }: { id: string }) {
         </div>
         <div className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Icone</h2>
-          {service.icon ? (
-            <img src={`/${service.icon}`} alt="icon" width={120} height={120} className="object-contain border rounded" />
-          ) : <div className="w-full border p-4 text-lg bg-gray-100 rounded">—</div>}
+          {service.icon ? (() => {
+            // Handle different path formats
+            let iconPath;
+            if (service.icon.startsWith('/')) {
+              iconPath = service.icon; // New format: /produits/août2025/file.jpg
+            } else if (service.icon.includes('/')) {
+              iconPath = `/${service.icon}`; // Old format: services/September2023/file.png
+            } else {
+              iconPath = `/produits/${service.icon}`; // Just filename: file.jpg
+            }
+            return <img src={iconPath} alt="icon" width={120} height={120} className="object-contain border rounded" />;
+          })() : <div className="w-full border p-4 text-lg bg-gray-100 rounded">—</div>}
         </div>
         <div className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Date de création</h2>

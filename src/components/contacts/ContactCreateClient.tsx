@@ -50,7 +50,6 @@ export default function ContactCreateClient() {
             value={form.name || ""}
             onChange={handleChange}
             className="w-full border p-4 text-base"
-            required
           />
         </div>
         <div className="p-6 bg-gray-50 border">
@@ -61,7 +60,6 @@ export default function ContactCreateClient() {
             value={form.email}
             onChange={handleChange}
             className="w-full border p-4 text-base"
-            required
           />
         </div>
         <div className="p-6 bg-gray-50 border">

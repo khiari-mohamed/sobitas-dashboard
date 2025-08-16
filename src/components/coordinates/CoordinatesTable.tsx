@@ -177,13 +177,13 @@ export default function CoordinatesTable() {
                 {/* Logo */}
                 <td className="px-4 py-2">
                   {c.logo ? (
-                    <img src={`/${c.logo}`} alt="logo" width={200} height={100} style={{ objectFit: 'contain' }} className="border rounded" />
+                    <img src={c.logo.startsWith('/') ? c.logo : `/${c.logo}`} alt="logo" width={200} height={100} style={{ objectFit: 'contain' }} className="border rounded" />
                   ) : "—"}
                 </td>
                 {/* Logo Facture */}
                 <td className="px-4 py-2">
                   {c.logo_facture ? (
-                    <img src={`/${c.logo_facture}`} alt="logo facture" width={200} height={100} style={{ objectFit: 'contain' }} className="border rounded" />
+                    <img src={c.logo_facture.startsWith('/') ? c.logo_facture : `/${c.logo_facture}`} alt="logo facture" width={200} height={100} style={{ objectFit: 'contain' }} className="border rounded" />
                   ) : "—"}
                 </td>
                 {/* WhatsApp */}

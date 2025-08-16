@@ -48,7 +48,7 @@ export default function AnnouncesViewClient({ id }: { id: string }) {
             <div className="mb-6">
               <label className="block text-xl font-semibold mb-2">Image {n}</label>
               {annonce[`image_${n}` as keyof Annonce] ? (
-                <img src={`/${annonce[`image_${n}` as keyof Annonce]}`} alt={`img${n}`} width={200} height={100} className="object-contain border rounded" />
+                <img src={(annonce[`image_${n}` as keyof Annonce] as string).startsWith('/') ? (annonce[`image_${n}` as keyof Annonce] as string) : `/${annonce[`image_${n}` as keyof Annonce]}`} alt={`img${n}`} width={200} height={100} className="object-contain border rounded" />
               ) : <div className="w-full border p-4 text-base bg-gray-100 rounded">—</div>}
             </div>
             <div className="mb-6">
@@ -62,7 +62,7 @@ export default function AnnouncesViewClient({ id }: { id: string }) {
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Default Cover</label>
           {annonce.products_default_cover ? (
-            <img src={`/${annonce.products_default_cover}`} alt="default cover" width={200} height={100} className="object-contain border rounded" />
+            <img src={annonce.products_default_cover.startsWith('/') ? annonce.products_default_cover : `/${annonce.products_default_cover}`} alt="default cover" width={200} height={100} className="object-contain border rounded" />
           ) : <div className="w-full border p-4 text-base bg-gray-100 rounded">—</div>}
         </div>
         <div className="mb-6">

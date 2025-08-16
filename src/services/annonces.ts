@@ -14,13 +14,51 @@ export const fetchAnnonceById = async (id: string): Promise<Annonce> => {
   return data;
 };
 
-export const createAnnonce = async (annonce: Omit<Annonce, '_id'>): Promise<Annonce> => {
-  const { data } = await axiosInstance.post<Annonce>(RESOURCE, annonce);
+export const createAnnonce = async (annonce: any): Promise<Annonce> => {
+  // Handle file uploads first
+  const formData: any = { ...annonce };
+  
+  // Upload files if they exist
+  for (const [key, value] of Object.entries(annonce)) {
+    if (value && typeof value === 'object' && value.constructor === File) {
+      try {
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', value as File);
+        const uploadResponse = await axiosInstance.post('/upload/image', uploadFormData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        formData[key] = uploadResponse.data.url;
+      } catch (error) {
+        console.error(`Failed to upload ${key}:`, error);
+        delete formData[key];
+      }
+    }
+  }
+  
+  const cleanData = Object.fromEntries(
+    Object.entries(formData).filter(([_, value]) => value !== undefined && value !== '' && !(value && typeof value === 'object' && value.constructor === File))
+  );
+  const { data } = await axiosInstance.post<Annonce>(RESOURCE, cleanData);
   return data;
 };
 
-export const updateAnnonce = async (id: string, annonce: Partial<Annonce>): Promise<Annonce> => {
-  const { data } = await axiosInstance.patch<Annonce>(`${RESOURCE}/${id}`, annonce);
+export const updateAnnonce = async (id: string, annonce: any): Promise<Annonce> => {
+  const formData = new FormData();
+  
+  // Add all fields to FormData
+  for (const [key, value] of Object.entries(annonce)) {
+    if (key !== '_id' && key !== '__v' && key !== 'createdAt' && key !== 'updatedAt') {
+      if (value && typeof value === 'object' && value.constructor === File) {
+        formData.append(key, value as File);
+      } else if (value !== undefined && value !== '') {
+        formData.append(key, String(value));
+      }
+    }
+  }
+  
+  const { data } = await axiosInstance.put<Annonce>(`${RESOURCE}/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
   return data;
 };
 

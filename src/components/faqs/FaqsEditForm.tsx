@@ -51,7 +51,12 @@ export default function FaqsEditForm({ id }: { id: string }) {
     setLoading(true);
     setError(null);
     try {
-      await updateFaq(id, form);
+      const submitData = {
+        ...(form.id && { id: form.id }),
+        ...(form.question && { question: form.question }),
+        ...(form.answer && { answer: form.answer })
+      };
+      await updateFaq(id, submitData);
       router.push("/admin/faqs");
     } catch (err: any) {
       setError(err.message || "Erreur lors de la modification de la FAQ");
@@ -88,7 +93,6 @@ export default function FaqsEditForm({ id }: { id: string }) {
             value={form.question}
             onChange={handleChange}
             className="w-full border p-4 text-base"
-            required
           />
         </div>
         {/* Answer */}

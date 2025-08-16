@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchPages } from "@/services/page";
+import { fetchPages, deletePage } from "@/services/page";
 import { Page } from "@/types/page";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 import { FaSearch } from "react-icons/fa";
@@ -54,18 +54,25 @@ export default function PagesTable() {
     setDeletePageId(id);
   };
 
-  // TODO: Implement deletePage and deleteMultiplePages in service
   const handleConfirmDelete = async () => {
-    // await deletePage(deletePageId!);
-    setPages((prev) => prev.filter(p => p._id !== deletePageId));
-    setDeletePageId(null);
+    try {
+      await deletePage(deletePageId!);
+      setPages((prev) => prev.filter(p => p._id !== deletePageId));
+      setDeletePageId(null);
+    } catch (error) {
+      console.error('Error deleting page:', error);
+    }
   };
 
   const handleConfirmDeleteSelection = async () => {
-    // await deleteMultiplePages(selectedIds);
-    setPages((prev) => prev.filter(p => !selectedIds.includes(p._id)));
-    setSelectedIds([]);
-    setDeleteSelectionOpen(false);
+    try {
+      await Promise.all(selectedIds.map(id => deletePage(id)));
+      setPages((prev) => prev.filter(p => !selectedIds.includes(p._id)));
+      setSelectedIds([]);
+      setDeleteSelectionOpen(false);
+    } catch (error) {
+      console.error('Error deleting pages:', error);
+    }
   };
 
   return (

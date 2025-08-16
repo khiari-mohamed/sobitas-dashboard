@@ -23,7 +23,7 @@ const initialState: Partial<Slide> = {
 
 export default function SlidesCreateClient() {
   const router = useRouter();
-  const [form, setForm] = useState<Partial<Slide>>(initialState);
+  const [form, setForm] = useState<any>(initialState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -36,8 +36,7 @@ export default function SlidesCreateClient() {
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      // You must upload the file and set the returned URL/path as cover
-      setForm({ ...form, cover: file.name }); // TEMP: just set file name for now
+      setForm({ ...form, cover: file });
       const reader = new FileReader();
       reader.onload = () => {
         setCoverPreview(reader.result as string);
@@ -68,7 +67,7 @@ export default function SlidesCreateClient() {
         {/* ID */}
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">ID</label>
-          <input type="text" name="id" value={form.id || ""} onChange={handleChange} className="w-full border p-4 text-base" required />
+          <input type="text" name="id" value={form.id || ""} onChange={handleChange} className="w-full border p-4 text-base" />
         </div>
         {/* Cover (upload + preview) */}
         <div className="mb-6">

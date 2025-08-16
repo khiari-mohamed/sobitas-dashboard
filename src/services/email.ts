@@ -32,10 +32,21 @@ export const sendOrderShipped = async (payload: OrderShippedPayload): Promise<{ 
   return data;
 };
 
+export const fetchEmailTemplates = async (): Promise<any[]> => {
+  const { data } = await axiosInstance.get(`${EMAIL_BASE}/templates`);
+  return data;
+};
+
+export const deleteEmailTemplate = async (type: string): Promise<void> => {
+  await axiosInstance.delete(`${EMAIL_BASE}/templates/${type}`);
+};
+
 const emailService = {
   sendOrderConfirmation,
   sendWeeklyPromotion,
   sendOrderShipped,
+  fetchEmailTemplates,
+  deleteEmailTemplate,
 };
 
 export default emailService;

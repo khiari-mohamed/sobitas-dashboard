@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchPageById } from "@/services/page";
+import { fetchPageById, updatePage } from "@/services/page";
 import { Page } from "@/types/page";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 
@@ -28,7 +28,12 @@ export default function PagesEditForm({ id }: { id: string }) {
     setLoading(true);
     setError(null);
     try {
-      // await updatePage(id, form);
+      const cleanData = Object.fromEntries(
+        Object.entries(form).filter(([key, value]) => 
+          value !== undefined && value !== '' && key !== '_id' && key !== 'createdAt' && key !== 'updatedAt'
+        )
+      );
+      await updatePage(id, cleanData);
       router.push("/admin/pages");
     } catch (err: any) {
       setError(err.message || "Erreur lors de la modification de la page");
@@ -52,7 +57,6 @@ export default function PagesEditForm({ id }: { id: string }) {
             value={form.title || ""}
             onChange={handleChange}
             className="w-full border p-4 text-base"
-            required
           />
         </div>
         {/* Slug */}

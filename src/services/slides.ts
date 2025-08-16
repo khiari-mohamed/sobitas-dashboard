@@ -14,13 +14,51 @@ export const fetchSlideById = async (id: string): Promise<Slide> => {
   return data;
 };
 
-export const createSlide = async (slide: Omit<Slide, '_id'>): Promise<Slide> => {
-  const { data } = await axiosInstance.post<Slide>(RESOURCE, slide);
+export const createSlide = async (slide: any): Promise<Slide> => {
+  // Handle file uploads first
+  const formData: any = { ...slide };
+  
+  // Upload files if they exist
+  for (const [key, value] of Object.entries(slide)) {
+    if (value && typeof value === 'object' && value.constructor === File) {
+      try {
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', value as File);
+        const uploadResponse = await axiosInstance.post('/upload/image', uploadFormData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        formData[key] = uploadResponse.data.url;
+      } catch (error) {
+        console.error(`Failed to upload ${key}:`, error);
+        delete formData[key];
+      }
+    }
+  }
+  
+  const cleanData = Object.fromEntries(
+    Object.entries(formData).filter(([_, value]) => value !== undefined && value !== '' && !(value && typeof value === 'object' && value.constructor === File))
+  );
+  const { data } = await axiosInstance.post<Slide>(RESOURCE, cleanData);
   return data;
 };
 
-export const updateSlide = async (id: string, slide: Partial<Slide>): Promise<Slide> => {
-  const { data } = await axiosInstance.patch<Slide>(`${RESOURCE}/${id}`, slide);
+export const updateSlide = async (id: string, slide: any): Promise<Slide> => {
+  const formData = new FormData();
+  
+  // Add all fields to FormData
+  for (const [key, value] of Object.entries(slide)) {
+    if (key !== '_id' && key !== '__v' && key !== 'createdAt' && key !== 'updatedAt') {
+      if (value && typeof value === 'object' && value.constructor === File) {
+        formData.append(key, value as File);
+      } else if (value !== undefined && value !== '') {
+        formData.append(key, String(value));
+      }
+    }
+  }
+  
+  const { data } = await axiosInstance.put<Slide>(`${RESOURCE}/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
   return data;
 };
 

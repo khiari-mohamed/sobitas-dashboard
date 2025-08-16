@@ -17,7 +17,7 @@ const initialState: Partial<ServiceItem> = {
 
 export default function ServicesEditForm({ id }: { id: string }) {
   const router = useRouter();
-  const [form, setForm] = useState<Partial<ServiceItem>>(initialState);
+  const [form, setForm] = useState<any>(initialState);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [iconPreview, setIconPreview] = useState<string | null>(null);
@@ -27,7 +27,18 @@ export default function ServicesEditForm({ id }: { id: string }) {
     fetchServiceById(id)
       .then((service) => {
         setForm(service);
-        if (service.icon) setIconPreview(`/${service.icon}`);
+        if (service.icon) {
+          // Handle different path formats
+          let iconPath;
+          if (service.icon.startsWith('/')) {
+            iconPath = service.icon; // New format: /produits/août2025/file.jpg
+          } else if (service.icon.includes('/')) {
+            iconPath = `/${service.icon}`; // Old format: services/September2023/file.png
+          } else {
+            iconPath = `/produits/${service.icon}`; // Just filename: file.jpg
+          }
+          setIconPreview(iconPath);
+        }
       })
       .catch(() => setError("Service introuvable"))
       .finally(() => setLoading(false));
@@ -40,7 +51,7 @@ export default function ServicesEditForm({ id }: { id: string }) {
   const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setForm({ ...form, icon: file.name }); // TEMP: just set file name for now
+      setForm({ ...form, icon: file });
       const reader = new FileReader();
       reader.onload = () => {
         setIconPreview(reader.result as string);
@@ -77,7 +88,7 @@ export default function ServicesEditForm({ id }: { id: string }) {
         {/* Désignation */}
         <div className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Désignation</h2>
-          <input type="text" name="designation_fr" value={form.designation_fr || ""} onChange={handleChange} className="w-full border p-4 text-lg" required />
+          <input type="text" name="designation_fr" value={form.designation_fr || ""} onChange={handleChange} className="w-full border p-4 text-lg" />
         </div>
         {/* Description (RichTextEditor) */}
         <div className="mb-10 col-span-1 md:col-span-2">

@@ -26,7 +26,7 @@ export default function CoordinatesViewClient({ id }: { id: string }) {
     <div className="mb-6">
       <label className="block text-xl font-semibold mb-2">{label}</label>
       {isImage && value ? (
-        <img src={`/${value}`} alt={label} width={200} height={100} style={{ objectFit: 'contain' }} className="border rounded" />
+        <img src={value.startsWith('/') ? value : `/${value}`} alt={label} width={200} height={100} style={{ objectFit: 'contain' }} className="border rounded" />
       ) : isLink && value ? (
         <a href={value} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">{value}</a>
       ) : isRich && value ? (

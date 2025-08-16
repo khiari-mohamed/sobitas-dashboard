@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { fetchAllPacks, updatePack, deletePack } from "@/services/pack";
+import { fetchAllPacks, updatePack, deletePack, getFrontendPackConfig } from "@/services/pack";
 import { Pack } from "@/types/pack";
 import dynamic from "next/dynamic";
 
@@ -18,13 +18,96 @@ export default function PacksControlClient() {
   const [sectionTitle, setSectionTitle] = useState("Nos Packs Exclusifs");
   const [sectionDescription, setSectionDescription] = useState("Profitez de nos packs exclusifs pour faire des économies sur vos achats !");
   const [showOnFrontend, setShowOnFrontend] = useState(true);
+  const [savingConfig, setSavingConfig] = useState(false);
+
+  const saveConfiguration = async () => {
+    setSavingConfig(true);
+    try {
+      const config = {
+        sectionTitle,
+        sectionDescription,
+        maxDisplay,
+        showOnFrontend,
+        lastUpdated: new Date().toISOString()
+      };
+      
+      // Save to localStorage for dashboard persistence
+      localStorage.setItem('packsConfig', JSON.stringify(config));
+      
+      // Save to backend for frontend consumption
+      const response = await fetch('http://localhost:5000/admin/packs/config/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(config),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save configuration');
+      }
+      
+      alert('Configuration sauvegardée avec succès! Les changements sont maintenant visibles sur le site web.');
+    } catch (error) {
+      console.error('Error saving configuration:', error);
+      alert('Erreur lors de la sauvegarde de la configuration');
+    } finally {
+      setSavingConfig(false);
+    }
+  };
+
+  // Load configuration on mount
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        // Try to load from backend first
+        const frontendConfig = await getFrontendPackConfig();
+        if (frontendConfig?.data?.config) {
+          const config = frontendConfig.data.config;
+          setSectionTitle(config.sectionTitle || 'Nos Packs Exclusifs');
+          setSectionDescription(config.sectionDescription || 'Profitez de nos packs exclusifs pour faire des économies sur vos achats !');
+          setMaxDisplay(config.maxDisplay || 4);
+          setShowOnFrontend(config.showOnFrontend !== undefined ? config.showOnFrontend : true);
+          return;
+        }
+      } catch (error) {
+        console.error('Error loading backend config:', error);
+      }
+      
+      // Fallback to localStorage
+      try {
+        const savedConfig = localStorage.getItem('packsConfig');
+        if (savedConfig) {
+          const config = JSON.parse(savedConfig);
+          setSectionTitle(config.sectionTitle || 'Nos Packs Exclusifs');
+          setSectionDescription(config.sectionDescription || 'Profitez de nos packs exclusifs pour faire des économies sur vos achats !');
+          setMaxDisplay(config.maxDisplay || 4);
+          setShowOnFrontend(config.showOnFrontend !== undefined ? config.showOnFrontend : true);
+        }
+      } catch (error) {
+        console.error('Error loading localStorage config:', error);
+      }
+    };
+    
+    loadConfig();
+  }, []);
 
   useEffect(() => {
     const fetchPacks = async () => {
       try {
         const data = await fetchAllPacks();
-        setPacks(data);
-        setDisplayedPacks(data.filter(p => p.publier === "1").slice(0, maxDisplay));
+        // Sort by displayOrder if available, otherwise by creation date
+        const sortedData = data.sort((a, b) => {
+          if (a.displayOrder !== undefined && b.displayOrder !== undefined) {
+            return a.displayOrder - b.displayOrder;
+          }
+          if (a.createdAt && b.createdAt) {
+            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          }
+          return 0;
+        });
+        setPacks(sortedData);
+        setDisplayedPacks(sortedData.filter(p => p.publier === "1").slice(0, maxDisplay));
       } catch (err) {
         console.error(err);
       } finally {
@@ -38,22 +121,52 @@ export default function PacksControlClient() {
     setDisplayedPacks(packs.filter(p => p.publier === "1").slice(0, maxDisplay));
   }, [packs, maxDisplay]);
 
-  const movePack = (fromIndex: number, toIndex: number) => {
+  const movePack = async (fromIndex: number, toIndex: number) => {
     if (toIndex < 0 || toIndex >= packs.length) return;
+    
     const newPacks = [...packs];
     const [movedPack] = newPacks.splice(fromIndex, 1);
     newPacks.splice(toIndex, 0, movedPack);
+    
+    // Update local state immediately for UI responsiveness
     setPacks(newPacks);
+    
+    // Save new order to backend
+    try {
+      // Update each pack with its new order position
+      const updatePromises = newPacks.map((pack, index) => {
+        if (pack._id) {
+          return updatePack(pack._id, { ...pack, displayOrder: index });
+        }
+        return Promise.resolve();
+      });
+      
+      await Promise.all(updatePromises);
+      console.log('Pack order updated successfully');
+    } catch (error) {
+      console.error('Error updating pack order:', error);
+      // Revert on error
+      const revertedPacks = [...packs];
+      setPacks(revertedPacks);
+      alert('Erreur lors de la sauvegarde de l\'ordre');
+    }
   };
 
   const handleQuickEdit = (field: string, value: string | number, pack: Pack) => {
     if (!pack._id) return;
     setUpdating(pack._id);
-    updatePack(pack._id, { ...pack, [field]: value })
+    
+    // Create update payload with proper field mapping
+    const updatePayload = { ...pack, [field]: value };
+    
+    updatePack(pack._id, updatePayload)
       .then(() => {
         setPacks(packs.map(p => p._id === pack._id ? { ...p, [field]: value } : p));
       })
-      .catch(console.error)
+      .catch((error) => {
+        console.error('Update error:', error);
+        alert('Erreur lors de la mise à jour');
+      })
       .finally(() => setUpdating(null));
   };
 
@@ -95,17 +208,32 @@ export default function PacksControlClient() {
       setPacks(packs.map(p => p._id === editingPack._id ? editingPack : p));
       setShowEditModal(false);
       setEditingPack(null);
+      alert('Pack mis à jour avec succès!');
     } catch (err) {
-      console.error(err);
+      console.error('Save error:', err);
+      alert('Erreur lors de la sauvegarde');
     } finally {
       setUpdating(null);
     }
   };
 
   const getImageSrc = (pack: Pack) => {
-    if (!pack.cover || pack.cover === "undefined") return "/images/packs/pack.webp";
-    if (pack.cover.startsWith('http') || pack.cover.startsWith('/')) return pack.cover;
-    return `/storage/app/public/${pack.cover}`;
+    // Check mainImage first (from backend schema)
+    if (pack.mainImage?.url) {
+      return pack.mainImage.url;
+    }
+    
+    // Check cover field
+    if (pack.cover && pack.cover !== "undefined") {
+      if (pack.cover.startsWith('http') || pack.cover.startsWith('/')) {
+        return pack.cover;
+      }
+      // Handle relative paths
+      return `/${pack.cover.replace(/^\/+/, "")}`;
+    }
+    
+    // Default fallback
+    return "/images/placeholder.png";
   };
 
   if (loading) return <div className="p-8">Chargement...</div>;
@@ -153,7 +281,7 @@ export default function PacksControlClient() {
             className="w-full border p-2 rounded h-20"
           />
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between">
           <label className="flex items-center">
             <input
               type="checkbox"
@@ -163,6 +291,13 @@ export default function PacksControlClient() {
             />
             Afficher la section sur le frontend
           </label>
+          <button
+            onClick={saveConfiguration}
+            disabled={savingConfig}
+            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50"
+          >
+            {savingConfig ? 'Sauvegarde...' : 'Sauvegarder la configuration'}
+          </button>
         </div>
       </div>
 
@@ -182,8 +317,8 @@ export default function PacksControlClient() {
             'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
           }`}>
             {displayedPacks.map((pack, idx) => {
-              const prixNum = Number(pack.prix) || 0;
-              const promoNum = Number(pack.promo) || 0;
+              const prixNum = Number(pack.prix || pack.price) || 0;
+              const promoNum = Number(pack.promo || pack.oldPrice) || 0;
               const hasPromo = !!promoNum && promoNum < prixNum;
               return (
                 <div key={pack._id} className="bg-white border rounded-lg p-4 shadow-sm">
@@ -199,15 +334,15 @@ export default function PacksControlClient() {
                       </div>
                     )}
                   </div>
-                  <h4 className="font-semibold text-sm mb-2 line-clamp-2">{pack.designation_fr}</h4>
+                  <h4 className="font-semibold text-sm mb-2 line-clamp-2">{pack.designation_fr || pack.designation || 'Pack sans nom'}</h4>
                   <div className="text-center">
                     {hasPromo ? (
                       <div className="flex items-center justify-center gap-2">
-                        <span className="text-purple-600 font-bold">{pack.promo} TND</span>
-                        <span className="text-gray-500 line-through text-sm">{pack.prix} TND</span>
+                        <span className="text-purple-600 font-bold">{pack.promo || pack.oldPrice} TND</span>
+                        <span className="text-gray-500 line-through text-sm">{pack.prix || pack.price} TND</span>
                       </div>
                     ) : (
-                      <span className="text-purple-600 font-bold">{pack.prix} TND</span>
+                      <span className="text-purple-600 font-bold">{pack.prix || pack.price} TND</span>
                     )}
                   </div>
                 </div>
@@ -257,8 +392,11 @@ export default function PacksControlClient() {
                 <td className="border border-gray-300 px-2 py-3">
                   <input
                     type="text"
-                    value={pack.designation_fr}
-                    onChange={(e) => handleQuickEdit("designation_fr", e.target.value, pack)}
+                    value={pack.designation_fr || pack.designation || ''}
+                    onChange={(e) => {
+                      const newPacks = packs.map(p => p._id === pack._id ? { ...p, designation_fr: e.target.value } : p);
+                      setPacks(newPacks);
+                    }}
                     className="w-full border-0 bg-transparent text-sm"
                     onBlur={(e) => handleQuickEdit("designation_fr", e.target.value, pack)}
                   />
