@@ -20,3 +20,11 @@ export interface Testimonial {
   status?: string;
   [key: string]: any;
 }
+
+export interface TestimonialConfig {
+  sectionTitle: string;
+  sectionDescription: string;
+  maxDisplay: number;
+  showOnFrontend: boolean;
+  testimonialOrder: string[];
+}

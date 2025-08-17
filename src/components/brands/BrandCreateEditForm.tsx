@@ -75,7 +75,7 @@ export default function BrandCreateEditForm({ initialBrand, mode, onSubmit, load
             className="w-full border p-4 rounded text-base"
             value={form.designation_fr || ""}
             onChange={e => handleChange("designation_fr", e.target.value)}
-            required
+
           />
         </div>
         <div>

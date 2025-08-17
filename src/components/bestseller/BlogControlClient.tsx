@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { fetchAllBlogs, updateBlog, deleteBlog } from "@/services/blog";
+import { fetchAllBlogs, updateBlog, deleteBlog, fetchBlogConfig, saveBlogConfig } from "@/services/blog";
 import { Blog } from "@/types/blog";
 import dynamic from "next/dynamic";
 
@@ -18,23 +18,36 @@ export default function BlogControlClient() {
   const [sectionTitle, setSectionTitle] = useState("Blog & FAQ");
   const [sectionDescription, setSectionDescription] = useState("Découvrez nos conseils d'experts et trouvez les réponses à vos questions sur la nutrition sportive");
   const [showOnFrontend, setShowOnFrontend] = useState(true);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchBlogs = async () => {
+    const fetchData = async () => {
       try {
-        const data = await fetchAllBlogs();
-        const blogsArray = Array.isArray(data) ? data : [];
+        const [blogsData, configData] = await Promise.all([
+          fetchAllBlogs(),
+          fetchBlogConfig()
+        ]);
+        
+        const blogsArray = Array.isArray(blogsData) ? blogsData : [];
         setBlogs(blogsArray);
-        setDisplayedBlogs(blogsArray.filter(b => b.publier === "1").slice(0, maxDisplay));
+        
+        if (configData) {
+          setSectionTitle(configData.sectionTitle || "Blog & FAQ");
+          setSectionDescription(configData.sectionDescription || "Découvrez nos conseils d'experts et trouvez les réponses à vos questions sur la nutrition sportive");
+          setMaxDisplay(configData.maxDisplay || 4);
+          setShowOnFrontend(configData.showOnFrontend !== false);
+        }
       } catch (err) {
-        console.error(err);
+        console.error('Failed to fetch data:', err);
         setBlogs([]);
-        setDisplayedBlogs([]);
       } finally {
         setLoading(false);
       }
     };
-    fetchBlogs();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -128,7 +141,20 @@ export default function BlogControlClient() {
 
   return (
     <div className="bg-white p-8 shadow-xl w-full max-w-[1600px] mx-auto mt-8 border">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Contrôle de la Section Blog</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">Contrôle de la Section Blog</h1>
+        
+        {success && (
+          <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+            {success}
+          </div>
+        )}
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+      </div>
       
       {/* Section Configuration */}
       <div className="mb-8 p-6 bg-gray-50 rounded-lg">
@@ -139,7 +165,7 @@ export default function BlogControlClient() {
             <input
               type="text"
               value={sectionTitle}
-              onChange={(e) => setSectionTitle(e.target.value)}
+              onChange={(e) => { setSectionTitle(e.target.value); setHasChanges(true); }}
               className="w-full border p-2 rounded"
             />
           </div>
@@ -147,7 +173,7 @@ export default function BlogControlClient() {
             <label className="block text-sm font-medium mb-2">Nombre d'articles à afficher</label>
             <select
               value={maxDisplay}
-              onChange={(e) => setMaxDisplay(Number(e.target.value))}
+              onChange={(e) => { setMaxDisplay(Number(e.target.value)); setHasChanges(true); }}
               className="w-full border p-2 rounded"
             >
               <option value={2}>2 articles</option>
@@ -165,20 +191,52 @@ export default function BlogControlClient() {
           <label className="block text-sm font-medium mb-2">Description de la section</label>
           <textarea
             value={sectionDescription}
-            onChange={(e) => setSectionDescription(e.target.value)}
+            onChange={(e) => { setSectionDescription(e.target.value); setHasChanges(true); }}
             className="w-full border p-2 rounded h-20"
           />
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between">
           <label className="flex items-center">
             <input
               type="checkbox"
               checked={showOnFrontend}
-              onChange={(e) => setShowOnFrontend(e.target.checked)}
+              onChange={(e) => { setShowOnFrontend(e.target.checked); setHasChanges(true); }}
               className="mr-2"
             />
             Afficher la section sur le frontend
           </label>
+          <div className="flex items-center gap-4">
+            {hasChanges && (
+              <span className="text-orange-600 text-sm font-medium">
+                ⚠️ Changements non enregistrés
+              </span>
+            )}
+            <button
+              onClick={async () => {
+                setSaving(true);
+                try {
+                  const config = { sectionTitle, sectionDescription, maxDisplay, showOnFrontend, blogOrder: blogs.map(b => b._id).filter(Boolean) };
+                  await saveBlogConfig(config);
+                  setHasChanges(false);
+                  setSuccess('Configuration enregistrée avec succès!');
+                  setTimeout(() => setSuccess(null), 3000);
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('blogConfigChanged', { detail: config }));
+                  }
+                } catch (err) {
+                  setError('Erreur lors de l\'enregistrement');
+                } finally {
+                  setSaving(false);
+                }
+              }}
+              disabled={!hasChanges || saving}
+              className={`px-4 py-2 rounded font-medium ${
+                hasChanges ? "bg-blue-500 text-white hover:bg-blue-600" : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              } ${saving ? "opacity-50" : ""}`}
+            >
+              {saving ? "Sauvegarde..." : "Appliquer les changements"}
+            </button>
+          </div>
         </div>
       </div>
 

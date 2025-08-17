@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import factureService from "@/services/facture";
 
 interface BCItem {
   designation: string;
@@ -71,19 +72,22 @@ export default function BonCommandeCreate() {
       const bcData = {
         type: 'bon_commande',
         numero: bcInfo.numero || `BC-${Date.now()}`,
-        client: clientInfo,
-        items,
+        nom: clientInfo.nom,
+        prenom: clientInfo.prenom,
+        email: clientInfo.email,
+        phone: clientInfo.phone,
+        adresse1: clientInfo.adresse,
+        ville: clientInfo.ville,
         date_livraison: bcInfo.date_livraison,
         note: bcInfo.note,
-        total_ht: getTotalHT(),
-        tva: getTVA(),
-        total_ttc: getTotalTTC(),
+        prix_ht: getTotalHT().toString(),
+        tva: getTVA().toString(),
+        prix_ttc: getTotalTTC().toString(),
+        items: JSON.stringify(items),
         created_at: new Date().toISOString()
       };
       
-      // Call your BC creation service here
-      console.log('Creating BC:', bcData);
-      
+      await factureService.createFacture(bcData);
       router.push("/admin/facture");
     } catch (error) {
       console.error('Error creating BC:', error);
@@ -137,23 +141,21 @@ export default function BonCommandeCreate() {
           <h3 className="text-lg font-semibold mb-4 border-b pb-2">Informations Client</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Nom *</label>
+              <label className="block text-sm font-medium mb-1">Nom</label>
               <input
                 type="text"
                 value={clientInfo.nom}
                 onChange={(e) => setClientInfo({...clientInfo, nom: e.target.value})}
                 className="w-full border rounded px-3 py-2"
-                required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Prénom *</label>
+              <label className="block text-sm font-medium mb-1">Prénom</label>
               <input
                 type="text"
                 value={clientInfo.prenom}
                 onChange={(e) => setClientInfo({...clientInfo, prenom: e.target.value})}
                 className="w-full border rounded px-3 py-2"
-                required
               />
             </div>
             <div>
@@ -166,13 +168,12 @@ export default function BonCommandeCreate() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Téléphone *</label>
+              <label className="block text-sm font-medium mb-1">Téléphone</label>
               <input
                 type="text"
                 value={clientInfo.phone}
                 onChange={(e) => setClientInfo({...clientInfo, phone: e.target.value})}
                 className="w-full border rounded px-3 py-2"
-                required
               />
             </div>
             <div>
@@ -220,7 +221,6 @@ export default function BonCommandeCreate() {
                         onChange={(e) => updateItem(index, 'designation', e.target.value)}
                         className="w-full border rounded px-3 py-2"
                         placeholder="Description du produit"
-                        required
                       />
                     </td>
                     <td className="px-4 py-3">
@@ -230,7 +230,6 @@ export default function BonCommandeCreate() {
                         onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 0)}
                         className="w-full border rounded px-3 py-2 text-center"
                         min="1"
-                        required
                       />
                     </td>
                     <td className="px-4 py-3">
@@ -240,7 +239,6 @@ export default function BonCommandeCreate() {
                         value={item.prix_unitaire}
                         onChange={(e) => updateItem(index, 'prix_unitaire', parseFloat(e.target.value) || 0)}
                         className="w-full border rounded px-3 py-2 text-right"
-                        required
                       />
                     </td>
                     <td className="px-4 py-3 text-right font-medium">

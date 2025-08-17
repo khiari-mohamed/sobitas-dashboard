@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import factureService from "@/services/facture";
 
 interface TicketItem {
   designation: string;
@@ -52,17 +53,16 @@ export default function TicketCaisseCreate() {
     
     try {
       const ticketData = {
-        type: 'ticket',
+        type: 'ticket_caisse',
         numero: `TIC-${Date.now()}`,
-        client: clientInfo,
-        items,
-        total_ttc: getTotalTTC(),
+        nom: clientInfo.nom,
+        phone: clientInfo.phone,
+        prix_ttc: getTotalTTC().toString(),
+        items: JSON.stringify(items),
         created_at: new Date().toISOString()
       };
       
-      // Call your ticket creation service here
-      console.log('Creating ticket:', ticketData);
-      
+      await factureService.createFacture(ticketData);
       router.push("/admin/facture");
     } catch (error) {
       console.error('Error creating ticket:', error);
@@ -125,7 +125,6 @@ export default function TicketCaisseCreate() {
                       onChange={(e) => updateItem(index, 'designation', e.target.value)}
                       className="w-full border rounded px-2 py-1"
                       placeholder="Nom du produit"
-                      required
                     />
                   </td>
                   <td className="px-4 py-2">
@@ -135,7 +134,6 @@ export default function TicketCaisseCreate() {
                       onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 0)}
                       className="w-full border rounded px-2 py-1 text-center"
                       min="1"
-                      required
                     />
                   </td>
                   <td className="px-4 py-2">
@@ -145,7 +143,6 @@ export default function TicketCaisseCreate() {
                       value={item.prix_unitaire}
                       onChange={(e) => updateItem(index, 'prix_unitaire', parseFloat(e.target.value) || 0)}
                       className="w-full border rounded px-2 py-1 text-right"
-                      required
                     />
                   </td>
                   <td className="px-4 py-2 text-right font-medium">

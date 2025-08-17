@@ -87,10 +87,16 @@ export default function CategoryViewClient({ category, id }: { category: Categor
           <div className="w-[300px] h-[300px] flex items-center justify-center">
             <Image
               src={
-                category.id && category.id !== ""
+                // Priority 1: New uploaded images (start with /categories/)
+                category.cover && category.cover.startsWith('/categories/')
+                  ? category.cover
+                  // Priority 2: SVG icons by ID
+                  : category.id && category.id !== ""
                   ? `/images/categories/${category.id}.svg`
-                  : category.cover
+                  // Priority 3: Old PNG images by cover filename
+                  : category.cover && category.cover !== ""
                   ? `/images/categories/${category.cover.split('/').pop()}`
+                  // Fallback: Placeholder
                   : "/images/placeholder.png"
               }
               alt={category.alt_cover || category.designation || category.title || "Category image"}
@@ -100,7 +106,10 @@ export default function CategoryViewClient({ category, id }: { category: Categor
               style={{ maxWidth: 300, maxHeight: 300 }}
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                if (category.cover) {
+                // Try fallbacks in order
+                if (category.id && category.id !== "") {
+                  target.src = `/images/categories/${category.id}.svg`;
+                } else if (category.cover && category.cover !== "") {
                   target.src = `/images/categories/${category.cover.split('/').pop()}`;
                 } else {
                   target.src = "/images/placeholder.png";
@@ -120,12 +129,25 @@ export default function CategoryViewClient({ category, id }: { category: Categor
         <div className="flex flex-col items-center mb-6">
           <div className="w-[300px] h-[300px] flex items-center justify-center">
             <Image
-              src={category.product_liste_cover ? `/images/categories/${category.product_liste_cover.split('/').pop()}` : "/images/placeholder.png"}
+              src={
+                // Priority 1: New uploaded images (start with /categories/)
+                category.product_liste_cover && category.product_liste_cover.startsWith('/categories/')
+                  ? category.product_liste_cover
+                  // Priority 2: Old images by filename
+                  : category.product_liste_cover
+                  ? `/images/categories/${category.product_liste_cover.split('/').pop()}`
+                  // Fallback: Placeholder
+                  : "/images/placeholder.png"
+              }
               alt="Couverture liste de produits"
               width={300}
               height={300}
               className="object-contain border rounded w-full h-full"
               style={{ maxWidth: 300, maxHeight: 300 }}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "/images/placeholder.png";
+              }}
             />
           </div>
         </div>

@@ -37,3 +37,32 @@ export const deleteBlog = async (id: string) => {
   const res = await axios.delete(`/blogs/delete/${id}`);
   return res.data;
 };
+
+// Blog configuration API calls
+export const fetchBlogConfig = async () => {
+  try {
+    const res = await axios.get("/blog/config");
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching blog config:", error);
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('blogConfig');
+      return saved ? JSON.parse(saved) : null;
+    }
+    return null;
+  }
+};
+
+export const saveBlogConfig = async (config: any) => {
+  try {
+    const res = await axios.post("/blog/config", config);
+    return res.data;
+  } catch (error) {
+    console.error("Error saving blog config:", error);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('blogConfig', JSON.stringify(config));
+      window.dispatchEvent(new CustomEvent('blogConfigChanged', { detail: config }));
+    }
+    return { success: true, data: config };
+  }
+};

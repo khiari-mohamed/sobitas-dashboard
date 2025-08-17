@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { fetchAllTestimonials, updateTestimonial, deleteTestimonial } from "@/services/testimonial";
+import { fetchAllTestimonials, updateTestimonial, deleteTestimonial, fetchTestimonialConfig, saveTestimonialConfig } from "@/services/testimonial";
 import { Testimonial } from "@/types/testimonial";
 
 export default function TestimonialControlClient() {
@@ -15,23 +15,36 @@ export default function TestimonialControlClient() {
   const [sectionTitle, setSectionTitle] = useState("Avis de nos clients");
   const [sectionDescription, setSectionDescription] = useState("Découvrez ce que pensent nos clients de PROTEINE TUNISIE. Plus de 15 ans d'expérience au service de votre performance.");
   const [showOnFrontend, setShowOnFrontend] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [registering, setRegistering] = useState(false);
 
   useEffect(() => {
-    const fetchTestimonials = async () => {
+    const fetchData = async () => {
       try {
-        const data = await fetchAllTestimonials();
-        const testimonialsArray = Array.isArray(data) ? data : [];
+        const [testimonialsData, configData] = await Promise.all([
+          fetchAllTestimonials(),
+          fetchTestimonialConfig()
+        ]);
+        
+        const testimonialsArray = Array.isArray(testimonialsData) ? testimonialsData : [];
         setTestimonials(testimonialsArray);
-        setDisplayedTestimonials(testimonialsArray.filter(t => t.publier === "1" && t.comment?.trim()).slice(0, maxDisplay));
+        
+        if (configData) {
+          setSectionTitle(configData.sectionTitle || "Avis de nos clients");
+          setSectionDescription(configData.sectionDescription || "Découvrez ce que pensent nos clients de PROTEINE TUNISIE. Plus de 15 ans d'expérience au service de votre performance.");
+          setMaxDisplay(configData.maxDisplay || 6);
+          setShowOnFrontend(configData.showOnFrontend !== false);
+        }
       } catch (err) {
-        console.error(err);
+        console.error('Failed to fetch data:', err);
         setTestimonials([]);
-        setDisplayedTestimonials([]);
       } finally {
         setLoading(false);
       }
     };
-    fetchTestimonials();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -40,12 +53,60 @@ export default function TestimonialControlClient() {
     }
   }, [testimonials, maxDisplay]);
 
+  const updateConfig = (field: string, value: any) => {
+    switch (field) {
+      case 'sectionTitle':
+        setSectionTitle(value);
+        break;
+      case 'sectionDescription':
+        setSectionDescription(value);
+        break;
+      case 'maxDisplay':
+        setMaxDisplay(value);
+        break;
+      case 'showOnFrontend':
+        setShowOnFrontend(value);
+        break;
+    }
+    setHasChanges(true);
+  };
+
+  const registerChanges = async () => {
+    setRegistering(true);
+    setError(null);
+    try {
+      const config = {
+        sectionTitle,
+        sectionDescription,
+        maxDisplay,
+        showOnFrontend,
+        testimonialOrder: testimonials.map(t => t._id || t.id).filter(Boolean)
+      };
+      console.log('Saving config:', config);
+      const result = await saveTestimonialConfig(config);
+      console.log('Config saved:', result);
+      setHasChanges(false);
+      setSuccess('Configuration enregistrée avec succès!');
+      setTimeout(() => setSuccess(null), 3000);
+      // Trigger frontend refresh
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('testimonialConfigChanged', { detail: config }));
+      }
+    } catch (err) {
+      console.error('Failed to save config:', err);
+      setError('Erreur lors de l\'enregistrement');
+    } finally {
+      setRegistering(false);
+    }
+  };
+
   const moveTestimonial = (fromIndex: number, toIndex: number) => {
     if (toIndex < 0 || toIndex >= testimonials.length) return;
     const newTestimonials = [...testimonials];
     const [movedTestimonial] = newTestimonials.splice(fromIndex, 1);
     newTestimonials.splice(toIndex, 0, movedTestimonial);
     setTestimonials(newTestimonials);
+    setHasChanges(true);
   };
 
   const handleQuickEdit = (field: string, value: string | number, testimonial: Testimonial) => {
@@ -54,6 +115,7 @@ export default function TestimonialControlClient() {
     updateTestimonial(testimonial._id, { ...testimonial, [field]: value })
       .then(() => {
         setTestimonials(testimonials.map(t => t._id === testimonial._id ? { ...t, [field]: value } : t));
+        setHasChanges(true);
       })
       .catch(console.error)
       .finally(() => setUpdating(null));
@@ -71,8 +133,12 @@ export default function TestimonialControlClient() {
     try {
       await deleteTestimonial(testimonial._id);
       setTestimonials(testimonials.filter(t => t._id !== testimonial._id));
+      setHasChanges(true);
+      setSuccess('Témoignage supprimé avec succès');
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error(err);
+      setError('Erreur lors de la suppression');
     } finally {
       setUpdating(null);
     }
@@ -91,8 +157,12 @@ export default function TestimonialControlClient() {
       setTestimonials(testimonials.map(t => t._id === editingTestimonial._id ? editingTestimonial : t));
       setShowEditModal(false);
       setEditingTestimonial(null);
+      setHasChanges(true);
+      setSuccess('Témoignage modifié avec succès');
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error(err);
+      setError('Erreur lors de la modification');
     } finally {
       setUpdating(null);
     }
@@ -108,9 +178,31 @@ export default function TestimonialControlClient() {
 
   return (
     <div className="bg-white p-8 shadow-xl w-full max-w-[1600px] mx-auto mt-8 border">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Contrôle de la Section Témoignages</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">Contrôle de la Section Témoignages</h1>
+        
+        {success && (
+          <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+            {success}
+          </div>
+        )}
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+        
+        {hasChanges && (
+          <button
+            onClick={registerChanges}
+            disabled={registering}
+            className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50 animate-pulse"
+          >
+            {registering ? 'Enregistrement...' : '💾 Enregistrer les changements'}
+          </button>
+        )}
+      </div>
       
-      {/* Section Configuration */}
       <div className="mb-8 p-6 bg-gray-50 rounded-lg">
         <h2 className="text-xl font-semibold mb-4">Configuration de la Section</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -119,7 +211,7 @@ export default function TestimonialControlClient() {
             <input
               type="text"
               value={sectionTitle}
-              onChange={(e) => setSectionTitle(e.target.value)}
+              onChange={(e) => updateConfig('sectionTitle', e.target.value)}
               className="w-full border p-2 rounded"
             />
           </div>
@@ -127,7 +219,7 @@ export default function TestimonialControlClient() {
             <label className="block text-sm font-medium mb-2">Nombre de témoignages à afficher</label>
             <select
               value={maxDisplay}
-              onChange={(e) => setMaxDisplay(Number(e.target.value))}
+              onChange={(e) => updateConfig('maxDisplay', Number(e.target.value))}
               className="w-full border p-2 rounded"
             >
               <option value={3}>3 témoignages</option>
@@ -144,24 +236,41 @@ export default function TestimonialControlClient() {
           <label className="block text-sm font-medium mb-2">Description de la section</label>
           <textarea
             value={sectionDescription}
-            onChange={(e) => setSectionDescription(e.target.value)}
+            onChange={(e) => updateConfig('sectionDescription', e.target.value)}
             className="w-full border p-2 rounded h-20"
           />
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between">
           <label className="flex items-center">
             <input
               type="checkbox"
               checked={showOnFrontend}
-              onChange={(e) => setShowOnFrontend(e.target.checked)}
+              onChange={(e) => updateConfig('showOnFrontend', e.target.checked)}
               className="mr-2"
             />
             Afficher la section sur le frontend
           </label>
+          <div className="flex items-center gap-4">
+            {hasChanges && (
+              <span className="text-orange-600 text-sm font-medium">
+                ⚠️ Changements non enregistrés
+              </span>
+            )}
+            <button
+              onClick={registerChanges}
+              disabled={!hasChanges || registering}
+              className={`px-4 py-2 rounded font-medium ${
+                hasChanges
+                  ? "bg-blue-500 text-white hover:bg-blue-600"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              } ${registering ? "opacity-50" : ""}`}
+            >
+              {registering ? "Sauvegarde..." : "Appliquer les changements"}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Preview Section */}
       {showOnFrontend && (
         <div className="mb-8 p-6 bg-gray-50 rounded-lg">
           <h2 className="text-xl font-semibold mb-4">Aperçu Frontend</h2>
@@ -215,7 +324,6 @@ export default function TestimonialControlClient() {
         </div>
       )}
 
-      {/* Testimonials Management Table */}
       <div className="overflow-x-auto">
         <table className="w-full border-collapse border border-gray-300">
           <thead>
@@ -238,13 +346,13 @@ export default function TestimonialControlClient() {
                       onClick={() => moveTestimonial(idx, idx - 1)}
                       disabled={idx === 0}
                       className="px-2 py-1 bg-gray-200 rounded text-xs disabled:opacity-50"
-                    >↑</button>
+                    >{"↑"}</button>
                     <span className="text-xs text-center">{idx + 1}</span>
                     <button
                       onClick={() => moveTestimonial(idx, idx + 1)}
                       disabled={idx === testimonials.length - 1}
                       className="px-2 py-1 bg-gray-200 rounded text-xs disabled:opacity-50"
-                    >↓</button>
+                    >{"↓"}</button>
                   </div>
                 </td>
                 <td className="border border-gray-300 px-2 py-3">
@@ -312,7 +420,6 @@ export default function TestimonialControlClient() {
         </table>
       </div>
 
-      {/* Edit Modal */}
       {showEditModal && editingTestimonial && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">

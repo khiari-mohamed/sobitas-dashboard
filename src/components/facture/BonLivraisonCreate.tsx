@@ -4,17 +4,17 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import factureService from "@/services/facture";
 
-interface FactureItem {
+interface BLItem {
   designation: string;
   quantity: number;
   prix_unitaire: number;
   total: number;
 }
 
-export default function FactureTVACreate() {
+export default function BonLivraisonCreate() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [items, setItems] = useState<FactureItem[]>([
+  const [items, setItems] = useState<BLItem[]>([
     { designation: "", quantity: 1, prix_unitaire: 0, total: 0 }
   ]);
   const [clientInfo, setClientInfo] = useState({
@@ -23,22 +23,19 @@ export default function FactureTVACreate() {
     email: "",
     phone: "",
     adresse: "",
-    ville: "",
-    code_postal: "",
-    pays: "Tunisie"
+    ville: ""
   });
-  const [factureInfo, setFactureInfo] = useState({
+  const [blInfo, setBlInfo] = useState({
     numero: "",
-    date_echeance: "",
-    note: "",
-    conditions_paiement: "30 jours"
+    date_livraison: "",
+    note: ""
   });
 
   const addItem = () => {
     setItems([...items, { designation: "", quantity: 1, prix_unitaire: 0, total: 0 }]);
   };
 
-  const updateItem = (index: number, field: keyof FactureItem, value: string | number) => {
+  const updateItem = (index: number, field: keyof BLItem, value: string | number) => {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
     
@@ -60,15 +57,11 @@ export default function FactureTVACreate() {
   };
 
   const getTVA = () => {
-    return getTotalHT() * 0.19; // 19% TVA
-  };
-
-  const getTimbre = () => {
-    return 0.600; // Timbre fiscal fixe
+    return getTotalHT() * 0.19;
   };
 
   const getTotalTTC = () => {
-    return getTotalHT() + getTVA() + getTimbre();
+    return getTotalHT() + getTVA();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,32 +69,28 @@ export default function FactureTVACreate() {
     setLoading(true);
     
     try {
-      const factureData = {
-        type: 'facture_tva',
-        numero: factureInfo.numero || `FAC-${Date.now()}`,
+      const blData = {
+        type: 'bon_livraison',
+        numero: blInfo.numero || `BL-${Date.now()}`,
         nom: clientInfo.nom,
         prenom: clientInfo.prenom,
         email: clientInfo.email,
         phone: clientInfo.phone,
         adresse1: clientInfo.adresse,
         ville: clientInfo.ville,
-        code_postale: clientInfo.code_postal,
-        pays: clientInfo.pays,
-        date_echeance: factureInfo.date_echeance,
-        conditions_paiement: factureInfo.conditions_paiement,
-        note: factureInfo.note,
+        date_livraison: blInfo.date_livraison,
+        note: blInfo.note,
         prix_ht: getTotalHT().toString(),
         tva: getTVA().toString(),
-        timbre: getTimbre().toString(),
         prix_ttc: getTotalTTC().toString(),
         items: JSON.stringify(items),
         created_at: new Date().toISOString()
       };
       
-      await factureService.createFacture(factureData);
+      await factureService.createFacture(blData);
       router.push("/admin/facture");
     } catch (error) {
-      console.error('Error creating facture:', error);
+      console.error('Error creating BL:', error);
     } finally {
       setLoading(false);
     }
@@ -109,31 +98,29 @@ export default function FactureTVACreate() {
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg max-w-6xl mx-auto mt-6">
-      <div className="text-center mb-8 border-b pb-6">
-        <h1 className="text-3xl font-bold text-gray-800">FACTURE TVA</h1>
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">BON DE LIVRAISON</h1>
         <p className="text-gray-600">SOBITAS - Protein.tn</p>
-        <p className="text-sm text-gray-500">MF: 1234567ABC - RC: B123456789</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Facture Info */}
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">N° Facture</label>
+            <label className="block text-sm font-medium mb-1">N° Bon de Livraison</label>
             <input
               type="text"
-              value={factureInfo.numero}
-              onChange={(e) => setFactureInfo({...factureInfo, numero: e.target.value})}
+              value={blInfo.numero}
+              onChange={(e) => setBlInfo({...blInfo, numero: e.target.value})}
               className="w-full border rounded px-3 py-2"
               placeholder="Auto-généré si vide"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Date d'échéance</label>
+            <label className="block text-sm font-medium mb-1">Date de Livraison</label>
             <input
               type="date"
-              value={factureInfo.date_echeance}
-              onChange={(e) => setFactureInfo({...factureInfo, date_echeance: e.target.value})}
+              value={blInfo.date_livraison}
+              onChange={(e) => setBlInfo({...blInfo, date_livraison: e.target.value})}
               className="w-full border rounded px-3 py-2"
             />
           </div>
@@ -148,7 +135,6 @@ export default function FactureTVACreate() {
           </div>
         </div>
 
-        {/* Client Info */}
         <div>
           <h3 className="text-lg font-semibold mb-4 border-b pb-2">Informations Client</h3>
           <div className="grid grid-cols-2 gap-4">
@@ -206,38 +192,19 @@ export default function FactureTVACreate() {
                 className="w-full border rounded px-3 py-2"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Code Postal</label>
-              <input
-                type="text"
-                value={clientInfo.code_postal}
-                onChange={(e) => setClientInfo({...clientInfo, code_postal: e.target.value})}
-                className="w-full border rounded px-3 py-2"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Pays</label>
-              <input
-                type="text"
-                value={clientInfo.pays}
-                onChange={(e) => setClientInfo({...clientInfo, pays: e.target.value})}
-                className="w-full border rounded px-3 py-2"
-              />
-            </div>
           </div>
         </div>
 
-        {/* Items */}
         <div>
-          <h3 className="text-lg font-semibold mb-4 border-b pb-2">Articles Facturés</h3>
+          <h3 className="text-lg font-semibold mb-4 border-b pb-2">Articles Livrés</h3>
           <div className="border rounded-lg overflow-hidden">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left">Désignation</th>
                   <th className="px-4 py-3 text-center">Quantité</th>
-                  <th className="px-4 py-3 text-right">Prix Unitaire HT</th>
-                  <th className="px-4 py-3 text-right">Total HT</th>
+                  <th className="px-4 py-3 text-right">Prix Unitaire</th>
+                  <th className="px-4 py-3 text-right">Total</th>
                   <th className="px-4 py-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -250,7 +217,7 @@ export default function FactureTVACreate() {
                         value={item.designation}
                         onChange={(e) => updateItem(index, 'designation', e.target.value)}
                         className="w-full border rounded px-3 py-2"
-                        placeholder="Description du produit/service"
+                        placeholder="Description du produit"
                       />
                     </td>
                     <td className="px-4 py-3">
@@ -299,34 +266,17 @@ export default function FactureTVACreate() {
           </button>
         </div>
 
-        {/* Payment Terms & Note */}
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium mb-1">Conditions de Paiement</label>
-            <select
-              value={factureInfo.conditions_paiement}
-              onChange={(e) => setFactureInfo({...factureInfo, conditions_paiement: e.target.value})}
-              className="w-full border rounded px-3 py-2"
-            >
-              <option value="Immédiat">Paiement immédiat</option>
-              <option value="15 jours">15 jours</option>
-              <option value="30 jours">30 jours</option>
-              <option value="60 jours">60 jours</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Note / Observations</label>
-            <textarea
-              value={factureInfo.note}
-              onChange={(e) => setFactureInfo({...factureInfo, note: e.target.value})}
-              className="w-full border rounded px-3 py-2"
-              rows={3}
-              placeholder="Remarques particulières..."
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Note / Observations</label>
+          <textarea
+            value={blInfo.note}
+            onChange={(e) => setBlInfo({...blInfo, note: e.target.value})}
+            className="w-full border rounded px-3 py-2"
+            rows={3}
+            placeholder="Remarques particulières..."
+          />
         </div>
 
-        {/* Totals */}
         <div className="border-t pt-6">
           <div className="flex justify-end">
             <div className="w-80 space-y-2">
@@ -338,10 +288,6 @@ export default function FactureTVACreate() {
                 <span>TVA (19%):</span>
                 <span className="font-medium">{getTVA().toFixed(3)} DT</span>
               </div>
-              <div className="flex justify-between">
-                <span>Timbre Fiscal:</span>
-                <span className="font-medium">{getTimbre().toFixed(3)} DT</span>
-              </div>
               <div className="flex justify-between text-xl font-bold border-t pt-2">
                 <span>Total TTC:</span>
                 <span>{getTotalTTC().toFixed(3)} DT</span>
@@ -350,7 +296,6 @@ export default function FactureTVACreate() {
           </div>
         </div>
 
-        {/* Submit */}
         <div className="flex gap-4">
           <button
             type="button"
@@ -362,9 +307,9 @@ export default function FactureTVACreate() {
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-red-600 text-white py-3 rounded hover:bg-red-700 disabled:opacity-50"
+            className="flex-1 bg-blue-600 text-white py-3 rounded hover:bg-blue-700 disabled:opacity-50"
           >
-            {loading ? "Création..." : "Créer Facture TVA"}
+            {loading ? "Création..." : "Créer Bon de Livraison"}
           </button>
         </div>
       </form>

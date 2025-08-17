@@ -11,7 +11,7 @@ interface FactureItem {
   total: number;
 }
 
-export default function FactureTVACreate() {
+export default function FactureClientCreate() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<FactureItem[]>([
@@ -25,13 +25,15 @@ export default function FactureTVACreate() {
     adresse: "",
     ville: "",
     code_postal: "",
-    pays: "Tunisie"
+    pays: "Tunisie",
+    client_nif: ""
   });
   const [factureInfo, setFactureInfo] = useState({
     numero: "",
     date_echeance: "",
     note: "",
-    conditions_paiement: "30 jours"
+    conditions_paiement: "30 jours, virement bancaire",
+    penalites_retard: ""
   });
 
   const addItem = () => {
@@ -60,11 +62,11 @@ export default function FactureTVACreate() {
   };
 
   const getTVA = () => {
-    return getTotalHT() * 0.19; // 19% TVA
+    return getTotalHT() * 0.19;
   };
 
   const getTimbre = () => {
-    return 0.600; // Timbre fiscal fixe
+    return 0.600;
   };
 
   const getTotalTTC = () => {
@@ -77,8 +79,8 @@ export default function FactureTVACreate() {
     
     try {
       const factureData = {
-        type: 'facture_tva',
-        numero: factureInfo.numero || `FAC-${Date.now()}`,
+        type: 'facture_client',
+        numero: factureInfo.numero || `FC-${Date.now()}`,
         nom: clientInfo.nom,
         prenom: clientInfo.prenom,
         email: clientInfo.email,
@@ -87,8 +89,10 @@ export default function FactureTVACreate() {
         ville: clientInfo.ville,
         code_postale: clientInfo.code_postal,
         pays: clientInfo.pays,
+        client_nif: clientInfo.client_nif,
         date_echeance: factureInfo.date_echeance,
         conditions_paiement: factureInfo.conditions_paiement,
+        penalites_retard: factureInfo.penalites_retard,
         note: factureInfo.note,
         prix_ht: getTotalHT().toString(),
         tva: getTVA().toString(),
@@ -101,7 +105,7 @@ export default function FactureTVACreate() {
       await factureService.createFacture(factureData);
       router.push("/admin/facture");
     } catch (error) {
-      console.error('Error creating facture:', error);
+      console.error('Error creating facture client:', error);
     } finally {
       setLoading(false);
     }
@@ -110,13 +114,12 @@ export default function FactureTVACreate() {
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg max-w-6xl mx-auto mt-6">
       <div className="text-center mb-8 border-b pb-6">
-        <h1 className="text-3xl font-bold text-gray-800">FACTURE TVA</h1>
+        <h1 className="text-3xl font-bold text-gray-800">FACTURE CLIENT</h1>
         <p className="text-gray-600">SOBITAS - Protein.tn</p>
-        <p className="text-sm text-gray-500">MF: 1234567ABC - RC: B123456789</p>
+        <p className="text-sm text-gray-500">NIF: 1234567A | RC: B123456789</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Facture Info */}
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">N° Facture</label>
@@ -148,7 +151,6 @@ export default function FactureTVACreate() {
           </div>
         </div>
 
-        {/* Client Info */}
         <div>
           <h3 className="text-lg font-semibold mb-4 border-b pb-2">Informations Client</h3>
           <div className="grid grid-cols-2 gap-4">
@@ -224,10 +226,19 @@ export default function FactureTVACreate() {
                 className="w-full border rounded px-3 py-2"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">NIF Client</label>
+              <input
+                type="text"
+                value={clientInfo.client_nif}
+                onChange={(e) => setClientInfo({...clientInfo, client_nif: e.target.value})}
+                className="w-full border rounded px-3 py-2"
+                placeholder="Numéro d'identification fiscale"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Items */}
         <div>
           <h3 className="text-lg font-semibold mb-4 border-b pb-2">Articles Facturés</h3>
           <div className="border rounded-lg overflow-hidden">
@@ -299,34 +310,40 @@ export default function FactureTVACreate() {
           </button>
         </div>
 
-        {/* Payment Terms & Note */}
         <div className="grid grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium mb-1">Conditions de Paiement</label>
-            <select
+            <input
+              type="text"
               value={factureInfo.conditions_paiement}
               onChange={(e) => setFactureInfo({...factureInfo, conditions_paiement: e.target.value})}
               className="w-full border rounded px-3 py-2"
-            >
-              <option value="Immédiat">Paiement immédiat</option>
-              <option value="15 jours">15 jours</option>
-              <option value="30 jours">30 jours</option>
-              <option value="60 jours">60 jours</option>
-            </select>
+              placeholder="30 jours, virement bancaire"
+            />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Note / Observations</label>
-            <textarea
-              value={factureInfo.note}
-              onChange={(e) => setFactureInfo({...factureInfo, note: e.target.value})}
+            <label className="block text-sm font-medium mb-1">Pénalités de retard</label>
+            <input
+              type="text"
+              value={factureInfo.penalites_retard}
+              onChange={(e) => setFactureInfo({...factureInfo, penalites_retard: e.target.value})}
               className="w-full border rounded px-3 py-2"
-              rows={3}
-              placeholder="Remarques particulières..."
+              placeholder="Selon législation en vigueur"
             />
           </div>
         </div>
 
-        {/* Totals */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Note / Observations</label>
+          <textarea
+            value={factureInfo.note}
+            onChange={(e) => setFactureInfo({...factureInfo, note: e.target.value})}
+            className="w-full border rounded px-3 py-2"
+            rows={3}
+            placeholder="Remarques particulières..."
+          />
+        </div>
+
         <div className="border-t pt-6">
           <div className="flex justify-end">
             <div className="w-80 space-y-2">
@@ -350,7 +367,6 @@ export default function FactureTVACreate() {
           </div>
         </div>
 
-        {/* Submit */}
         <div className="flex gap-4">
           <button
             type="button"
@@ -362,9 +378,9 @@ export default function FactureTVACreate() {
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-red-600 text-white py-3 rounded hover:bg-red-700 disabled:opacity-50"
+            className="flex-1 bg-blue-600 text-white py-3 rounded hover:bg-blue-700 disabled:opacity-50"
           >
-            {loading ? "Création..." : "Créer Facture TVA"}
+            {loading ? "Création..." : "Créer Facture Client"}
           </button>
         </div>
       </form>

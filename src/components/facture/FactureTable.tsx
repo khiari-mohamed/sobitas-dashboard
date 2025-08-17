@@ -73,10 +73,12 @@ export default function FactureTable() {
 
   const handleConfirmDelete = async () => {
     if (!deleteFactureObj) return;
+    const factureId = deleteFactureObj.id || deleteFactureObj._id;
+    if (!factureId) return;
     try {
-      await deleteFacture(deleteFactureObj.id || deleteFactureObj._id);
+      await deleteFacture(factureId);
       setFactures((prev) => prev.filter(f => f.id !== deleteFactureObj.id && f._id !== deleteFactureObj._id));
-      setSelectedIds((prev) => prev.filter(id => id !== (deleteFactureObj.id || deleteFactureObj._id)));
+      setSelectedIds((prev) => prev.filter(id => id !== factureId));
     } catch (err) {
       // Optionally show error
     }
@@ -89,7 +91,7 @@ export default function FactureTable() {
         await deleteFacture(id);
       } catch {}
     }
-    setFactures((prev) => prev.filter(f => !selectedIds.includes(f.id) && !selectedIds.includes(f._id)));
+    setFactures((prev) => prev.filter(f => !selectedIds.includes(f.id || '') && !selectedIds.includes(f._id || '')));
     setSelectedIds([]);
     setDeleteSelectionOpen(false);
   };
@@ -115,7 +117,19 @@ export default function FactureTable() {
         <div className="flex flex-wrap gap-2 ml-auto">
           <button
             className="bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-2 rounded"
-            onClick={() => router.push('/admin/facture/new')}
+            onClick={() => {
+              const createRoutes = {
+                'bon-commande': '/admin/facture/bondcommande/new',
+                'bon-livraison': '/admin/facture/bon-livraison/new',
+                'devis': '/admin/facture/devis/new',
+                'facture-client': '/admin/facture/facture-client/new',
+                'facture-boutique': '/admin/facture/facture-boutique/new',
+                'ticket-caisse': '/admin/facture/ticket-caisse/new',
+                'facture-tva': '/admin/facture/facture-tva/new'
+              };
+              const route = createRoutes[tab as keyof typeof createRoutes] || '/admin/facture/new';
+              router.push(route);
+            }}
           >
             + Ajouter nouveau
           </button>
@@ -200,11 +214,11 @@ export default function FactureTable() {
                     />
                   </td>
                   <td className="px-4 py-2 text-blue-600 underline cursor-pointer" onClick={() => {
-                    const safeId = rowId || "";
+                    if (!rowId) return;
                     if (tab === "facture" || !tab) {
-                      router.push(`/admin/facture/${safeId}/view`);
+                      router.push(`/admin/facture/${rowId}/view`);
                     } else {
-                      router.push(`/admin/facture/${safeId}/document?doc=${tab}`);
+                      router.push(`/admin/facture/${rowId}/document?doc=${tab}`);
                     }
                   }}>
                     {facture.numero}

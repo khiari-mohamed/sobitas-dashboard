@@ -43,10 +43,17 @@ export default function BlogViewClient({ id }: { id: string }) {
     return <div className="text-center py-12 text-red-500">Aucun blog trouvé.</div>;
   }
 
-  const coverUrl = typeof blog.cover === "string"
-    ? (blog.cover.startsWith("http") ? blog.cover : "/uploads/" + blog.cover.replace(/^\/+/ , ""))
-    : blog.cover?.url
-    ? (blog.cover.url.startsWith("http") ? blog.cover.url : "/uploads/" + blog.cover.url.replace(/^\/+/ , ""))
+  const coverUrl = 
+    // Priority 1: New uploaded images (start with /blogs/)
+    typeof blog.cover === "string" && blog.cover.startsWith('/blogs/')
+      ? blog.cover
+    // Priority 2: Object format with URL
+    : typeof blog.cover === "object" && blog.cover?.url
+      ? blog.cover.url.startsWith("http") ? blog.cover.url : blog.cover.url
+    // Priority 3: Old uploads format (articles/February2025/file.webp)
+    : typeof blog.cover === "string" && blog.cover !== ""
+      ? blog.cover.startsWith('/') ? blog.cover : `/uploads/${blog.cover}`
+    // Fallback: Placeholder
     : "/images/placeholder.png";
 
   return (

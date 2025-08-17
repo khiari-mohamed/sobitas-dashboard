@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { fetchAllPacks, updatePack, deletePack, getFrontendPackConfig } from "@/services/pack";
+import { fetchAllPacks, updatePack, deletePack, fetchPackConfig, savePackConfig } from "@/services/pack";
 import { Pack } from "@/types/pack";
 import dynamic from "next/dynamic";
 
@@ -18,86 +18,45 @@ export default function PacksControlClient() {
   const [sectionTitle, setSectionTitle] = useState("Nos Packs Exclusifs");
   const [sectionDescription, setSectionDescription] = useState("Profitez de nos packs exclusifs pour faire des économies sur vos achats !");
   const [showOnFrontend, setShowOnFrontend] = useState(true);
-  const [savingConfig, setSavingConfig] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  const saveConfiguration = async () => {
-    setSavingConfig(true);
+  const registerChanges = async () => {
+    setSaving(true);
+    setError(null);
     try {
       const config = {
         sectionTitle,
         sectionDescription,
         maxDisplay,
         showOnFrontend,
-        lastUpdated: new Date().toISOString()
+        packOrder: packs.map(p => p._id).filter(Boolean)
       };
-      
-      // Save to localStorage for dashboard persistence
-      localStorage.setItem('packsConfig', JSON.stringify(config));
-      
-      // Save to backend for frontend consumption
-      const response = await fetch('http://localhost:5000/admin/packs/config/save', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(config),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to save configuration');
+      await savePackConfig(config);
+      setHasChanges(false);
+      setSuccess('Configuration enregistrée avec succès!');
+      setTimeout(() => setSuccess(null), 3000);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('packConfigChanged', { detail: config }));
       }
-      
-      alert('Configuration sauvegardée avec succès! Les changements sont maintenant visibles sur le site web.');
-    } catch (error) {
-      console.error('Error saving configuration:', error);
-      alert('Erreur lors de la sauvegarde de la configuration');
+    } catch (err) {
+      setError('Erreur lors de l\'enregistrement');
     } finally {
-      setSavingConfig(false);
+      setSaving(false);
     }
   };
 
-  // Load configuration on mount
   useEffect(() => {
-    const loadConfig = async () => {
+    const fetchData = async () => {
       try {
-        // Try to load from backend first
-        const frontendConfig = await getFrontendPackConfig();
-        if (frontendConfig?.data?.config) {
-          const config = frontendConfig.data.config;
-          setSectionTitle(config.sectionTitle || 'Nos Packs Exclusifs');
-          setSectionDescription(config.sectionDescription || 'Profitez de nos packs exclusifs pour faire des économies sur vos achats !');
-          setMaxDisplay(config.maxDisplay || 4);
-          setShowOnFrontend(config.showOnFrontend !== undefined ? config.showOnFrontend : true);
-          return;
-        }
-      } catch (error) {
-        console.error('Error loading backend config:', error);
-      }
-      
-      // Fallback to localStorage
-      try {
-        const savedConfig = localStorage.getItem('packsConfig');
-        if (savedConfig) {
-          const config = JSON.parse(savedConfig);
-          setSectionTitle(config.sectionTitle || 'Nos Packs Exclusifs');
-          setSectionDescription(config.sectionDescription || 'Profitez de nos packs exclusifs pour faire des économies sur vos achats !');
-          setMaxDisplay(config.maxDisplay || 4);
-          setShowOnFrontend(config.showOnFrontend !== undefined ? config.showOnFrontend : true);
-        }
-      } catch (error) {
-        console.error('Error loading localStorage config:', error);
-      }
-    };
-    
-    loadConfig();
-  }, []);
-
-  useEffect(() => {
-    const fetchPacks = async () => {
-      try {
-        const data = await fetchAllPacks();
-        // Sort by displayOrder if available, otherwise by creation date
-        const sortedData = data.sort((a, b) => {
+        const [packsData, configData] = await Promise.all([
+          fetchAllPacks(),
+          fetchPackConfig()
+        ]);
+        
+        const sortedData = packsData.sort((a, b) => {
           if (a.displayOrder !== undefined && b.displayOrder !== undefined) {
             return a.displayOrder - b.displayOrder;
           }
@@ -107,15 +66,24 @@ export default function PacksControlClient() {
           return 0;
         });
         setPacks(sortedData);
-        setDisplayedPacks(sortedData.filter(p => p.publier === "1").slice(0, maxDisplay));
+        
+        if (configData) {
+          setSectionTitle(configData.sectionTitle || 'Nos Packs Exclusifs');
+          setSectionDescription(configData.sectionDescription || 'Profitez de nos packs exclusifs pour faire des économies sur vos achats !');
+          setMaxDisplay(configData.maxDisplay || 4);
+          setShowOnFrontend(configData.showOnFrontend !== false);
+        }
       } catch (err) {
-        console.error(err);
+        console.error('Failed to fetch data:', err);
+        setPacks([]);
       } finally {
         setLoading(false);
       }
     };
-    fetchPacks();
+    fetchData();
   }, []);
+
+
 
   useEffect(() => {
     setDisplayedPacks(packs.filter(p => p.publier === "1").slice(0, maxDisplay));
@@ -240,7 +208,20 @@ export default function PacksControlClient() {
 
   return (
     <div className="bg-white p-8 shadow-xl w-full max-w-[1600px] mx-auto mt-8 border">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Contrôle de la Section Packs Frontend</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">Contrôle de la Section Packs</h1>
+        
+        {success && (
+          <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+            {success}
+          </div>
+        )}
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+      </div>
       
       {/* Section Configuration */}
       <div className="mb-8 p-6 bg-gray-50 rounded-lg">
@@ -251,7 +232,7 @@ export default function PacksControlClient() {
             <input
               type="text"
               value={sectionTitle}
-              onChange={(e) => setSectionTitle(e.target.value)}
+              onChange={(e) => { setSectionTitle(e.target.value); setHasChanges(true); }}
               className="w-full border p-2 rounded"
             />
           </div>
@@ -259,7 +240,7 @@ export default function PacksControlClient() {
             <label className="block text-sm font-medium mb-2">Nombre de packs à afficher</label>
             <select
               value={maxDisplay}
-              onChange={(e) => setMaxDisplay(Number(e.target.value))}
+              onChange={(e) => { setMaxDisplay(Number(e.target.value)); setHasChanges(true); }}
               className="w-full border p-2 rounded"
             >
               <option value={2}>2 packs</option>
@@ -277,7 +258,7 @@ export default function PacksControlClient() {
           <label className="block text-sm font-medium mb-2">Description de la section</label>
           <textarea
             value={sectionDescription}
-            onChange={(e) => setSectionDescription(e.target.value)}
+            onChange={(e) => { setSectionDescription(e.target.value); setHasChanges(true); }}
             className="w-full border p-2 rounded h-20"
           />
         </div>
@@ -286,18 +267,29 @@ export default function PacksControlClient() {
             <input
               type="checkbox"
               checked={showOnFrontend}
-              onChange={(e) => setShowOnFrontend(e.target.checked)}
+              onChange={(e) => { setShowOnFrontend(e.target.checked); setHasChanges(true); }}
               className="mr-2"
             />
             Afficher la section sur le frontend
           </label>
-          <button
-            onClick={saveConfiguration}
-            disabled={savingConfig}
-            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50"
-          >
-            {savingConfig ? 'Sauvegarde...' : 'Sauvegarder la configuration'}
-          </button>
+          <div className="flex items-center gap-4">
+            {hasChanges && (
+              <span className="text-orange-600 text-sm font-medium">
+                ⚠️ Changements non enregistrés
+              </span>
+            )}
+            <button
+              onClick={registerChanges}
+              disabled={!hasChanges || saving}
+              className={`px-4 py-2 rounded font-medium ${
+                hasChanges
+                  ? "bg-blue-500 text-white hover:bg-blue-600"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              } ${saving ? "opacity-50" : ""}`}
+            >
+              {saving ? "Sauvegarde..." : "Appliquer les changements"}
+            </button>
+          </div>
         </div>
       </div>
 

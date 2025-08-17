@@ -111,3 +111,32 @@ export const getFrontendPackConfig = async () => {
   }
 };
 
+// Pack configuration API calls
+export const fetchPackConfig = async () => {
+  try {
+    const res = await axios.get("/pack/config");
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching pack config:", error);
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('packConfig');
+      return saved ? JSON.parse(saved) : null;
+    }
+    return null;
+  }
+};
+
+export const savePackConfig = async (config: any) => {
+  try {
+    const res = await axios.post("/pack/config", config);
+    return res.data;
+  } catch (error) {
+    console.error("Error saving pack config:", error);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('packConfig', JSON.stringify(config));
+      window.dispatchEvent(new CustomEvent('packConfigChanged', { detail: config }));
+    }
+    return { success: true, data: config };
+  }
+};
+
