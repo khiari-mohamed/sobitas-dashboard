@@ -26,14 +26,30 @@ export const fetchAllVenteFlash = async (): Promise<VenteFlash[]> => {
   }
 };
 
+// Create a new vente flash product
+export const createVenteFlash = async (payload: Partial<VenteFlash>) => {
+  const res = await axios.post("/vente-flash", payload);
+  return res.data;
+};
+
 // Update a vente flash product
 export const updateVenteFlash = async (id: string, payload: Partial<VenteFlash>) => {
-  const res = await axios.patch(`/products/${id}`, payload);
+  const res = await axios.put(`/vente-flash/${id}`, payload);
   return res.data;
 };
 
 // Delete a vente flash product
 export const deleteVenteFlash = async (id: string) => {
-  const res = await axios.delete(`/products/${id}`);
+  const res = await axios.delete(`/vente-flash/${id}`);
+  return res.data;
+};
+
+// Upload image
+export const uploadImage = async (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await axios.post('/upload/image', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
   return res.data;
 };

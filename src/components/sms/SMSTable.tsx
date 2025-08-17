@@ -121,12 +121,7 @@ export default function SMSTable() {
       </div>
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <select className="border rounded px-3 py-2 text-sm w-full sm:w-60" disabled>
-          <option>Type de message</option>
-        </select>
-        <select className="border rounded px-3 py-2 text-sm w-full sm:w-40" disabled>
-          <option>contains</option>
-        </select>
+        {/* Removed dropdowns */}
         <div className="relative w-full sm:w-72">
           <input
             type="text"

@@ -28,12 +28,28 @@ export const fetchAllMusculationProducts = async (): Promise<MusculationProduct[
 
 // Update a musculation product
 export const updateMusculationProduct = async (id: string, payload: Partial<MusculationProduct>) => {
-  const res = await axios.put(`/musculation-products/update/${id}`, payload);
+  const res = await axios.put(`/musculation-products/${id}`, payload);
   return res.data;
 };
 
 // Delete a musculation product
 export const deleteMusculationProduct = async (id: string) => {
-  const res = await axios.delete(`/musculation-products/delete/${id}`);
+  const res = await axios.delete(`/musculation-products/${id}`);
+  return res.data;
+};
+
+// Configuration functions
+export const getMusculationConfig = async () => {
+  const res = await axios.get('/products/admin/musculation-config');
+  return res.data;
+};
+
+export const updateMusculationConfig = async (config: any) => {
+  const res = await axios.post('/products/admin/musculation-config', config);
+  return res.data;
+};
+
+export const updateMusculationOrder = async (productOrder: string[]) => {
+  const res = await axios.put('/products/admin/musculation-order', { productOrder });
   return res.data;
 };

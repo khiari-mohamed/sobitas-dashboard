@@ -18,14 +18,48 @@ export default function MusculationProductControlClient() {
   const [sectionTitle, setSectionTitle] = useState("Matériel de Musculation");
   const [sectionDescription, setSectionDescription] = useState("Découvrez notre gamme complète de matériel musculation, fitness et cardio pour équiper votre salle de sport.");
   const [showOnFrontend, setShowOnFrontend] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [registering, setRegistering] = useState(false);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
-        const data = await fetchAllMusculationProducts();
-        const productsArray = Array.isArray(data) ? data : [];
+        // Fetch products
+        const productsData = await fetchAllMusculationProducts();
+        const productsArray = Array.isArray(productsData) ? productsData : [];
         setProducts(productsArray);
-        setDisplayedProducts(productsArray.filter(p => p.publier === "1").slice(0, maxDisplay));
+        
+        // Fetch configuration
+        try {
+          const configResponse = await fetch('/api/products/admin/musculation-config');
+          if (configResponse.ok) {
+            const config = await configResponse.json();
+            setSectionTitle(config.sectionTitle || "Matériel de Musculation");
+            setSectionDescription(config.sectionDescription || "Découvrez notre gamme complète de matériel musculation, fitness et cardio pour équiper votre salle de sport.");
+            setMaxDisplay(config.maxDisplay || 4);
+            setShowOnFrontend(config.showOnFrontend !== false);
+            
+            // Apply order if exists
+            if (config.productOrder && config.productOrder.length > 0) {
+              const orderedProducts = [];
+              const productMap = new Map(productsArray.map(p => [p._id!, p]));
+              
+              for (const id of config.productOrder) {
+                if (productMap.has(id)) {
+                  orderedProducts.push(productMap.get(id)!);
+                  productMap.delete(id);
+                }
+              }
+              orderedProducts.push(...Array.from(productMap.values()));
+              setProducts(orderedProducts);
+            }
+          }
+        } catch (configError) {
+          console.log('Using default config');
+        }
+        
       } catch (err) {
         console.error(err);
         setProducts([]);
@@ -34,7 +68,7 @@ export default function MusculationProductControlClient() {
         setLoading(false);
       }
     };
-    fetchProducts();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -43,12 +77,64 @@ export default function MusculationProductControlClient() {
     }
   }, [products, maxDisplay]);
 
-  const moveProduct = (fromIndex: number, toIndex: number) => {
+  const updateConfig = (field: string, value: any) => {
+    if (field === 'sectionTitle') setSectionTitle(value);
+    if (field === 'sectionDescription') setSectionDescription(value);
+    if (field === 'maxDisplay') setMaxDisplay(value);
+    if (field === 'showOnFrontend') setShowOnFrontend(value);
+    setHasChanges(true);
+  };
+
+  const registerChanges = async () => {
+    setRegistering(true);
+    setError(null);
+    try {
+      // Save to backend
+      const response = await fetch('/api/products/admin/musculation-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sectionTitle,
+          sectionDescription,
+          maxDisplay,
+          showOnFrontend,
+          productOrder: products.map(p => p._id!).filter(Boolean)
+        })
+      });
+      
+      if (response.ok) {
+        setHasChanges(false);
+        setSuccess('Configuration enregistrée avec succès!');
+        setTimeout(() => setSuccess(null), 3000);
+      } else {
+        throw new Error('Erreur serveur');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Erreur lors de l\'enregistrement');
+    } finally {
+      setRegistering(false);
+    }
+  };
+
+  const moveProduct = async (fromIndex: number, toIndex: number) => {
     if (toIndex < 0 || toIndex >= products.length) return;
     const newProducts = [...products];
     const [movedProduct] = newProducts.splice(fromIndex, 1);
     newProducts.splice(toIndex, 0, movedProduct);
     setProducts(newProducts);
+    setHasChanges(true);
+    
+    // Save new order
+    try {
+      await fetch('/api/products/admin/musculation-order', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productOrder: newProducts.map(p => p._id!).filter(Boolean) })
+      });
+    } catch (error) {
+      console.error('Error updating order:', error);
+    }
   };
 
   const handleQuickEdit = (field: string, value: string | number, product: MusculationProduct) => {
@@ -57,6 +143,7 @@ export default function MusculationProductControlClient() {
     updateMusculationProduct(product._id, { ...product, [field]: value })
       .then(() => {
         setProducts(products.map(p => p._id === product._id ? { ...p, [field]: value } : p));
+        setHasChanges(true);
       })
       .catch(console.error)
       .finally(() => setUpdating(null));
@@ -74,8 +161,12 @@ export default function MusculationProductControlClient() {
     try {
       await deleteMusculationProduct(product._id);
       setProducts(products.filter(p => p._id !== product._id));
+      setHasChanges(true);
+      setSuccess('Produit supprimé avec succès');
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error(err);
+      setError('Erreur lors de la suppression');
     } finally {
       setUpdating(null);
     }
@@ -94,8 +185,12 @@ export default function MusculationProductControlClient() {
       setProducts(products.map(p => p._id === editingProduct._id ? editingProduct : p));
       setShowEditModal(false);
       setEditingProduct(null);
+      setHasChanges(true);
+      setSuccess('Produit modifié avec succès');
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error(err);
+      setError('Erreur lors de la modification');
     } finally {
       setUpdating(null);
     }
@@ -111,7 +206,30 @@ export default function MusculationProductControlClient() {
 
   return (
     <div className="bg-white p-8 shadow-xl w-full max-w-[1600px] mx-auto mt-8 border">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Contrôle de la Section Matériel de Musculation</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">Contrôle de la Section Matériel de Musculation</h1>
+        
+        {success && (
+          <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+            {success}
+          </div>
+        )}
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+        
+        {hasChanges && (
+          <button
+            onClick={registerChanges}
+            disabled={registering}
+            className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50 animate-pulse"
+          >
+            {registering ? 'Enregistrement...' : '💾 Enregistrer les changements'}
+          </button>
+        )}
+      </div>
       
       {/* Section Configuration */}
       <div className="mb-8 p-6 bg-gray-50 rounded-lg">
@@ -122,7 +240,7 @@ export default function MusculationProductControlClient() {
             <input
               type="text"
               value={sectionTitle}
-              onChange={(e) => setSectionTitle(e.target.value)}
+              onChange={(e) => updateConfig('sectionTitle', e.target.value)}
               className="w-full border p-2 rounded"
             />
           </div>
@@ -130,7 +248,7 @@ export default function MusculationProductControlClient() {
             <label className="block text-sm font-medium mb-2">Nombre de produits à afficher</label>
             <select
               value={maxDisplay}
-              onChange={(e) => setMaxDisplay(Number(e.target.value))}
+              onChange={(e) => updateConfig('maxDisplay', Number(e.target.value))}
               className="w-full border p-2 rounded"
             >
               <option value={2}>2 produits</option>
@@ -148,7 +266,7 @@ export default function MusculationProductControlClient() {
           <label className="block text-sm font-medium mb-2">Description de la section</label>
           <textarea
             value={sectionDescription}
-            onChange={(e) => setSectionDescription(e.target.value)}
+            onChange={(e) => updateConfig('sectionDescription', e.target.value)}
             className="w-full border p-2 rounded h-20"
           />
         </div>
@@ -157,11 +275,16 @@ export default function MusculationProductControlClient() {
             <input
               type="checkbox"
               checked={showOnFrontend}
-              onChange={(e) => setShowOnFrontend(e.target.checked)}
+              onChange={(e) => updateConfig('showOnFrontend', e.target.checked)}
               className="mr-2"
             />
             Afficher la section sur le frontend
           </label>
+          {hasChanges && (
+            <span className="text-orange-600 text-sm font-medium">
+              ⚠️ Changements non enregistrés
+            </span>
+          )}
         </div>
       </div>
 

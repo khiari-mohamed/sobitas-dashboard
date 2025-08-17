@@ -14,13 +14,26 @@ export const fetchSystemMessageById = async (id: string): Promise<SystemMessage>
   return data;
 };
 
-export const createSystemMessage = async (systemMessage: Omit<SystemMessage, '_id'>): Promise<SystemMessage> => {
-  const { data } = await axiosInstance.post<SystemMessage>(RESOURCE, systemMessage);
+export const createSystemMessage = async (systemMessage: any): Promise<SystemMessage> => {
+  const cleanData = Object.fromEntries(
+    Object.entries(systemMessage).filter(([_, value]) => value !== undefined && value !== '')
+  );
+  const { data } = await axiosInstance.post<SystemMessage>(RESOURCE, cleanData);
   return data;
 };
 
-export const updateSystemMessage = async (id: string, systemMessage: Partial<SystemMessage>): Promise<SystemMessage> => {
-  const { data } = await axiosInstance.patch<SystemMessage>(`${RESOURCE}/${id}`, systemMessage);
+export const updateSystemMessage = async (id: string, systemMessage: any): Promise<SystemMessage> => {
+  const cleanData = Object.fromEntries(
+    Object.entries(systemMessage).filter(([key, value]) => 
+      value !== undefined && 
+      value !== '' && 
+      key !== '_id' && 
+      key !== '__v' && 
+      key !== 'createdAt' && 
+      key !== 'updatedAt'
+    )
+  );
+  const { data } = await axiosInstance.put<SystemMessage>(`${RESOURCE}/${id}`, cleanData);
   return data;
 };
 

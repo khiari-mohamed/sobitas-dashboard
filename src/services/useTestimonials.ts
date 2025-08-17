@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+/*import { useEffect, useState } from "react";
 import { Testimonial } from "@/types/testimonial";
 import testimonialsData from "./../components/Home/Testimonials/testimonialsData";
 
@@ -65,3 +65,6 @@ export function useTestimonials() {
 
   return { testimonials, loading };
 }
+
+
+*/

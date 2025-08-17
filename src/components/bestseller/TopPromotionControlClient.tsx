@@ -1,7 +1,7 @@
-"use client";
+/*"use client";
 
 import React, { useState, useEffect } from "react";
-import { fetchAllTopPromotions, updateTopPromotion, deleteTopPromotion } from "@/services/toppromotion";
+import { fetchAllTopPromotions, updateTopPromotion, deleteTopPromotion, getSectionConfig, updateSectionConfig } from "@/services/toppromotion";
 import { TopPromotion } from "@/types/toppromotion";
 import dynamic from "next/dynamic";
 
@@ -20,12 +20,21 @@ export default function TopPromotionControlClient() {
   const [showOnFrontend, setShowOnFrontend] = useState(true);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
-        const data = await fetchAllTopPromotions();
-        const productsArray = Array.isArray(data) ? data : [];
+        const [productsData, configData] = await Promise.all([
+          fetchAllTopPromotions(),
+          getSectionConfig()
+        ]);
+        const productsArray = Array.isArray(productsData) ? productsData : [];
         setProducts(productsArray);
-        setDisplayedProducts(productsArray.filter(p => p.publier === "1").slice(0, maxDisplay));
+        setDisplayedProducts(productsArray.filter(p => p.publier === "1").slice(0, configData.maxDisplay || 4));
+        
+        // Load saved configuration
+        setMaxDisplay(configData.maxDisplay || 4);
+        setSectionTitle(configData.sectionTitle || 'Top Promos');
+        setSectionDescription(configData.sectionDescription || 'Profitez de nos meilleures offres du moment sur une sélection de produits !');
+        setShowOnFrontend(configData.showOnFrontend !== false);
       } catch (err) {
         console.error(err);
         setProducts([]);
@@ -34,7 +43,7 @@ export default function TopPromotionControlClient() {
         setLoading(false);
       }
     };
-    fetchProducts();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -54,9 +63,15 @@ export default function TopPromotionControlClient() {
   const handleQuickEdit = (field: string, value: string | number, product: TopPromotion) => {
     if (!product._id) return;
     setUpdating(product._id);
-    updateTopPromotion(product._id, { ...product, [field]: value })
+    updateTopPromotion(product._id, { [field]: value })
       .then(() => {
+        // Update local state
         setProducts(products.map(p => p._id === product._id ? { ...p, [field]: value } : p));
+        // Refresh data to get updated info from backend
+        fetchAllTopPromotions().then(data => {
+          const productsArray = Array.isArray(data) ? data : [];
+          setProducts(productsArray);
+        });
       })
       .catch(console.error)
       .finally(() => setUpdating(null));
@@ -102,9 +117,25 @@ export default function TopPromotionControlClient() {
   };
 
   const getImageSrc = (product: TopPromotion) => {
-    if (!product.cover || product.cover === "undefined") return "/images/placeholder.png";
-    if (product.cover.startsWith('http') || product.cover.startsWith('/')) return product.cover;
-    return `https://admin.protein.tn/storage/app/public/${product.cover}`;
+    // Try multiple sources for cover image
+    const cover = (product as any).product?.cover || 
+                  (product as any).productId?.cover || 
+                  product.cover;
+    
+    if (!cover || cover === "undefined") {
+      return "/images/placeholder.png";
+    }
+    
+    // Handle different path formats
+    if (cover.startsWith('/')) {
+      return cover; // New format: /produits/août2025/file.jpg
+    } else if (cover.includes('/')) {
+      return `/${cover}`; // Old format: produits/August2024/file.webp
+    } else if (cover.startsWith('http')) {
+      return cover; // External URL
+    } else {
+      return `/produits/${cover}`; // Just filename: file.jpg
+    }
   };
 
   if (loading) return <div className="p-8">Chargement...</div>;
@@ -113,7 +144,7 @@ export default function TopPromotionControlClient() {
     <div className="bg-white p-8 shadow-xl w-full max-w-[1600px] mx-auto mt-8 border">
       <h1 className="text-3xl font-bold text-gray-800 mb-8">Contrôle de la Section Top Promotions</h1>
       
-      {/* Section Configuration */}
+      {/* Section Configuration 
       <div className="mb-8 p-6 bg-gray-50 rounded-lg">
         <h2 className="text-xl font-semibold mb-4">Configuration de la Section</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -162,10 +193,28 @@ export default function TopPromotionControlClient() {
             />
             Afficher la section sur le frontend
           </label>
+          <button
+            onClick={async () => {
+              try {
+                await updateSectionConfig({
+                  maxDisplay,
+                  sectionTitle,
+                  sectionDescription,
+                  showOnFrontend
+                });
+                alert('Configuration sauvegardée !');
+              } catch (err) {
+                alert('Erreur lors de la sauvegarde');
+              }
+            }}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Sauvegarder la configuration
+          </button>
         </div>
       </div>
 
-      {/* Preview Section */}
+      {/* Preview Section 
       {showOnFrontend && (
         <div className="mb-8 p-6 bg-yellow-50 rounded-lg">
           <h2 className="text-xl font-semibold mb-4">Aperçu Frontend</h2>
@@ -222,7 +271,7 @@ export default function TopPromotionControlClient() {
         </div>
       )}
 
-      {/* Products Management Table */}
+      {/* Products Management Table 
       <div className="overflow-x-auto">
         <table className="w-full border-collapse border border-gray-300">
           <thead>
@@ -340,7 +389,7 @@ export default function TopPromotionControlClient() {
         </table>
       </div>
 
-      {/* Edit Modal */}
+      {/* Edit Modal 
       {showEditModal && editingProduct && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -446,3 +495,4 @@ export default function TopPromotionControlClient() {
     </div>
   );
 }
+  */

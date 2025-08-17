@@ -15,6 +15,10 @@ export default function NewArrivalControlClient() {
   const [editingProduct, setEditingProduct] = useState<NewArrival | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [registering, setRegistering] = useState(false);
   
   // Configuration state
   const [sectionTitle, setSectionTitle] = useState("Nouveautés");
@@ -73,11 +77,22 @@ export default function NewArrivalControlClient() {
     if (updates.sectionDescription !== undefined) setSectionDescription(updates.sectionDescription);
     if (updates.maxDisplay !== undefined) setMaxDisplay(updates.maxDisplay);
     if (updates.showOnFrontend !== undefined) setShowOnFrontend(updates.showOnFrontend);
+    setHasChanges(true);
   };
 
-  const saveConfig = async () => {
-    setSaving(true);
+  const registerChanges = async () => {
+    setRegistering(true);
+    setError(null);
     try {
+      const configData = {
+        sectionTitle,
+        sectionDescription,
+        maxDisplay,
+        showOnFrontend,
+        products: displayedProducts
+      };
+      
+      // Save to backend
       await updateNewArrivalConfig({
         sectionTitle,
         sectionDescription,
@@ -85,15 +100,15 @@ export default function NewArrivalControlClient() {
         showOnFrontend,
         productOrder: products.map(p => p._id!).filter(Boolean)
       });
-      // Clear frontend cache and trigger refresh
-      if (typeof window !== 'undefined') {
-        sessionStorage.removeItem('products-new-products');
-        localStorage.setItem('new-arrivals-updated', Date.now().toString());
-      }
-    } catch (error) {
-      console.error('Error saving config:', error);
+      
+      setHasChanges(false);
+      setSuccess('Configuration enregistrée avec succès!');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error(err);
+      setError('Erreur lors de l\'enregistrement');
     } finally {
-      setSaving(false);
+      setRegistering(false);
     }
   };
 
@@ -103,6 +118,7 @@ export default function NewArrivalControlClient() {
     const [movedProduct] = newProducts.splice(fromIndex, 1);
     newProducts.splice(toIndex, 0, movedProduct);
     setProducts(newProducts);
+    setHasChanges(true);
     
     // Save new order
     try {
@@ -122,6 +138,7 @@ export default function NewArrivalControlClient() {
     updateNewArrival(product._id, { ...product, [field]: value })
       .then(() => {
         setProducts(products.map(p => p._id === product._id ? { ...p, [field]: value } : p));
+        setHasChanges(true);
         // Clear frontend cache
         if (typeof window !== 'undefined') {
           sessionStorage.removeItem('products-new-products');
@@ -143,8 +160,12 @@ export default function NewArrivalControlClient() {
     try {
       await deleteNewArrival(product._id);
       setProducts(products.filter(p => p._id !== product._id));
+      setHasChanges(true);
+      setSuccess('Produit supprimé avec succès');
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error(err);
+      setError('Erreur lors de la suppression');
     } finally {
       setUpdating(null);
     }
@@ -163,8 +184,12 @@ export default function NewArrivalControlClient() {
       setProducts(products.map(p => p._id === editingProduct._id ? editingProduct : p));
       setShowEditModal(false);
       setEditingProduct(null);
+      setHasChanges(true);
+      setSuccess('Produit modifié avec succès');
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error(err);
+      setError('Erreur lors de la modification');
     } finally {
       setUpdating(null);
     }
@@ -180,7 +205,31 @@ export default function NewArrivalControlClient() {
 
   return (
     <div className="bg-white p-8 shadow-xl w-full max-w-[1600px] mx-auto mt-8 border">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Contrôle de la Section Nouveautés</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">Contrôle de la Section Nouveautés</h1>
+        
+        {/* Success/Error Messages */}
+        {success && (
+          <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+            {success}
+          </div>
+        )}
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+        
+        {hasChanges && (
+          <button
+            onClick={registerChanges}
+            disabled={registering}
+            className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50 animate-pulse"
+          >
+            {registering ? 'Enregistrement...' : '💾 Enregistrer les changements'}
+          </button>
+        )}
+      </div>
       
       {/* Section Configuration */}
       <div className="mb-8 p-6 bg-gray-50 rounded-lg">
@@ -221,7 +270,7 @@ export default function NewArrivalControlClient() {
             className="w-full border p-2 rounded h-20"
           />
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
           <label className="flex items-center">
             <input
               type="checkbox"
@@ -231,13 +280,11 @@ export default function NewArrivalControlClient() {
             />
             Afficher la section sur le frontend
           </label>
-          <button
-            onClick={saveConfig}
-            disabled={saving}
-            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-          >
-            {saving ? 'Sauvegarde...' : 'Sauvegarder la configuration'}
-          </button>
+          {hasChanges && (
+            <span className="text-orange-600 text-sm font-medium">
+              ⚠️ Changements non enregistrés
+            </span>
+          )}
         </div>
       </div>
 

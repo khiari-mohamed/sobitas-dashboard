@@ -26,13 +26,13 @@ export default function SidebarControlFrontDropdown({
 
   const items = [
     { label: "Meilleures ventes", href: "/admin/bestseller/control", icon: ShoppingCart },
-    { label: "Top Promotions", href: "/admin/toppromotion/control", icon: Tag },
+    //{ label: "Top Promotions", href: "/admin/toppromotion/control", icon: Tag },
     { label: "Vente Flash", href: "/admin/VenteFlash/control", icon: Zap },
     { label: "Nouveautés", href: "/admin/NewArrival/control", icon: Sparkles },
     { label: "Musculation", href: "/admin/productmusculation/control", icon: Dumbbell },
     { label: "Témoignages", href: "/admin/testimonials/control", icon: MessageSquare },
     { label: "Blog", href: "/admin/blogs/control", icon: FileText },
-    { label: "Catégories", href: "/admin/categories/control", icon: Folder },
+    //{ label: "Catégories", href: "/admin/categories/control", icon: Folder },
     { label: "Marques", href: "/admin/brands/control", icon: Tag },
   ];
 

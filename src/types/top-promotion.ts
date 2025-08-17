@@ -1,4 +1,4 @@
-export type TopPromotion = {
+/*export type TopPromotion = {
   _id: string;
   productId: string; // or Types.ObjectId if you want to be more specific
   designation_fr: string;
@@ -15,3 +15,5 @@ export type TopPromotion = {
   cover?: string; // <-- Add this line
   product?: any; // <-- Add this line if you want to include the full product object
 };
+
+*/

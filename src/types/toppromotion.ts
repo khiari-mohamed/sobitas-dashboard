@@ -1,4 +1,4 @@
-export interface TopPromotion {
+/*export interface TopPromotion {
   _id: string;
   id?: string;
   sous_categorie_id?: string | null;
@@ -47,5 +47,8 @@ export interface TopPromotion {
     url: string;
     img_id: string;
   }>;
+  product?: any; // Populated product data from backend
   [key: string]: any;
 }
+
+*/
