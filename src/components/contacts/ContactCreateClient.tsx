@@ -31,8 +31,8 @@ export default function ContactCreateClient() {
     try {
       await createClient(form);
       router.push("/admin/clients");
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Erreur lors de la création du client.");
+    } catch (err: unknown) {
+      setError((err as Error)?.message || "Erreur lors de la création du client.");
     } finally {
       setLoading(false);
     }

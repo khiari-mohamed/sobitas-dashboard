@@ -1,5 +1,6 @@
 import EmailTemplatesViewClient from "@/components/email_templates/EmailTemplatesViewClient";
 
-export default function EmailTemplatesViewPage({ params }: { params: { id: string } }) {
-  return <EmailTemplatesViewClient id={params.id} />;
+export default async function EmailTemplatesViewPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <EmailTemplatesViewClient id={id} />;
 }

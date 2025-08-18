@@ -51,8 +51,8 @@ export default function PacksCreateClient() {
     try {
       await createPack(form, selectedFile || undefined);
       router.push("/admin/packs");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la création du pack");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur lors de la création du pack");
     } finally {
       setLoading(false);
     }
@@ -94,7 +94,7 @@ export default function PacksCreateClient() {
                 reader.readAsDataURL(file);
               }
             }} className="w-full border p-2 text-base" />
-            <p className="text-sm text-gray-500">Vous pouvez soit saisir un chemin d'image, soit télécharger un fichier</p>
+            <p className="text-sm text-gray-500">Vous pouvez soit saisir un chemin d&apos;image, soit télécharger un fichier</p>
           </div>
         </div>
         <div className="mb-6">

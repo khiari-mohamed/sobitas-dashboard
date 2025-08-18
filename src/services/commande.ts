@@ -38,7 +38,7 @@ export async function updateCommande(id: string, commande: Partial<Commande>): P
   return res.json();
 }
 
-export async function deleteCommande(id: string): Promise<any> {
+export async function deleteCommande(id: string): Promise<{ success: boolean; message: string }> {
   const res = await fetch(`${API_URL}/${id}` , {
     method: "DELETE",
   });

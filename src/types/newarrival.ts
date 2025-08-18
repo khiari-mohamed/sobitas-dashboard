@@ -46,5 +46,4 @@ export interface NewArrival {
     url: string;
     img_id: string;
   }>;
-  [key: string]: any;
 }

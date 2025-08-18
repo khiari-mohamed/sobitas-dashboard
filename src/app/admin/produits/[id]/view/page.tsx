@@ -11,8 +11,9 @@ async function getProduct(id: string) {
   }
 }
 
-export default async function ProductViewPage({ params }: { params: { id: string } }) {
-  const product = await getProduct(params.id);
+export default async function ProductViewPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const product = await getProduct(id);
   if (!product) return notFound();
-  return <ProductViewClient product={product} id={params.id} />;
+  return <ProductViewClient product={product} id={id} />;
 }

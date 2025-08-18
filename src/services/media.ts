@@ -1,7 +1,5 @@
 import axiosInstance from '../lib/axios';
 import { Media, Folder, Attachment } from '../types/media';
-import axios from 'axios';
-import Cookies from 'js-cookie';
 
 
 // Folder endpoints

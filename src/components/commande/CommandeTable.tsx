@@ -83,7 +83,7 @@ export default function CommandeTable() {
         await commandeService.deleteCommande(id);
       } catch {}
     }
-    setCommandes((prev) => prev.filter(c => !selectedIds.includes(c.id) && !selectedIds.includes(c._id)));
+    setCommandes((prev) => prev.filter(c => !selectedIds.includes(c.id || '') && !selectedIds.includes(c._id || '')));
     setSelectedIds([]);
     setDeleteSelectionOpen(false);
   };

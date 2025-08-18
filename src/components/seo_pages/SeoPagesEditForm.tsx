@@ -45,8 +45,8 @@ export default function SeoPagesEditForm({ id }: { id: string }) {
     try {
       await updateSeoPage(id, form);
       router.push("/admin/seo_pages");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la modification de la page SEO");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur lors de la modification de la page SEO");
     } finally {
       setLoading(false);
     }

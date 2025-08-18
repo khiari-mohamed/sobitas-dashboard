@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
+
 import { useRouter } from "next/navigation";
 import { FaMagic, FaTrash, FaArrowLeft } from "react-icons/fa";
 import { getAutofillTemplate } from "@/utils/productAutofillTemplates";
@@ -71,7 +71,7 @@ export default function ProductCreateClient() {
   const [form, setForm] = useState(emptyProduct);
   const [allSubcategories, setAllSubcategories] = useState<{ _id: string; designation: string }[]>([]);
   const [allBrands, setAllBrands] = useState<{ _id: string; designation_fr: string }[]>([]);
-  const [productDb, setProductDb] = useState<any[]>([]);
+  const [productDb, setProductDb] = useState<Array<Record<string, string | number | boolean>>>([]);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -80,7 +80,7 @@ export default function ProductCreateClient() {
     fetchSubcategories().then((data) => {
       setAllSubcategories(
         Array.isArray(data)
-          ? data.map((s: any) => ({ _id: s._id, designation: s.designation || s.designation_fr || s.title || s.slug }))
+          ? data.map((s: { _id: string; designation?: string; designation_fr?: string; title?: string; slug?: string }) => ({ _id: s._id, designation: s.designation || s.designation_fr || s.title || s.slug || 'Unknown' }))
           : []
       );
     });
@@ -94,7 +94,7 @@ export default function ProductCreateClient() {
       .catch(() => setProductDb([]));
   }, []);
 
-  const handleChange = (key: string, value: any) => {
+  const handleChange = (key: string, value: string | boolean | string[] | File[]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -123,13 +123,13 @@ const autofillKeyMap: Record<string, keyof typeof emptyProduct> = {
 const handleAutofill = (e: React.MouseEvent<HTMLButtonElement>) => {
   e.preventDefault();
 
-  const input = (form.designationFr || "").replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+  const input = String(form.designationFr || "").replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 
   // Try to find the best match from productDb
   let bestMatch = null;
   let bestScore = 0;
   for (const prod of productDb) {
-    const prodName = (prod.designation_fr || "").replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+    const prodName = String(prod.designation_fr || "").replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
     if (!prodName) continue;
     // Score: exact match > includes > partial
     if (prodName === input) {
@@ -158,39 +158,39 @@ const handleAutofill = (e: React.MouseEvent<HTMLButtonElement>) => {
   if (bestMatch) {
     // Map productDb fields to form fields
     const normalizedFields: Partial<typeof emptyProduct> = {
-      designationFr: bestMatch.designation_fr || "",
-      descriptionFr: bestMatch.description_fr || "",
-      metaDescriptionFr: bestMatch.meta_description_fr || "",
-      nutritionValues: bestMatch.nutrition_values || "",
-      questions: bestMatch.questions || "",
-      altCover: bestMatch.alt_cover || "",
-      descriptionCover: bestMatch.description_cover || "",
-      meta: bestMatch.meta || "",
-      zone1: bestMatch.zone1 || "",
-      zone2: bestMatch.zone2 || "",
-      zone3: bestMatch.zone3 || "",
-      zone4: bestMatch.zone4 || "",
-      schemaDescription: bestMatch.schema_description || "",
-      review: bestMatch.review || "",
-      aggregateRating: bestMatch.aggregateRating || "",
-      promo: bestMatch.promo || "",
-      prix: bestMatch.prix || "",
-      qte: bestMatch.qte || "",
+      designationFr: String(bestMatch.designation_fr || ""),
+      descriptionFr: String(bestMatch.description_fr || ""),
+      metaDescriptionFr: String(bestMatch.meta_description_fr || ""),
+      nutritionValues: String(bestMatch.nutrition_values || ""),
+      questions: String(bestMatch.questions || ""),
+      altCover: String(bestMatch.alt_cover || ""),
+      descriptionCover: String(bestMatch.description_cover || ""),
+      meta: String(bestMatch.meta || ""),
+      zone1: String(bestMatch.zone1 || ""),
+      zone2: String(bestMatch.zone2 || ""),
+      zone3: String(bestMatch.zone3 || ""),
+      zone4: String(bestMatch.zone4 || ""),
+      schemaDescription: String(bestMatch.schema_description || ""),
+      review: String(bestMatch.review || ""),
+      aggregateRating: String(bestMatch.aggregateRating || ""),
+      promo: String(bestMatch.promo || ""),
+      prix: String(bestMatch.prix || ""),
+      qte: String(bestMatch.qte || ""),
       publier: bestMatch.publier === "1" || bestMatch.publier === true,
-      codeProduct: bestMatch.code_product || bestMatch.codeProduct || "",
-      slug: bestMatch.slug || "",
+      codeProduct: String(bestMatch.code_product || bestMatch.codeProduct || ""),
+      slug: String(bestMatch.slug || ""),
       pack: bestMatch.pack === "1" || bestMatch.pack === true,
-      note: bestMatch.note || "5",
+      note: String(bestMatch.note || "5"),
       bestSeller: bestMatch.best_seller === "1" || bestMatch.best_seller === true,
       newProduct: bestMatch.new_product === "1" || bestMatch.new_product === true,
       rupture: bestMatch.rupture === "1" || bestMatch.rupture === true,
-      cover: bestMatch.cover ? `/` + bestMatch.cover.replace(/^\/+/, "") : "",
+      cover: bestMatch.cover ? `/` + String(bestMatch.cover).replace(/^\/+/, "") : "",
       // gallery, aromaIds, tags, brand, subCategory left for manual
     };
     setForm((prev) => ({
       ...prev,
       ...normalizedFields,
-      codeProduct: prev.codeProduct || normalizedFields.codeProduct || generateRandomCode(),
+      codeProduct: prev.codeProduct || (normalizedFields.codeProduct as string) || generateRandomCode(),
     }));
     return;
   }
@@ -213,16 +213,16 @@ const handleAutofill = (e: React.MouseEvent<HTMLButtonElement>) => {
         "schemaDescription",
         "review"
       ].includes(camelKey)) {
-        normalizedFields[camelKey] = value ?? "";
+        (normalizedFields as Record<string, unknown>)[camelKey] = String(value ?? "");
       } else {
-        normalizedFields[camelKey] = typeof value === "number" ? value.toString() : value ?? "";
+        (normalizedFields as Record<string, unknown>)[camelKey] = String(value ?? "");
       }
     } else if (key === "promo") {
-      normalizedFields.promo = typeof value === "number" ? value.toString() : value ?? "";
+      normalizedFields.promo = String(value ?? "");
     } else if (key === "prix") {
-      normalizedFields.prix = typeof value === "number" ? value.toString() : value ?? "";
+      normalizedFields.prix = String(value ?? "");
     } else if (key === "qte") {
-      normalizedFields.qte = typeof value === "number" ? value.toString() : value ?? "";
+      normalizedFields.qte = String(value ?? "");
     } else if (key === "publier") {
       normalizedFields.publier = Boolean(value);
     }
@@ -348,9 +348,9 @@ const handleSubmit = async (e: React.FormEvent) => {
       alert(coverFile ? 'Produit créé avec image avec succès!' : 'Produit créé avec succès!');
       router.push('/produits');
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error creating product:', error);
-    alert('Erreur lors de la création: ' + (error.response?.data?.message || error.message));
+    alert('Erreur lors de la création du produit');
   }
 
   setLoading(false);
@@ -433,7 +433,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               return sub ? sub.designation : id;
             }).join(", ")}
             onChange={handleSubcategoryInput}
-            placeholder="Tapez ou collez des sous-catégories, séparées par des virgules"
+            placeholder="Tapez ou collez des sous-cat&eacute;gories, s&eacute;par&eacute;es par des virgules"
           />
         </div>
         {/* --- RESTORE ALL OTHER FIELDS BELOW, UNCHANGED --- */}
@@ -463,7 +463,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             className="w-full border p-4 rounded text-base"
             value={form.brand}
             onChange={e => handleChange("brand", e.target.value)}
-            placeholder="Tapez ou collez une marque, ou sélectionnez ci-dessus"
+            placeholder="Tapez ou collez une marque, ou s&eacute;lectionnez ci-dessus"
           />
         </div>
         <div>
@@ -525,7 +525,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
         </div>
         <div>
-          <label className="block text-xl font-semibold mb-2">Date d'expiration du promo (Ventes Flash)</label>
+          <label className="block text-xl font-semibold mb-2">Date d&apos;expiration du promo (Ventes Flash)</label>
           <input
             type="date"
             className="w-full border p-4 rounded text-base"
@@ -647,7 +647,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           />
         </div>
         <div>
-          <label className="block text-xl font-semibold mb-2">Nombre d'étoiles</label>
+          <label className="block text-xl font-semibold mb-2">Nombre d&apos;étoiles</label>
           <select
             className="w-full border p-4 rounded text-base"
             value={form.note}
@@ -695,7 +695,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             className="w-full border p-4 rounded text-base"
             value={form.aromaIds.join(", ")}
             onChange={e => handleChange("aromaIds", e.target.value.split(",").map(s => s.trim()))}
-            placeholder="Séparez par des virgules"
+            placeholder="S&eacute;parez par des virgules"
           />
         </div>
         <div>

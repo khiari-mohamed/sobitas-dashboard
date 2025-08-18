@@ -39,7 +39,7 @@ export async function updateFacture(id: string, facture: Partial<Facture>): Prom
   return res.json();
 }
 
-export async function deleteFacture(id: string): Promise<any> {
+export async function deleteFacture(id: string): Promise<{ success: boolean; message: string }> {
   const res = await fetch(`${API_URL}/${id}`, {
     method: "DELETE",
   });

@@ -5,7 +5,7 @@ export async function fetchCategories(): Promise<Category[]> {
   try {
     const res = await axiosInstance.get("/categories");
     const data = res.data?.categories || [];
-    return data.map((cat: any) => ({
+    return data.map((cat: Category) => ({
       _id: cat._id,
       slug: cat.slug || "",
       designation: cat.designation,

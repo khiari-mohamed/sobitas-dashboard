@@ -9,12 +9,20 @@ export async function getAllTestimonials(): Promise<Testimonial[]> {
   if (!res.ok) throw new Error("Failed to fetch testimonials");
   const data = await res.json();
   return Array.isArray(data)
-  ? data.map((t: any) => ({
+  ? data.map((t: Testimonial) => ({
+      _id: t._id || t.id || "",
+      comment: t.comment || "",
+      stars: t.stars || "5",
       review: t.comment,
       authorName: t.user?.name || "Anonyme",
       authorRole: t.user?.role || "",
-      authorImg: t.user?.img || "/images/default-user.png",
-      _id: t._id || t.id || undefined,
+      authorImg: t.user?.avatar || "/images/default-user.png",
+      user_id: t.user_id,
+      product_id: t.product_id,
+      publier: t.publier,
+      created_at: t.created_at,
+      updated_at: t.updated_at,
+      status: t.status,
     }))
   : [];
 }

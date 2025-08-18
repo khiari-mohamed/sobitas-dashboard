@@ -23,7 +23,7 @@ export default function ClientsCreateClient() {
     try {
       await createClient(form);
       router.push("/admin/clients");
-    } catch (err) {
+    } catch (err: unknown) {
       alert("Erreur lors de la création du client.");
     } finally {
       setLoading(false);

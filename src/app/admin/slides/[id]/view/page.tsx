@@ -1,5 +1,6 @@
 import SlidesViewClient from "@/components/slides/SlidesViewClient";
 
-export default function SlidesViewPage({ params }: { params: { id: string } }) {
-  return <SlidesViewClient id={params.id} />;
+export default async function SlidesViewPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <SlidesViewClient id={id} />;
 }

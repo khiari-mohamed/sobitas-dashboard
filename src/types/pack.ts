@@ -49,5 +49,4 @@ export interface Pack {
   designation?: string;
   price?: number;
   oldPrice?: number;
-  [key: string]: any;
 }

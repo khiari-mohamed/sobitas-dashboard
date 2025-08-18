@@ -2,6 +2,7 @@
 import React, { useEffect, useState, use } from "react";
 import { useSearchParams } from "next/navigation";
 import factureService from "@/services/facture";
+import { Facture } from "@/types/facture";
 import BonCommande from "@/components/facture/BonCommande";
 import BonLivraison from "@/components/facture/BonLivraison";
 import Devis from "@/components/facture/Devis";
@@ -9,7 +10,7 @@ import FactureClient from "@/components/facture/FactureClient";
 import FactureBoutique from "@/components/facture/FactureBoutique";
 import TicketCaisse from "@/components/facture/TicketCaisse";
 
-const DOC_COMPONENTS: Record<string, any> = {
+const DOC_COMPONENTS: Record<string, React.ComponentType<{ order: Record<string, unknown> }>> = {
   "bon-commande": BonCommande,
   "bon-livraison": BonLivraison,
   "devis": Devis,
@@ -22,7 +23,7 @@ export default function FactureDocumentPage({ params }: { params: Promise<{ id: 
   const { id } = use(params);
   const searchParams = useSearchParams();
   const doc = searchParams?.get("doc") || "bon-commande";
-  const [order, setOrder] = useState<any>(null);
+  const [order, setOrder] = useState<Facture | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +43,7 @@ export default function FactureDocumentPage({ params }: { params: Promise<{ id: 
 
   return (
     <div className="py-8">
-      <DocComponent order={order} />
+      <DocComponent order={order as unknown as Record<string, unknown>} />
     </div>
   );
 }

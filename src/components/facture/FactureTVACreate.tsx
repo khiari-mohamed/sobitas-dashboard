@@ -129,7 +129,7 @@ export default function FactureTVACreate() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Date d'échéance</label>
+            <label className="block text-sm font-medium mb-1">Date d&apos;échéance</label>
             <input
               type="date"
               value={factureInfo.date_echeance}

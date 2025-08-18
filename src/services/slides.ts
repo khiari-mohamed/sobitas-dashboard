@@ -14,13 +14,13 @@ export const fetchSlideById = async (id: string): Promise<Slide> => {
   return data;
 };
 
-export const createSlide = async (slide: any): Promise<Slide> => {
+export const createSlide = async (slide: Partial<Slide>): Promise<Slide> => {
   // Handle file uploads first
-  const formData: any = { ...slide };
+  const formData: Record<string, unknown> = { ...slide };
   
   // Upload files if they exist
   for (const [key, value] of Object.entries(slide)) {
-    if (value && typeof value === 'object' && value.constructor === File) {
+    if (value && typeof value === 'object' && 'name' in value && 'size' in value) {
       try {
         const uploadFormData = new FormData();
         uploadFormData.append('file', value as File);
@@ -36,19 +36,19 @@ export const createSlide = async (slide: any): Promise<Slide> => {
   }
   
   const cleanData = Object.fromEntries(
-    Object.entries(formData).filter(([_, value]) => value !== undefined && value !== '' && !(value && typeof value === 'object' && value.constructor === File))
+    Object.entries(formData).filter(([, value]) => value !== undefined && value !== '' && !(value && typeof value === 'object' && 'name' in value && 'size' in value))
   );
   const { data } = await axiosInstance.post<Slide>(RESOURCE, cleanData);
   return data;
 };
 
-export const updateSlide = async (id: string, slide: any): Promise<Slide> => {
+export const updateSlide = async (id: string, slide: Partial<Slide>): Promise<Slide> => {
   const formData = new FormData();
   
   // Add all fields to FormData
   for (const [key, value] of Object.entries(slide)) {
     if (key !== '_id' && key !== '__v' && key !== 'createdAt' && key !== 'updatedAt') {
-      if (value && typeof value === 'object' && value.constructor === File) {
+      if (value && typeof value === 'object' && 'name' in value && 'size' in value) {
         formData.append(key, value as File);
       } else if (value !== undefined && value !== '') {
         formData.append(key, String(value));

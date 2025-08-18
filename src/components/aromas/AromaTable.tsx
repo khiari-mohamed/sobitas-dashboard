@@ -17,7 +17,7 @@ export default function AromaTable() {
   const [deleteAroma, setDeleteAroma] = useState<Aroma | null>(null);
   const [deleteSelectionOpen, setDeleteSelectionOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [totalAromas, setTotalAromas] = useState(0);
+  // const [totalAromas, setTotalAromas] = useState(0);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -26,7 +26,7 @@ export default function AromaTable() {
     getAllAromas()
       .then((data) => {
         setAromas(data);
-        setTotalAromas(data.length);
+        // setTotalAromas(data.length);
       })
       .catch(() => setAromas([]))
       .finally(() => setLoading(false));

@@ -36,8 +36,8 @@ export default function NewsletterEditForm({ id }: { id: string }) {
     try {
       await updateNewsletter(id, form);
       router.push("/admin/newsletter");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la modification de l'abonné");
+    } catch (err) {
+      setError((err as Error).message || "Erreur lors de la modification de l&apos;abonné");
     } finally {
       setLoading(false);
     }
@@ -47,7 +47,7 @@ export default function NewsletterEditForm({ id }: { id: string }) {
 
   return (
     <div className="bg-white p-8 shadow-xl w-full max-w-[1600px] mx-auto mt-8 border">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Modifier l'abonné à la newsletter</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-8">Modifier l&apos;abonné à la newsletter</h1>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-8">
         {/* ID (readonly) */}
         <div className="mb-10">

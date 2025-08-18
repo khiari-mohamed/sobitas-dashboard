@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { FaEdit, FaArrowLeft } from "react-icons/fa";
 import axiosInstance from "@/lib/axios";
 
-const samplePayloads: Record<string, any> = {
+const samplePayloads: Record<string, Record<string, unknown>> = {
   "order-confirmation": {
     customerName: "Test User",
     orderNumber: "CMD-TEST",

@@ -1,5 +1,5 @@
 import axios from "@/lib/axios";
-import { VenteFlash } from "@/types/venteflash";
+import { VenteFlash } from "@/types/venteFlash";
 
 // Fetch all vente flash products
 export const fetchAllVenteFlash = async (): Promise<VenteFlash[]> => {

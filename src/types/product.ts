@@ -23,10 +23,10 @@ export type Product = {
   status: boolean;
   qte: ReactNode;
   quantity: ReactNode;
-  zone4: any;
-  zone3: any;
-  zone2: any;
-  zone1: any;
+  zone4: string;
+  zone3: string;
+  zone2: string;
+  zone1: string;
   content_seo: string;
   meta: string;
   aroma_ids: string[];
@@ -98,7 +98,7 @@ metaDescriptionFr?: string; // meta_description_fr
 altCover?: string; // alt_cover
 descriptionCover?: string; // description_cover
 contentSeo?: string; // content_seo
-review?: any; // review (if you want to store review object/array)
+review?: string | Review[]; // review (if you want to store review object/array)
 nutritionValues?: string | null; // nutrition_values
 aromaIds?: string[]; // aroma_ids (array of string)
 

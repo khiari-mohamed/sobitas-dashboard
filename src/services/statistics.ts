@@ -74,7 +74,7 @@ export const statisticsService = {
   },
 
   // Get revenue over time
-  async getRevenueOverTime(params: Omit<StatisticsParams, 'chartType'> & { timeFrame?: string }): Promise<any[]> {
+  async getRevenueOverTime(params: Omit<StatisticsParams, 'chartType'> & { timeFrame?: string }): Promise<Array<{ date: string; revenue: number }>> {
     const response = await axios.get('/api/analytics/revenue-over-time', { params });
     return response.data || [];
   },
@@ -112,63 +112,63 @@ export const statisticsService = {
 
 // Module-specific data generators for different modules
 export const moduleDataGenerators = {
-  'Commande': (startDate: string, endDate: string) => ({
+  'Commande': () => ({
     apiEndpoint: '/api/analytics/orders',
     label: 'Commandes',
     valueKey: 'orderCount',
     color: 'rgba(29, 161, 242, 0.8)'
   }),
 
-  'Facture TVA': (startDate: string, endDate: string) => ({
+  'Facture TVA': () => ({
     apiEndpoint: '/api/analytics/invoices',
     label: 'Factures TVA',
     valueKey: 'invoiceCount',
     color: 'rgba(34, 197, 94, 0.8)'
   }),
 
-  'Bon de commande': (startDate: string, endDate: string) => ({
+  'Bon de commande': () => ({
     apiEndpoint: '/api/analytics/purchase-orders',
     label: 'Bons de commande',
     valueKey: 'poCount',
     color: 'rgba(168, 85, 247, 0.8)'
   }),
 
-  'Produit': (startDate: string, endDate: string) => ({
+  'Produit': () => ({
     apiEndpoint: '/api/analytics/products',
     label: 'Produits',
     valueKey: 'productCount',
     color: 'rgba(249, 115, 22, 0.8)'
   }),
 
-  'Redirection': (startDate: string, endDate: string) => ({
+  'Redirection': () => ({
     apiEndpoint: '/api/analytics/redirections',
     label: 'Redirections',
     valueKey: 'redirectCount',
     color: 'rgba(236, 72, 153, 0.8)'
   }),
 
-  'Review': (startDate: string, endDate: string) => ({
+  'Review': () => ({
     apiEndpoint: '/api/analytics/reviews',
     label: 'Avis',
     valueKey: 'reviewCount',
     color: 'rgba(14, 165, 233, 0.8)'
   }),
 
-  'Seo Page': (startDate: string, endDate: string) => ({
+  'Seo Page': () => ({
     apiEndpoint: '/api/analytics/seo-pages',
     label: 'Pages SEO',
     valueKey: 'pageCount',
     color: 'rgba(16, 185, 129, 0.8)'
   }),
 
-  'Ticket': (startDate: string, endDate: string) => ({
+  'Ticket': () => ({
     apiEndpoint: '/api/analytics/tickets',
     label: 'Tickets',
     valueKey: 'ticketCount',
     color: 'rgba(245, 158, 11, 0.8)'
   }),
 
-  'User': (startDate: string, endDate: string) => ({
+  'User': () => ({
     apiEndpoint: '/api/analytics/users',
     label: 'Utilisateurs',
     valueKey: 'userCount',

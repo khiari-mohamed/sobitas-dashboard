@@ -11,10 +11,10 @@ import { Category } from "@/types/category";
 const Editor = dynamic(() => import("@/components/ui/RichTextEditor"), { ssr: false });
 
 // Helper to get a value from both camelCase and snake_case
-function getField<T = any>(obj: any, ...keys: string[]): T | undefined {
+function getField<T = unknown>(obj: Record<string, unknown>, ...keys: string[]): T | undefined {
   for (const key of keys) {
     if (obj && obj[key] !== undefined && obj[key] !== null && obj[key] !== "") {
-      return obj[key];
+      return obj[key] as T;
     }
   }
   return undefined;
@@ -54,37 +54,37 @@ type FieldType = typeof FIELD_ORDER[number]["key"];
 export default function CategoryEditForm({ category }: { category: Category }) {
   const router = useRouter();
   // Normalize all fields for both camelCase and snake_case
-  const initialForm: Category = {
+  const initialForm = {
     ...category,
-    designation: getField(category, "designation", "designation_fr") ?? "",
-    designation_fr: getField(category, "designation_fr", "designation") ?? "",
-    slug: getField(category, "slug") ?? "",
-    cover: getField(category, "cover") ?? "",
-    cover_liste_produits: getField(category, "cover_liste_produits") ?? "",
-    alt_cover: getField(category, "alt_cover", "altCover") ?? "",
-    description_fr: getField(category, "description_fr", "description") ?? "",
-    nutrition_values: getField(category, "nutrition_values", "nutritionValues") ?? "",
-    questions: getField(category, "questions", "Questions") ?? "",
-    more_details: getField(category, "more_details", "moreDetails") ?? "",
-    description_cover: getField(category, "description_cover", "descriptionCover") ?? "",
-    meta: getField(category, "meta", "Meta") ?? "",
-    schema_description: getField(category, "schema_description", "schemaDescription") ?? "",
-    content_seo: getField(category, "content_seo", "contentSeo") ?? "",
-    review: getField(category, "review") ?? "",
-    aggregateRating: getField(category, "aggregateRating") ?? "",
-    zone1: getField(category, "zone1") ?? "",
-    zone2: getField(category, "zone2") ?? "",
-    zone3: getField(category, "zone3") ?? "",
-  };
+    designation: getField(category as unknown as Record<string, unknown>, "designation", "designation_fr") ?? "",
+    designation_fr: getField(category as unknown as Record<string, unknown>, "designation_fr", "designation") ?? "",
+    slug: getField(category as unknown as Record<string, unknown>, "slug") ?? "",
+    cover: getField(category as unknown as Record<string, unknown>, "cover") ?? "",
+    cover_liste_produits: getField(category as unknown as Record<string, unknown>, "cover_liste_produits") ?? "",
+    alt_cover: getField(category as unknown as Record<string, unknown>, "alt_cover", "altCover") ?? "",
+    description_fr: getField(category as unknown as Record<string, unknown>, "description_fr", "description") ?? "",
+    nutrition_values: getField(category as unknown as Record<string, unknown>, "nutrition_values", "nutritionValues") ?? "",
+    questions: getField(category as unknown as Record<string, unknown>, "questions", "Questions") ?? "",
+    more_details: getField(category as unknown as Record<string, unknown>, "more_details", "moreDetails") ?? "",
+    description_cover: getField(category as unknown as Record<string, unknown>, "description_cover", "descriptionCover") ?? "",
+    meta: getField(category as unknown as Record<string, unknown>, "meta", "Meta") ?? "",
+    schema_description: getField(category as unknown as Record<string, unknown>, "schema_description", "schemaDescription") ?? "",
+    content_seo: getField(category as unknown as Record<string, unknown>, "content_seo", "contentSeo") ?? "",
+    review: getField(category as unknown as Record<string, unknown>, "review") ?? "",
+    aggregateRating: getField(category as unknown as Record<string, unknown>, "aggregateRating") ?? "",
+    zone1: getField(category as unknown as Record<string, unknown>, "zone1") ?? "",
+    zone2: getField(category as unknown as Record<string, unknown>, "zone2") ?? "",
+    zone3: getField(category as unknown as Record<string, unknown>, "zone3") ?? "",
+  } as Category;
 
-  const [form, setForm] = useState<Category>({ ...initialForm });
+  const [form, setForm] = useState({ ...initialForm });
   const [image, setImage] = useState<File | null>(null);
   const [imageListeProduits, setImageListeProduits] = useState<File | null>(null);
   const [showDelete, setShowDelete] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const fileInputListeProduitsRef = useRef<HTMLInputElement>(null);
 
-  const handleChange = (key: FieldType, value: any) => {
+  const handleChange = (key: FieldType, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -122,7 +122,7 @@ export default function CategoryEditForm({ category }: { category: Category }) {
     }
   };
 
-  let mainImage = image
+  const mainImage = image
     ? URL.createObjectURL(image)
     : // Priority 1: New uploaded images (start with /categories/)
       form.cover && form.cover.startsWith('/categories/')
@@ -136,10 +136,10 @@ export default function CategoryEditForm({ category }: { category: Category }) {
       // Fallback: Placeholder
       : "/images/placeholder.png";
 
-  let mainImageListeProduits = imageListeProduits
+  const mainImageListeProduits = imageListeProduits
     ? URL.createObjectURL(imageListeProduits)
-    : form.cover_liste_produits
-    ? `/images/categories/${form.cover_liste_produits.split('/').pop()}`
+    : (form as Record<string, unknown>).cover_liste_produits
+    ? `/images/categories/${String((form as Record<string, unknown>).cover_liste_produits).split('/').pop()}`
     : "/images/placeholder.png";
 
   const renderField = (field: typeof FIELD_ORDER[number]) => {
@@ -157,8 +157,8 @@ export default function CategoryEditForm({ category }: { category: Category }) {
               className="border rounded object-contain"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                if (form.cover_liste_produits) {
-                  target.src = `/images/categories/${form.cover_liste_produits.split('/').pop()}`;
+                if ((form as Record<string, unknown>).cover_liste_produits) {
+                  target.src = `/images/categories/${String((form as Record<string, unknown>).cover_liste_produits).split('/').pop()}`;
                 } else {
                   target.src = "/images/placeholder.png";
                 }
@@ -212,7 +212,7 @@ export default function CategoryEditForm({ category }: { category: Category }) {
           <textarea
             rows={rows || 2}
             className="w-full border p-4 rounded text-base"
-            value={form[key as keyof Category] ?? ""}
+            value={String((form as Record<string, unknown>)[key] ?? "")}
             onChange={(e) => handleChange(key as FieldType, e.target.value)}
           />
         </div>
@@ -223,7 +223,7 @@ export default function CategoryEditForm({ category }: { category: Category }) {
         <div key={key} className="mb-6">
           <label className="block text-xl font-semibold mb-2">{label}</label>
           <Editor
-            value={form[key as keyof Category] ?? ""}
+            value={String((form as Record<string, unknown>)[key] ?? "")}
             onChange={(value: string) => handleChange(key as FieldType, value)}
             label={label}
           />
@@ -236,7 +236,7 @@ export default function CategoryEditForm({ category }: { category: Category }) {
         <input
           type="text"
           className="w-full border p-4 rounded text-base"
-          value={form[key as keyof Category] ?? ""}
+          value={String((form as Record<string, unknown>)[key] ?? "")}
           onChange={(e) => handleChange(key as FieldType, e.target.value)}
         />
       </div>
@@ -245,15 +245,15 @@ export default function CategoryEditForm({ category }: { category: Category }) {
 
   // Subcategories edit (simple text list for now)
   const renderSubCategories = () => {
-    const subCategories = getField(form, "subCategories", "subcategories");
+    const subCategories = getField(form as Record<string, unknown>, "subCategories", "subcategories");
     return (
       <div className="mb-6">
         <label className="block text-xl font-semibold mb-2">Sous-catégories</label>
         {Array.isArray(subCategories) && subCategories.length > 0 ? (
           <ul className="list-disc ml-6">
-            {subCategories.map((sub: any, idx: number) => (
-              <li key={sub._id || sub.slug || idx}>
-                {getField(sub, "designation_fr", "designation", "name") || sub.slug || sub._id}
+            {subCategories.map((sub: Record<string, unknown>, idx: number) => (
+              <li key={String(sub._id || sub.slug || idx)}>
+                {String(getField(sub, "designation_fr", "designation", "name") || sub.slug || sub._id)}
               </li>
             ))}
           </ul>
@@ -286,7 +286,7 @@ export default function CategoryEditForm({ category }: { category: Category }) {
         open={showDelete}
         onClose={() => setShowDelete(false)}
         onConfirm={handleDelete}
-        productName={form.designation || form.designation_fr || form.title}
+        productName={String((form as Record<string, unknown>).designation || (form as Record<string, unknown>).designation_fr || (form as Record<string, unknown>).title || 'Category')}
       />
       <form onSubmit={handleSubmit}>
         <h1 className="text-3xl font-bold text-gray-800 mb-8">Modifier la catégorie</h1>

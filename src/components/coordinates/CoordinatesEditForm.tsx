@@ -112,8 +112,8 @@ export default function CoordinatesEditForm({ id }: { id: string }) {
       // You may need to handle file upload separately if backend expects multipart/form-data
       await updateCoordinate(id, form);
       router.push("/admin/coordinates");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la modification de la coordonnée");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Erreur lors de la modification de la coordonnée");
     } finally {
       setLoading(false);
     }

@@ -3,7 +3,7 @@ const API_URL =
     ? `${process.env.NEXT_PUBLIC_API_URL}/commande`
     : "http://localhost:5000/commande";
 
-export async function fetchOrders(p0: { type: string; }) {
+export async function fetchOrders() {
   const res = await fetch(`${API_URL}`);
   if (!res.ok) throw new Error("Failed to fetch orders");
   return res.json();
@@ -15,7 +15,7 @@ export async function fetchOrderById(id: string) {
   return res.json();
 }
 
-export async function createOrder(order: any) {
+export async function createOrder(order: { customerName: string; items: Array<{ name: string; quantity: number; price: number }>; total: number }) {
   const res = await fetch(`${API_URL}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -25,7 +25,7 @@ export async function createOrder(order: any) {
   return res.json();
 }
 
-export async function updateOrder(id: string, order: any) {
+export async function updateOrder(id: string, order: { customerName?: string; items?: Array<{ name: string; quantity: number; price: number }>; total?: number }) {
   const res = await fetch(`${API_URL}/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },

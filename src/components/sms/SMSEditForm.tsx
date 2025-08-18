@@ -41,8 +41,8 @@ export default function SMSEditForm() {
         msg_passez_commande: form.msg_passez_commande,
       });
       router.push("/admin/sms");
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Erreur lors de la modification du message.");
+    } catch (err: unknown) {
+      setError((err as Error)?.message || "Erreur lors de la modification du message.");
     } finally {
       setSaving(false);
     }

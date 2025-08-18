@@ -14,13 +14,13 @@ export const fetchServiceById = async (id: string): Promise<ServiceItem> => {
   return data;
 };
 
-export const createService = async (service: any): Promise<ServiceItem> => {
+export const createService = async (service: Partial<ServiceItem>): Promise<ServiceItem> => {
   // Handle file uploads first
-  const formData: any = { ...service };
+  const formData: Record<string, unknown> = { ...service };
   
   // Upload files if they exist
   for (const [key, value] of Object.entries(service)) {
-    if (value && typeof value === 'object' && value.constructor === File) {
+    if (value && typeof value === 'object' && 'name' in value && 'size' in value) {
       try {
         const uploadFormData = new FormData();
         uploadFormData.append('file', value as File);
@@ -36,19 +36,19 @@ export const createService = async (service: any): Promise<ServiceItem> => {
   }
   
   const cleanData = Object.fromEntries(
-    Object.entries(formData).filter(([_, value]) => value !== undefined && value !== '' && !(value && typeof value === 'object' && value.constructor === File))
+    Object.entries(formData).filter(([, value]) => value !== undefined && value !== '' && !(value && typeof value === 'object' && 'name' in value && 'size' in value))
   );
   const { data } = await axiosInstance.post<ServiceItem>(RESOURCE, cleanData);
   return data;
 };
 
-export const updateService = async (id: string, service: any): Promise<ServiceItem> => {
+export const updateService = async (id: string, service: Partial<ServiceItem>): Promise<ServiceItem> => {
   const formData = new FormData();
   
   // Add all fields to FormData
   for (const [key, value] of Object.entries(service)) {
     if (key !== '_id' && key !== '__v' && key !== 'createdAt' && key !== 'updatedAt') {
-      if (value && typeof value === 'object' && value.constructor === File) {
+      if (value && typeof value === 'object' && 'name' in value && 'size' in value) {
         formData.append(key, value as File);
       } else if (value !== undefined && value !== '') {
         formData.append(key, String(value));

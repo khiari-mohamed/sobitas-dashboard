@@ -12,8 +12,9 @@ async function getSubcategory(id: string) {
   }
 }
 
-export default async function SubcategoryViewPage({ params }: { params: { id: string } }) {
-  const subcategory = await getSubcategory(params.id);
+export default async function SubcategoryViewPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const subcategory = await getSubcategory(id);
   if (!subcategory) return notFound();
-  return <SubcategoryViewClient subcategory={subcategory} id={params.id} />;
+  return <SubcategoryViewClient subcategory={subcategory} id={id} />;
 }

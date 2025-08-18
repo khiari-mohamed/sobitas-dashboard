@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { fetchSlideById, updateSlide } from "@/services/slides";
 import { Slide } from "@/types/slides";
 
-const initialState: Partial<Slide> = {
+interface SlideFormState extends Omit<Slide, 'cover'> {
+  cover: string | File;
+}
+
+const initialState: Partial<SlideFormState> = {
   id: "",
   cover: "",
   designation_fr: "",
@@ -22,7 +26,7 @@ const initialState: Partial<Slide> = {
 
 export default function SlidesEditForm({ id }: { id: string }) {
   const router = useRouter();
-  const [form, setForm] = useState<any>(initialState);
+  const [form, setForm] = useState<Partial<SlideFormState>>(initialState);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -57,10 +61,10 @@ export default function SlidesEditForm({ id }: { id: string }) {
     }
   };
 
-  const getFileName = (fileOrString: any) => {
+  const getFileName = (fileOrString: unknown) => {
     if (!fileOrString) return "";
     if (typeof fileOrString === "string") return fileOrString.split("/").pop();
-    if (fileOrString.name) return fileOrString.name;
+    if ((fileOrString as File).name) return (fileOrString as File).name;
     return "";
   };
 
@@ -69,11 +73,14 @@ export default function SlidesEditForm({ id }: { id: string }) {
     setLoading(true);
     setError(null);
     try {
-      // You may need to handle file upload as multipart/form-data if backend expects it
-      await updateSlide(id, form);
+      const slideData: Partial<Slide> = {
+        ...form,
+        cover: typeof form.cover === 'string' ? form.cover : undefined
+      };
+      await updateSlide(id, slideData);
       router.push("/admin/slides");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la modification du slide");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Erreur lors de la modification du slide");
     } finally {
       setLoading(false);
     }

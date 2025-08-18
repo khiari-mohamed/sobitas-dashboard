@@ -77,11 +77,11 @@ export default function MusculationProductControlClient() {
     }
   }, [products, maxDisplay]);
 
-  const updateConfig = (field: string, value: any) => {
-    if (field === 'sectionTitle') setSectionTitle(value);
-    if (field === 'sectionDescription') setSectionDescription(value);
-    if (field === 'maxDisplay') setMaxDisplay(value);
-    if (field === 'showOnFrontend') setShowOnFrontend(value);
+  const updateConfig = (field: string, value: string | number | boolean) => {
+    if (field === 'sectionTitle') setSectionTitle(String(value));
+    if (field === 'sectionDescription') setSectionDescription(String(value));
+    if (field === 'maxDisplay') setMaxDisplay(Number(value));
+    if (field === 'showOnFrontend') setShowOnFrontend(Boolean(value));
     setHasChanges(true);
   };
 

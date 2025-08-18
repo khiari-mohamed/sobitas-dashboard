@@ -1,5 +1,4 @@
 import ContactViewClient from '@/components/contacts/ContactViewClient';
-import { useParams } from 'next/navigation';
 
 export default function ContactViewPage() {
   // The actual id will be passed as a prop in the client component

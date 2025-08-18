@@ -1,5 +1,6 @@
 import SlidesEditForm from "@/components/slides/SlidesEditForm";
 
-export default function SlidesEditPage({ params }: { params: { id: string } }) {
-  return <SlidesEditForm id={params.id} />;
+export default async function SlidesEditPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <SlidesEditForm id={id} />;
 }

@@ -12,9 +12,9 @@ async function getCategory(id: string) {
   }
 }
 
-export default async function CategoryEditPage(props: { params: { id: string } }) {
-  const { params } = await props;
-  const category = await getCategory(params.id);
+export default async function CategoryEditPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const category = await getCategory(id);
   if (!category) return notFound();
   return <CategoryEditForm category={category} />;
 }

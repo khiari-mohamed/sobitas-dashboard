@@ -5,8 +5,11 @@ import { useRouter } from "next/navigation";
 import { createSlide } from "@/services/slides";
 import { Slide } from "@/types/slides";
 
-// Only allow string for cover in form state (file upload must be handled separately)
-const initialState: Partial<Slide> = {
+interface SlideFormState extends Omit<Slide, 'cover'> {
+  cover: string | File;
+}
+
+const initialState: Partial<SlideFormState> = {
   id: "",
   cover: "",
   designation_fr: "",
@@ -23,7 +26,7 @@ const initialState: Partial<Slide> = {
 
 export default function SlidesCreateClient() {
   const router = useRouter();
-  const [form, setForm] = useState<any>(initialState);
+  const [form, setForm] = useState<Partial<SlideFormState>>(initialState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -53,8 +56,8 @@ export default function SlidesCreateClient() {
       // You may need to handle file upload as multipart/form-data if backend expects it
       await createSlide(form as Slide);
       router.push("/admin/slides");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la création du slide");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Erreur lors de la création du slide");
     } finally {
       setLoading(false);
     }

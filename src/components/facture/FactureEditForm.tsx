@@ -34,7 +34,7 @@ export default function FactureEditForm({ id }: { id: string }) {
     try {
       await factureService.updateFacture(id, form);
       router.push(`/admin/facture/${id}/view`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError("Erreur lors de la mise à jour de la facture.");
     } finally {
       setLoading(false);

@@ -35,8 +35,8 @@ export default function PaymentsEditForm({ id }: { id: string }) {
     try {
       await createPayment(form as Payment);
       router.push("/admin/payments");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la création du paiement");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur lors de la création du paiement");
     } finally {
       setLoading(false);
     }

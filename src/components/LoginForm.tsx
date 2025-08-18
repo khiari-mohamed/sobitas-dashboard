@@ -37,8 +37,8 @@ export default function LoginForm() {
         localStorage.setItem('admin_role', response.data.adminRole);
         router.push('/');
       }
-    } catch (error: any) {
-      setError(error.response?.data?.message || 'Login failed');
+    } catch (error) {
+      setError((error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -85,8 +85,8 @@ export default function LoginForm() {
         localStorage.setItem('admin_role', response.data.adminRole);
         router.push('/');
       }
-    } catch (error: any) {
-      setError(error.response?.data?.message || 'Registration failed');
+    } catch (error) {
+      setError((error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -106,7 +106,7 @@ export default function LoginForm() {
           <img src="/favicon.ico" alt="SOBITAS Logo" className="w-12 h-12 rounded-full" />
           <div>
             <h2 className="text-white font-bold text-xl">SOBITAS</h2>
-            <p className="text-white text-sm opacity-90">Bienvenue dans l'espace administration</p>
+            <p className="text-white text-sm opacity-90">Bienvenue dans l&apos;espace administration</p>
           </div>
         </div>
       </div>
@@ -250,7 +250,7 @@ export default function LoginForm() {
                 disabled={loading}
                 className="w-full bg-sky-500 hover:bg-sky-600 text-white font-medium py-3 px-4 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'CRÉATION...' : 'S\'INSCRIRE'}
+                {loading ? 'CRÉATION...' : 'S&apos;INSCRIRE'}
               </button>
             </form>
           )}
@@ -262,7 +262,7 @@ export default function LoginForm() {
               onClick={() => setIsSignup(!isSignup)}
               className="text-sky-500 hover:text-sky-600 text-sm font-medium"
             >
-              {isSignup ? 'Vous avez déjà un compte? Se connecter' : "Vous n'avez pas de compte admin? S'inscrire"}
+              {isSignup ? 'Vous avez déjà un compte? Se connecter' : "Vous n&apos;avez pas de compte admin? S&apos;inscrire"}
             </button>
           </div>
         </div>

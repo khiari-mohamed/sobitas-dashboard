@@ -24,9 +24,9 @@ export default function ClientsEditForm({ id }: { id: string }) {
     const { name, value, type } = e.target;
     if (type === "checkbox") {
       const checked = (e.target as HTMLInputElement).checked;
-      setForm((prev: any) => ({ ...prev, [name]: checked }));
+      setForm((prev) => prev ? { ...prev, [name]: checked } : null);
     } else {
-      setForm((prev: any) => ({ ...prev, [name]: value }));
+      setForm((prev) => prev ? { ...prev, [name]: value } : null);
     }
   };
 

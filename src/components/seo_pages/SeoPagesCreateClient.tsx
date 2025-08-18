@@ -38,8 +38,8 @@ export default function SeoPagesCreateClient() {
     try {
       await createSeoPage(form as SeoPage);
       router.push("/admin/seo_pages");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la création de la page SEO");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur lors de la création de la page SEO");
     } finally {
       setLoading(false);
     }

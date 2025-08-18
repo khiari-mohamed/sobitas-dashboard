@@ -24,7 +24,7 @@ export interface OrderConfirmationPayload {
   unsubscribeLink?: string;
   subject?: string;
   html?: string;
-  attachments?: any[];
+  attachments?: Array<{ filename: string; content: string; contentType: string }>;
 }
 
 export interface WeeklyPromotionPayload {
@@ -41,7 +41,7 @@ export interface WeeklyPromotionPayload {
     promoPrice: number;
     discountPercentage: number;
   }[];
-  attachments?: any[];
+  attachments?: Array<{ filename: string; content: string; contentType: string }>;
 }
 
 export interface OrderShippedPayload {
@@ -62,7 +62,7 @@ export interface OrderShippedPayload {
   total: string;
   billingLocalite?: string;
   unsubscribeLink?: string;
-  attachments?: any[];
+  attachments?: Array<{ filename: string; content: string; contentType: string }>;
 }
 
 

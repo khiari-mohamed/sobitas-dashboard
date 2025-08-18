@@ -17,14 +17,15 @@ function Divider() {
 }
 
 export default function BlogViewClient({ id }: { id: string }) {
-  const [blog, setBlog] = useState<any>(null);
+  const [blog, setBlog] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDelete, setShowDelete] = useState(false);
 
   useEffect(() => {
     setLoading(true);
     getBlogs().then((blogs) => {
-      setBlog(blogs.find((b) => b._id === id));
+      const foundBlog = blogs.find((b) => b._id === id);
+      setBlog(foundBlog ? foundBlog as unknown as Record<string, unknown> : null);
       setLoading(false);
     });
   }, [id]);
@@ -48,8 +49,8 @@ export default function BlogViewClient({ id }: { id: string }) {
     typeof blog.cover === "string" && blog.cover.startsWith('/blogs/')
       ? blog.cover
     // Priority 2: Object format with URL
-    : typeof blog.cover === "object" && blog.cover?.url
-      ? blog.cover.url.startsWith("http") ? blog.cover.url : blog.cover.url
+    : typeof blog.cover === "object" && blog.cover && (blog.cover as Record<string, unknown>).url
+      ? String((blog.cover as Record<string, unknown>).url).startsWith("http") ? String((blog.cover as Record<string, unknown>).url) : String((blog.cover as Record<string, unknown>).url)
     // Priority 3: Old uploads format (articles/February2025/file.webp)
     : typeof blog.cover === "string" && blog.cover !== ""
       ? blog.cover.startsWith('/') ? blog.cover : `/uploads/${blog.cover}`
@@ -84,11 +85,11 @@ export default function BlogViewClient({ id }: { id: string }) {
         open={showDelete}
         onClose={() => setShowDelete(false)}
         onConfirm={handleDelete}
-        productName={blog.title || blog.designation_fr}
+        productName={String(blog.title || blog.designation_fr || 'Blog')}
       />
       {/* Désignation */}
       <h2 className="text-3xl font-extrabold text-gray-800 mb-3">Désignation</h2>
-      <div className="text-2xl text-gray-900 mb-6 font-semibold">{blog.designation_fr || blog.title || "—"}</div>
+      <div className="text-2xl text-gray-900 mb-6 font-semibold">{String(blog.designation_fr || blog.title || "—")}</div>
       <Divider />
       {/* Couverture */}
       <h3 className="text-2xl font-bold text-gray-700 mb-3">Couverture</h3>
@@ -96,7 +97,7 @@ export default function BlogViewClient({ id }: { id: string }) {
         <div className="flex items-center justify-center" style={{ width: 660, height: 660 }}>
           <Image
             src={coverUrl}
-            alt={blog.title || blog.designation_fr || "Blog image"}
+            alt={String(blog.title || blog.designation_fr || "Blog image")}
             width={660}
             height={660}
             className="object-contain border w-full h-full"
@@ -108,7 +109,7 @@ export default function BlogViewClient({ id }: { id: string }) {
       {/* Description */}
       <h3 className="text-2xl font-bold text-gray-700 mb-3">Description</h3>
       <div className="mb-6 text-lg leading-relaxed bg-gray-50 border p-4">
-        {renderHTML(blog.description)}
+        {renderHTML(String(blog.description || ''))}
       </div>
       <Divider />
       {/* Publier */}
@@ -123,42 +124,42 @@ export default function BlogViewClient({ id }: { id: string }) {
       <Divider />
       {/* Slug */}
       <h3 className="text-2xl font-bold text-gray-700 mb-3">Slug</h3>
-      <div className="mb-6 text-lg">{blog.slug ?? "—"}</div>
+      <div className="mb-6 text-lg">{String(blog.slug ?? "—")}</div>
       <Divider />
       {/* Alt Cover (SEO) */}
       <h3 className="text-2xl font-bold text-gray-700 mb-3">Alt Cover (SEO)</h3>
-      <div className="mb-6 text-lg">{blog.alt_cover ?? "—"}</div>
+      <div className="mb-6 text-lg">{String(blog.alt_cover ?? "—")}</div>
       <Divider />
       {/* Description Cover (SEO) */}
       <h3 className="text-2xl font-bold text-gray-700 mb-3">Description Cover (SEO)</h3>
-      <div className="mb-6 text-lg">{blog.description_cover ?? "—"}</div>
+      <div className="mb-6 text-lg">{String(blog.description_cover ?? "—")}</div>
       <Divider />
       {/* Meta */}
       <h3 className="text-2xl font-bold text-gray-700 mb-3">Meta ( name;content/name;content/name;content......)</h3>
       <div className="mb-6 text-lg leading-relaxed bg-gray-50 border p-4">
-        {renderHTML(blog.meta)}
+        {renderHTML(String(blog.meta || ''))}
       </div>
       <Divider />
       {/* Schema description (seo) */}
       <h3 className="text-2xl font-bold text-gray-700 mb-3">Schema description (seo)</h3>
       <div className="mb-6 text-lg leading-relaxed bg-gray-50 border p-4">
-        {renderHTML(blog.content_seo)}
+        {renderHTML(String(blog.content_seo || ''))}
       </div>
       <Divider />
       {/* Review (seo) */}
       <h3 className="text-2xl font-bold text-gray-700 mb-3">Review (seo)</h3>
-      <div className="mb-6 text-lg">{blog.review ?? "—"}</div>
+      <div className="mb-6 text-lg">{String(blog.review ?? "—")}</div>
       <Divider />
       {/* AggregateRating (seo) */}
       <h3 className="text-2xl font-bold text-gray-700 mb-3">AggregateRating (seo)</h3>
-      <div className="mb-6 text-lg">{blog.aggregateRating ?? "—"}</div>
+      <div className="mb-6 text-lg">{String(blog.aggregateRating ?? "—")}</div>
       <Divider />
       {/* Dates */}
       <h3 className="text-2xl font-bold text-gray-700 mb-3">Créé le</h3>
-      <div className="mb-6 text-lg">{blog.createdAt || blog.created_at || "—"}</div>
+      <div className="mb-6 text-lg">{String(blog.createdAt || blog.created_at || "—")}</div>
       <Divider />
       <h3 className="text-2xl font-bold text-gray-700 mb-3">Modifié le</h3>
-      <div className="mb-6 text-lg">{blog.updatedAt || blog.updated_at || "—"}</div>
+      <div className="mb-6 text-lg">{String(blog.updatedAt || blog.updated_at || "—")}</div>
     </div>
   );
 }

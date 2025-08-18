@@ -45,8 +45,8 @@ export default function PacksEditForm({ id }: { id: string }) {
     try {
       await updatePack(id, form, selectedFile || undefined);
       router.push("/admin/packs");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la mise à jour du pack");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Erreur lors de la mise à jour du pack");
     } finally {
       setLoading(false);
     }
@@ -125,7 +125,7 @@ export default function PacksEditForm({ id }: { id: string }) {
               className="w-full border p-2 text-base"
             />
             <p className="text-sm text-gray-500">
-              Vous pouvez soit saisir un chemin d'image, soit télécharger un fichier
+              Vous pouvez soit saisir un chemin d&apos;image, soit télécharger un fichier
             </p>
           </div>
         </div>

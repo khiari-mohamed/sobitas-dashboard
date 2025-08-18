@@ -14,7 +14,7 @@ export default function BestSellerControlClient() {
   const [updating, setUpdating] = useState<string | null>(null);
   const [editingProduct, setEditingProduct] = useState<BestSeller | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [saving, setSaving] = useState(false);
+  // const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
@@ -298,7 +298,7 @@ export default function BestSellerControlClient() {
             displayedProducts.length >= 4 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' :
             'grid-cols-1'
           }`}>
-            {displayedProducts.map((product, idx) => {
+            {displayedProducts.map((product) => {
               const prixNum = Number(product.prix) || 0;
               const promoNum = Number(product.promo) || 0;
               const hasPromo = !!promoNum && promoNum < prixNum;

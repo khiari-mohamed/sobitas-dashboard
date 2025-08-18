@@ -45,7 +45,7 @@ export interface Facture {
   numero: string;
   historique?: string;
   paymentMethod?: string;
-  cart?: any; // Adjust type if you have a CartItem type
+  cart?: Array<{ id: string; quantity: number; price: number; name: string }>; // CartItem array
   type: string;
   billing_localite?: string;
   gouvernorat?: string;

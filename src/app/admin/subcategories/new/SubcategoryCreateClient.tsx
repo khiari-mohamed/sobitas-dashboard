@@ -1,13 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
+
 import { useRouter } from "next/navigation";
 import { createSubCategory } from "@/services/subcategories";
 import { getCategories } from "@/services/categories";
-import { SubCategory } from "@/types/subcategory";
+// import { SubCategory } from "@/types/subcategory";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 
-const emptySubcategory: Partial<SubCategory> = {
+const emptySubcategory = {
   category: "",
   designation: "",
   designation_fr: "",
@@ -31,7 +31,7 @@ const emptySubcategory: Partial<SubCategory> = {
 export default function SubcategoryCreateClient() {
   const router = useRouter();
   const [form, setForm] = useState(emptySubcategory);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Array<{ _id: string; designation_fr?: string; designation?: string; name?: string }>>([]);
   const [loading, setLoading] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,7 +43,7 @@ export default function SubcategoryCreateClient() {
     getCategories().then(setCategories);
   }, []);
 
-  const handleChange = (key: string, value: any) => {
+  const handleChange = (key: string, value: string | File | null) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -51,10 +51,10 @@ export default function SubcategoryCreateClient() {
     e.preventDefault();
     setLoading(true);
     try {
-      const categoryId = typeof form.category === "string" ? form.category : (form.category as any)?._id || "";
+      const categoryId = typeof form.category === "string" ? form.category : "";
       
       // Always use JSON - no FormData issues
-      const { cover, ...jsonData } = {
+      const jsonData = {
         name: form.designation_fr || form.designation || "Untitled",
         categoryId: categoryId || null,
         designation: form.designation || "",
@@ -92,7 +92,7 @@ export default function SubcategoryCreateClient() {
           <label className="block text-xl font-semibold mb-2">Catégorie</label>
           <select
             className="w-full border p-4 rounded text-base"
-            value={typeof form.category === "string" ? form.category : (form.category as any)?._id || ""}
+            value={typeof form.category === "string" ? form.category : ""}
             onChange={e => handleChange("category", e.target.value)}
           >
             <option value="">Sélectionner une catégorie...</option>
@@ -109,7 +109,7 @@ export default function SubcategoryCreateClient() {
             onChange={handleFileChange}
             className="w-full border p-2 rounded text-base"
           />
-          {form.cover && form.cover instanceof File && (
+          {form.cover && (
             <div className="mt-2">
               <img
                 src={URL.createObjectURL(form.cover)}

@@ -34,7 +34,7 @@ export default function CommandeEditForm({ id }: { id: string }) {
     try {
       await commandeService.updateCommande(id, form);
       router.push(`/admin/commande/${id}/view`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError("Erreur lors de la mise à jour de la commande.");
     } finally {
       setLoading(false);

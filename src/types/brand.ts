@@ -1,7 +1,7 @@
 
 import { Aroma } from './aroma';
 export interface Brand {
-  slug: any;
+  slug: string;
   _id: string; // MongoDB ObjectId as string
   id: string; // Custom string ID
   designation_fr: string;

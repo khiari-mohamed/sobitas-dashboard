@@ -22,5 +22,4 @@ export interface Blog {
   createdAt?: string;
   updatedAt?: string;
   status?: string;
-  [key: string]: any;
 }

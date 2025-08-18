@@ -29,8 +29,8 @@ export default function SMSCreateClient() {
     try {
       await systemMessagesService.createSystemMessage(form);
       router.push("/admin/sms");
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Erreur lors de la création du message.");
+    } catch (err: unknown) {
+      setError((err as Error)?.message || "Erreur lors de la création du message.");
     } finally {
       setLoading(false);
     }

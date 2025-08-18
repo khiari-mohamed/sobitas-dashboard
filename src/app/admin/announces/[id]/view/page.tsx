@@ -1,5 +1,6 @@
 import AnnouncesViewClient from "@/components/announces/AnnouncesViewClient";
 
-export default function AnnouncesViewPage({ params }: { params: { id: string } }) {
-  return <AnnouncesViewClient id={params.id} />;
+export default async function AnnouncesViewPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <AnnouncesViewClient id={id} />;
 }

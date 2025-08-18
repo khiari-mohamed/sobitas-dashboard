@@ -9,21 +9,21 @@ export const fetchAllCategoriesForControl = async (): Promise<Category[]> => {
     
     // Handle different response structures
     if (Array.isArray(res.data)) {
-      return res.data.map((cat: any) => ({
+      return res.data.map((cat: Category) => ({
         ...cat,
         designation_fr: cat.designation_fr || cat.designation,
         title: cat.title || cat.designation_fr || cat.designation,
       })) as Category[];
     }
     if (res.data?.data && Array.isArray(res.data.data)) {
-      return res.data.data.map((cat: any) => ({
+      return res.data.data.map((cat: Category) => ({
         ...cat,
         designation_fr: cat.designation_fr || cat.designation,
         title: cat.title || cat.designation_fr || cat.designation,
       })) as Category[];
     }
     if (res.data?.categories && Array.isArray(res.data.categories)) {
-      return res.data.categories.map((cat: any) => ({
+      return res.data.categories.map((cat: Category) => ({
         ...cat,
         designation_fr: cat.designation_fr || cat.designation,
         title: cat.title || cat.designation_fr || cat.designation,

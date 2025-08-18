@@ -224,12 +224,12 @@ export default function ProductTable() {
                 </td>
                 <td className="px-4 py-2">
                   {Array.isArray(product.subCategory) && product.subCategory.length > 0
-                    ? product.subCategory.map((sc: any) => {
+                    ? product.subCategory.map((sc: string | { _id: string; designation: string; }) => {
                         if (typeof sc === 'string') {
                           const found = subcategories.find(sub => sub._id === sc || sub.id === sc);
                           return found ? (found.designation_fr || found.designation || found.name || found.slug) : sc;
                         }
-                        return sc?.designation_fr || sc?.designation || sc?.name || sc?.title || sc?.slug || '';
+                        return (sc as { designation_fr?: string; designation?: string; name?: string; title?: string; slug?: string })?.designation_fr || (sc as { designation_fr?: string; designation?: string; name?: string; title?: string; slug?: string })?.designation || (sc as { designation_fr?: string; designation?: string; name?: string; title?: string; slug?: string })?.name || (sc as { designation_fr?: string; designation?: string; name?: string; title?: string; slug?: string })?.title || (sc as { designation_fr?: string; designation?: string; name?: string; title?: string; slug?: string })?.slug || '';
                       }).join(', ')
                     : typeof product.subCategory === 'string' && product.subCategory
                     ? (() => {

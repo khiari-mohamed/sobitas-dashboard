@@ -3,11 +3,8 @@
 import React, { useRef } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FaEye, FaTrash, FaArrowLeft, FaMagic } from "react-icons/fa";
-import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
-import { getAutofillTemplate } from "@/utils/productAutofillTemplates";
+import { FaArrowLeft } from "react-icons/fa";
 import axios from "@/lib/axios";
 
 // Dynamically load TinyMCE editor (client only)
@@ -62,40 +59,33 @@ const FIELD_ORDER = [
 ];
 
 interface ProductEditFormProps {
-  product: any;
-  setProduct?: (p: any) => void;
+  product: Record<string, unknown>;
+  setProduct?: (p: Record<string, unknown>) => void;
   topExtraButton?: React.ReactNode;
 }
 
-export default function ProductEditForm({ product, setProduct }: ProductEditFormProps) {
+export default function ProductEditForm({ product }: ProductEditFormProps) {
   const router = useRouter();
   const [form, setForm] = React.useState(product);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
-  const [showDelete, setShowDelete] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
-  const handleDelete = () => {
-    setShowDelete(false);
-    // TODO: Replace with real delete logic
-    alert("Produit supprimé (placeholder)");
-  };
-
-  const handleChange = (key: string, value: any) => {
-    setForm((prev: any) => ({ ...prev, [key]: value }));
+  const handleChange = (key: string, value: unknown) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
   };
 
   // (Autofill logic removed; only present in create page)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setForm((prev: any) => ({ ...prev, newCover: e.target.files![0] }));
+      setForm((prev) => ({ ...prev, newCover: e.target.files![0] }));
     }
   };
 
   const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setForm((prev: any) => ({
+      setForm((prev) => ({
         ...prev,
         newGallery: Array.from(e.target.files!),
       }));
@@ -107,22 +97,22 @@ export default function ProductEditForm({ product, setProduct }: ProductEditForm
     setLoading(true);
     
     try {
-      const hasFiles = form.newCover || (form.newGallery && form.newGallery.length > 0);
+      const hasFiles = form.newCover || (Array.isArray(form.newGallery) && form.newGallery.length > 0);
       
       if (hasFiles) {
         // Use FormData for file uploads
         const formData = new FormData();
-        formData.append('designation', form.designation_fr || '');
-        formData.append('description', form.description_fr || '');
+        formData.append('designation', String(form.designation_fr || ''));
+        formData.append('description', String(form.description_fr || ''));
         formData.append('price', String(form.prix || 0));
         formData.append('oldPrice', String(form.promo || 0));
         formData.append('inStock', String(form.inStock || true));
         formData.append('status', String(form.publier === '1' || form.publier === true));
-        formData.append('brand', form.brand || '');
-        formData.append('codaBar', form.code_product || '');
-        formData.append('smallDescription', form.meta_description_fr || '');
-        formData.append('question', form.questions || '');
-        formData.append('venteflashDate', form.promo_expiration_date || '');
+        formData.append('brand', String(form.brand || ''));
+        formData.append('codaBar', String(form.code_product || ''));
+        formData.append('smallDescription', String(form.meta_description_fr || ''));
+        formData.append('question', String(form.questions || ''));
+        formData.append('venteflashDate', String(form.promo_expiration_date || ''));
         formData.append('subCategoryIds', JSON.stringify([]));
         formData.append('nutritionalValues', JSON.stringify([]));
         formData.append('variant', JSON.stringify([{title: form.designation_fr || 'Default', inStock: true}]));
@@ -133,8 +123,8 @@ export default function ProductEditForm({ product, setProduct }: ProductEditForm
         if (form.pack === '1' || form.pack === true) features.push('pack');
         formData.append('features', JSON.stringify(features));
         
-        if (form.newCover) formData.append('mainImage', form.newCover);
-        if (form.newGallery && form.newGallery.length > 0) {
+        if (form.newCover) formData.append('mainImage', form.newCover as File);
+        if (Array.isArray(form.newGallery) && form.newGallery.length > 0) {
           form.newGallery.forEach((file: File) => formData.append('images', file));
         }
         
@@ -175,9 +165,9 @@ export default function ProductEditForm({ product, setProduct }: ProductEditForm
           router.push('/produits');
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating product:', error);
-      alert('Erreur lors de la mise à jour: ' + (error.response?.data?.message || error.message));
+      alert('Erreur lors de la mise à jour: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
       setLoading(false);
     }
@@ -185,19 +175,23 @@ export default function ProductEditForm({ product, setProduct }: ProductEditForm
 
   const mainImage =
     form.newCover
-      ? URL.createObjectURL(form.newCover)
-      : form.mainImage?.url || (form.cover ? `/${form.cover.replace(/^\/+/ , "")}` : "/images/placeholder.png");
+      ? URL.createObjectURL(form.newCover as File)
+      : String((form.mainImage as Record<string, unknown>)?.url || (form.cover ? `/${String(form.cover).replace(/^\/+/ , "")}` : "/images/placeholder.png"));
 
-  const renderField = (field: any) => {
-    const { key, label, type, inputType, rows } = field;
+  const renderField = (field: Record<string, unknown>) => {
+    const key = field.key as string;
+    const label = field.label as string;
+    const type = field.type as string;
+    const inputType = field.inputType as string;
+    const rows = field.rows as number;
 
     if (type === "cover") {
       return (
         <div key={key} className="mb-6">
           <label className="block text-xl font-semibold mb-2">{label}</label>
           <Image
-            src={mainImage}
-            alt={form.alt_cover || "Image produit"}
+            src={String(mainImage)}
+            alt={String(form.alt_cover || "Image produit")}
             width={200}
             height={200}
             className="border rounded object-contain"
@@ -235,7 +229,7 @@ export default function ProductEditForm({ product, setProduct }: ProductEditForm
           <textarea
             rows={rows || 4}
             className="w-full border p-4 rounded text-base"
-            value={form[key] ?? ""}
+            value={String(form[key] ?? "")}
             onChange={(e) => handleChange(key, e.target.value)}
           />
         </div>
@@ -246,7 +240,7 @@ export default function ProductEditForm({ product, setProduct }: ProductEditForm
       return (
         <div key={key} className="mb-6">
           <Editor
-            value={form[key] ?? ""}
+            value={String(form[key] ?? "")}
             onChange={(value: string) => handleChange(key, value)}
             label={label}
           />
@@ -274,7 +268,7 @@ export default function ProductEditForm({ product, setProduct }: ProductEditForm
         <input
           type={inputType || "text"}
           className="w-full border p-4 rounded text-base"
-          value={form[key] ?? ""}
+          value={String(form[key] ?? "")}
           onChange={(e) => handleChange(key, e.target.value)}
         />
       </div>

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getAromaById, updateAroma } from "@/services/aroma";
-import { Button } from "@/components/ui/button";
+
 
 export default function AromaEditForm({ id }: { id: string }) {
   const [form, setForm] = useState({ id: "", designation_fr: "" });
@@ -26,7 +26,7 @@ export default function AromaEditForm({ id }: { id: string }) {
       router.push("/admin/aromas");
     } catch (error) {
       console.error('Error updating aroma:', error);
-      alert('Erreur lors de la modification de l\'arôme');
+      alert('Erreur lors de la modification de l&apos;arôme');
     } finally {
       setLoading(false);
     }
@@ -48,7 +48,7 @@ export default function AromaEditForm({ id }: { id: string }) {
         </button>
       </div>
       <form onSubmit={handleSubmit}>
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">Modifier l'arôme</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">Modifier l&apos;arôme</h1>
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">ID</label>
           <input

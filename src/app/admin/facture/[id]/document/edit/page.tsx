@@ -3,12 +3,13 @@ import React, { useEffect, useState, use } from "react";
 import { useSearchParams } from "next/navigation";
 import factureService from "@/services/facture";
 import DocumentEditForm from "@/components/facture/DocumentEditForm";
+import { Facture } from "@/types/facture";
 
 export default function FactureDocumentEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const searchParams = useSearchParams();
   const doc = searchParams?.get("doc") || "bon-commande";
-  const [order, setOrder] = useState<any>(null);
+  const [order, setOrder] = useState<Facture | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,7 +27,7 @@ export default function FactureDocumentEditPage({ params }: { params: Promise<{ 
 
   return (
     <div className="py-8">
-      <DocumentEditForm order={order} doc={doc} />
+      <DocumentEditForm order={order as unknown as Record<string, unknown>} doc={doc} />
     </div>
   );
 }

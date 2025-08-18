@@ -13,13 +13,13 @@ export const fetchCoordinateById = async (id: string): Promise<Coordinates> => {
   return data;
 };
 
-export const createCoordinate = async (coordinate: any): Promise<Coordinates> => {
+export const createCoordinate = async (coordinate: Partial<Coordinates>): Promise<Coordinates> => {
   // Handle file uploads first
-  const formData: any = { ...coordinate };
+  const formData: Record<string, unknown> = { ...coordinate };
   
   // Upload files if they exist
   for (const [key, value] of Object.entries(coordinate)) {
-    if (value && typeof value === 'object' && value.constructor === File) {
+    if (value && typeof value === 'object' && 'name' in value && 'size' in value) {
       try {
         const uploadFormData = new FormData();
         uploadFormData.append('file', value as File);
@@ -35,19 +35,19 @@ export const createCoordinate = async (coordinate: any): Promise<Coordinates> =>
   }
   
   const cleanData = Object.fromEntries(
-    Object.entries(formData).filter(([_, value]) => value !== undefined && value !== '' && !(value && typeof value === 'object' && value.constructor === File))
+    Object.entries(formData).filter(([, value]) => value !== undefined && value !== '' && !(value instanceof File))
   );
   const { data } = await axiosInstance.post<Coordinates>(API_URL, cleanData);
   return data;
 };
 
-export const updateCoordinate = async (id: string, coordinate: any): Promise<Coordinates> => {
+export const updateCoordinate = async (id: string, coordinate: Partial<Coordinates>): Promise<Coordinates> => {
   const formData = new FormData();
   
   // Add all fields to FormData
   for (const [key, value] of Object.entries(coordinate)) {
     if (key !== '_id' && key !== '__v' && key !== 'createdAt' && key !== 'updatedAt') {
-      if (value && typeof value === 'object' && value.constructor === File) {
+      if (value && typeof value === 'object' && 'name' in value && 'size' in value) {
         formData.append(key, value as File);
       } else if (value !== undefined && value !== '') {
         formData.append(key, String(value));

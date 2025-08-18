@@ -1,5 +1,5 @@
 export type Menu = {
-  showBadge: any;
+  showBadge: boolean;
   id: number;
   title: string;
   path?: string;

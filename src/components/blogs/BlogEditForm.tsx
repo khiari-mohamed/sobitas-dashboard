@@ -7,7 +7,7 @@ import { getBlogs, updateBlog } from "@/services/blog.service";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 
 export default function BlogEditForm({ id }: { id: string }) {
-  const [form, setForm] = useState<any>(null);
+  const [form, setForm] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const router = useRouter();
@@ -16,19 +16,19 @@ export default function BlogEditForm({ id }: { id: string }) {
     setInitialLoading(true);
     getBlogs().then((blogs) => {
       const blog = blogs.find((b) => b._id === id);
-      setForm(blog);
+      setForm(blog ? blog as unknown as Record<string, unknown> : null);
       setInitialLoading(false);
     });
   }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm((prev: any) => ({ ...prev, [name]: value }));
+    setForm((prev) => prev ? { ...prev, [name]: value } : null);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setForm((prev: any) => ({ ...prev, cover: file }));
+    setForm((prev) => prev ? { ...prev, cover: file } : null);
   };
 
   // Compute preview URL for cover image (same logic as table)
@@ -39,9 +39,10 @@ export default function BlogEditForm({ id }: { id: string }) {
     } else if (typeof form.cover === "string" && form.cover.startsWith('/blogs/')) {
       // New uploaded images
       coverPreview = form.cover;
-    } else if (typeof form.cover === "object" && form.cover?.url) {
+    } else if (typeof form.cover === "object" && form.cover && 'url' in form.cover) {
       // Object format
-      coverPreview = form.cover.url.startsWith("http") ? form.cover.url : form.cover.url;
+      const coverObj = form.cover as { url: string };
+      coverPreview = coverObj.url.startsWith("http") ? coverObj.url : coverObj.url;
     } else if (typeof form.cover === "string" && form.cover !== "") {
       // Old uploads format
       coverPreview = form.cover.startsWith('/') ? form.cover : `/uploads/${form.cover}`;
@@ -52,7 +53,7 @@ export default function BlogEditForm({ id }: { id: string }) {
     e.preventDefault();
     setLoading(true);
     try {
-      const { cover, ...blogData } = form;
+      const { cover, ...blogData } = form || {};
       const imageFile = cover instanceof File ? cover : null;
       await updateBlog(id, blogData, imageFile);
       router.push("/admin/blogs");
@@ -88,7 +89,7 @@ export default function BlogEditForm({ id }: { id: string }) {
             type="text"
             name="designation_fr"
             className="w-full border p-4 text-base"
-            value={form.designation_fr || ""}
+            value={(form.designation_fr as string) || ""}
             onChange={handleChange}
             required
           />
@@ -117,8 +118,8 @@ export default function BlogEditForm({ id }: { id: string }) {
         {/* Description (Rich Text) */}
         <div className="mb-6">
           <RichTextEditor
-            value={form.description || ""}
-            onChange={val => setForm((prev: any) => ({ ...prev, description: val }))}
+            value={(form.description as string) || ""}
+            onChange={val => setForm((prev) => prev ? { ...prev, description: val } : null)}
             label="Description"
           />
         </div>
@@ -128,7 +129,7 @@ export default function BlogEditForm({ id }: { id: string }) {
           <select
             name="publier"
             className="w-full border p-4 text-base"
-            value={form.publier || "1"}
+            value={(form.publier as string) || "1"}
             onChange={handleChange}
           >
             <option value="1">Oui</option>
@@ -142,7 +143,7 @@ export default function BlogEditForm({ id }: { id: string }) {
             type="text"
             name="slug"
             className="w-full border p-4 text-base"
-            value={form.slug || ""}
+            value={(form.slug as string) || ""}
             onChange={handleChange}
             placeholder="Laissez vide pour génération automatique"
           />
@@ -154,7 +155,7 @@ export default function BlogEditForm({ id }: { id: string }) {
             type="text"
             name="alt_cover"
             className="w-full border p-4 text-base"
-            value={form.alt_cover || ""}
+            value={(form.alt_cover as string) || ""}
             onChange={handleChange}
           />
         </div>
@@ -164,7 +165,7 @@ export default function BlogEditForm({ id }: { id: string }) {
           <textarea
             name="description_cover"
             className="w-full border p-4 text-base"
-            value={form.description_cover || ""}
+            value={(form.description_cover as string) || ""}
             onChange={handleChange}
             rows={2}
           />
@@ -175,7 +176,7 @@ export default function BlogEditForm({ id }: { id: string }) {
           <textarea
             name="meta"
             className="w-full border p-4 text-base"
-            value={form.meta || ""}
+            value={(form.meta as string) || ""}
             onChange={handleChange}
             rows={2}
           />
@@ -183,8 +184,8 @@ export default function BlogEditForm({ id }: { id: string }) {
         {/* Schema description (seo) */}
         <div className="mb-6">
           <RichTextEditor
-            value={form.content_seo || ""}
-            onChange={val => setForm((prev: any) => ({ ...prev, content_seo: val }))}
+            value={(form.content_seo as string) || ""}
+            onChange={val => setForm((prev) => prev ? { ...prev, content_seo: val } : null)}
             label="Schema description (seo)"
           />
         </div>
@@ -195,7 +196,7 @@ export default function BlogEditForm({ id }: { id: string }) {
             type="text"
             name="review"
             className="w-full border p-4 text-base"
-            value={form.review || ""}
+            value={(form.review as string) || ""}
             onChange={handleChange}
           />
         </div>
@@ -206,7 +207,7 @@ export default function BlogEditForm({ id }: { id: string }) {
             type="text"
             name="aggregateRating"
             className="w-full border p-4 text-base"
-            value={form.aggregateRating || ""}
+            value={(form.aggregateRating as string) || ""}
             onChange={handleChange}
           />
         </div>

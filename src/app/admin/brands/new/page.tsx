@@ -3,12 +3,13 @@ import { useRouter } from "next/navigation";
 import { createBrand } from "@/utils/brands";
 import { useState } from "react";
 import BrandCreateEditForm from "@/components/brands/BrandCreateEditForm";
+import { Brand } from "@/types/brand";
 
 export default function BrandCreatePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (brand: any, logoFile?: File | null) => {
+  const handleSubmit = async (brand: Partial<Brand>, logoFile?: File | null) => {
     setLoading(true);
     try {
       await createBrand(brand, logoFile);

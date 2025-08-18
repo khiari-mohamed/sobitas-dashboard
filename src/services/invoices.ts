@@ -12,12 +12,12 @@ export async function fetchInvoiceById(id: string) {
   return res.data;
 }
 
-export async function createInvoice(data: any) {
+export async function createInvoice(data: { customerName: string; amount: number; items: Array<{ name: string; quantity: number; price: number }> }) {
   const res = await axios.post(`${API_BASE}/invoice`, data);
   return res.data;
 }
 
-export async function updateInvoice(id: string, data: any) {
+export async function updateInvoice(id: string, data: { customerName?: string; amount?: number; items?: Array<{ name: string; quantity: number; price: number }> }) {
   const res = await axios.patch(`${API_BASE}/invoice/${id}`, data);
   return res.data;
 }

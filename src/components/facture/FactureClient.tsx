@@ -17,18 +17,18 @@ function numberToFrenchWords(n: number): string {
   return n2words(n, { lang: "fr" });
 }
 
-function getProductArray(order: any): any[] {
+function getProductArray(order: Record<string, unknown>): Record<string, unknown>[] {
   if (!order) return [];
   if (Array.isArray(order.cart) && order.cart.length > 0) return order.cart;
   if (Array.isArray(order.products) && order.products.length > 0) return order.products;
   if (Array.isArray(order.items) && order.items.length > 0) return order.items;
-  if (order.cart && typeof order.cart === "object" && !Array.isArray(order.cart)) return [order.cart];
-  if (order.products && typeof order.products === "object" && !Array.isArray(order.products)) return [order.products];
-  if (order.items && typeof order.items === "object" && !Array.isArray(order.items)) return [order.items];
+  if (order.cart && typeof order.cart === "object" && !Array.isArray(order.cart)) return [order.cart as Record<string, unknown>];
+  if (order.products && typeof order.products === "object" && !Array.isArray(order.products)) return [order.products as Record<string, unknown>];
+  if (order.items && typeof order.items === "object" && !Array.isArray(order.items)) return [order.items as Record<string, unknown>];
   return [];
 }
 
-const FactureClient = ({ order, printRef }: { order: any; printRef?: React.Ref<HTMLDivElement> }) => {
+const FactureClient = ({ order, printRef }: { order: Record<string, unknown>; printRef?: React.Ref<HTMLDivElement> }) => {
   if (!order) return null;
   const cart = getProductArray(order);
   const totalTTC = Number(order.prix_ttc || 0);
@@ -58,7 +58,7 @@ const FactureClient = ({ order, printRef }: { order: any; printRef?: React.Ref<H
     phone: order.phone,
   };
   const dateEmission = order.created_at
-    ? new Date(order.created_at).toLocaleString("fr-FR", {
+    ? new Date(String(order.created_at)).toLocaleString("fr-FR", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
@@ -100,7 +100,7 @@ const FactureClient = ({ order, printRef }: { order: any; printRef?: React.Ref<H
               FACTURE CLIENT
             </span>
             <span className="text-xs text-gray-700 mt-2">Date démission : {dateEmission}</span>
-            <span className="text-xs text-gray-700">N° : <span className="font-semibold">{order.numero}</span></span>
+            <span className="text-xs text-gray-700">N° : <span className="font-semibold">{String(order.numero)}</span></span>
           </div>
         </div>
         <div className="w-full h-0.5 mb-4" style={{ background: ORANGE, borderRadius: 2 }} />
@@ -109,14 +109,14 @@ const FactureClient = ({ order, printRef }: { order: any; printRef?: React.Ref<H
           <div className="flex-1">
             <div className="font-semibold text-sm text-blue-700 mb-1">Facturé à</div>
             <div className="text-xs text-gray-700 leading-tight">
-              <div>{client.prenom} {client.nom}</div>
-              <div>{client.adresse1}</div>
-              {client.adresse2 && <div>{client.adresse2}</div>}
-              <div>{client.ville}{client.code_postale ? `, ${client.code_postale}` : ""}</div>
-              <div>{client.pays}</div>
-              {client.nif && <div>NIF : {client.nif}</div>}
-              <div>Email : {client.email}</div>
-              <div>Tél : {client.phone}</div>
+              <div>{String(client.prenom)} {String(client.nom)}</div>
+              <div>{String(client.adresse1)}</div>
+              {String(client.adresse2 || '').trim() && <div>{String(client.adresse2)}</div>}
+              <div>{String(client.ville)}{client.code_postale ? `, ${String(client.code_postale)}` : ""}</div>
+              <div>{String(client.pays)}</div>
+              {String(client.nif || '').trim() && <div>NIF : {String(client.nif)}</div>}
+              <div>Email : {String(client.email)}</div>
+              <div>Tél : {String(client.phone)}</div>
             </div>
           </div>
         </div>
@@ -134,13 +134,13 @@ const FactureClient = ({ order, printRef }: { order: any; printRef?: React.Ref<H
             </thead>
             <tbody>
               {cart.length > 0 ? (
-                cart.map((item: any, idx: number) => (
+                cart.map((item: Record<string, unknown>, idx: number) => (
                   <tr key={idx} className="border-t hover:bg-orange-50">
-                    <td className="p-1">{item.title || item.name || item.product_name || "Produit"}</td>
-                    <td className="p-1 text-right">{item.quantity ?? item.qty ?? 1}</td>
+                    <td className="p-1">{String(item.title || item.name || item.product_name || "Produit")}</td>
+                    <td className="p-1 text-right">{String(item.quantity ?? item.qty ?? 1)}</td>
                     <td className="p-1 text-right">{Number(item.price ?? item.unit_price ?? 0).toLocaleString("fr-TN", { style: "currency", currency: "TND" })}</td>
                     <td className="p-1 text-right">{item.tva ? Number(item.tva).toLocaleString("fr-TN", { style: "currency", currency: "TND" }) : "0,000 TND"}</td>
-                    <td className="p-1 text-right">{Number((item.price ?? item.unit_price ?? 0) * (item.quantity ?? item.qty ?? 1)).toLocaleString("fr-TN", { style: "currency", currency: "TND" })}</td>
+                    <td className="p-1 text-right">{(Number(item.price ?? item.unit_price ?? 0) * Number(item.quantity ?? item.qty ?? 1)).toLocaleString("fr-TN", { style: "currency", currency: "TND" })}</td>
                   </tr>
                 ))
               ) : (
@@ -180,8 +180,8 @@ const FactureClient = ({ order, printRef }: { order: any; printRef?: React.Ref<H
         </div>
         {/* Legal mentions */}
         <div className="text-[10px] text-gray-700 mt-2">
-          <div>Conditions de paiement : {order.conditions_paiement || "30 jours, virement bancaire"}</div>
-          <div>Pénalités de retard : {order.penalites_retard || "En cas de non-paiement à l'échéance, des pénalités seront appliquées conformément à la législation en vigueur."}</div>
+          <div>Conditions de paiement : {String(order.conditions_paiement || "30 jours, virement bancaire")}</div>
+          <div>Pénalités de retard : {String(order.penalites_retard || "En cas de non-paiement à l'échéance, des pénalités seront appliquées conformément à la législation en vigueur.")}</div>
         </div>
         {/* Footer with RIB and copyright */}
         <div className="flex flex-row justify-between items-end mt-6 border-t pt-3 text-xs">

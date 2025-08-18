@@ -1,5 +1,6 @@
 import ServicesEditForm from "@/components/services/ServicesEditForm";
 
-export default function ServicesEditPage({ params }: { params: { id: string } }) {
-  return <ServicesEditForm id={params.id} />;
+export default async function ServicesEditPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <ServicesEditForm id={id} />;
 }

@@ -28,7 +28,7 @@ export interface Blog {
 }
 
 // Helper to normalize date fields to camelCase
-function normalizeBlog(blog: any): Blog {
+function normalizeBlog(blog: Blog): Blog {
   return {
     ...blog,
     createdAt: blog.createdAt || blog.created_at,
@@ -71,14 +71,14 @@ export const getBlogBySlug = async (slug: string): Promise<Blog | null> => {
   }
 };
 
-export const createBlog = async (blogData: any, imageFile?: File | null) => {
+export const createBlog = async (blogData: Partial<Blog>, imageFile?: File | null) => {
   try {
     // Always use FormData to handle both cases
     const formData = new FormData();
     
     // Add all form fields
     Object.keys(blogData).forEach(key => {
-      const value = blogData[key];
+      const value = blogData[key as keyof Blog];
       if (value !== undefined && value !== null && value !== "") {
         formData.append(key, String(value));
       }
@@ -98,14 +98,14 @@ export const createBlog = async (blogData: any, imageFile?: File | null) => {
   }
 };
 
-export const updateBlog = async (id: string, blogData: any, imageFile?: File | null) => {
+export const updateBlog = async (id: string, blogData: Partial<Blog>, imageFile?: File | null) => {
   try {
     // Always use FormData to handle both cases
     const formData = new FormData();
     
     // Add all form fields
     Object.keys(blogData).forEach(key => {
-      const value = blogData[key];
+      const value = blogData[key as keyof Blog];
       if (value !== undefined && value !== null) {
         formData.append(key, String(value));
       }

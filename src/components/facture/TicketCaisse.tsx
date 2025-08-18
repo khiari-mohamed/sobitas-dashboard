@@ -9,7 +9,7 @@ const COMPANY = {
   website: "WWW.PROTEIN.TN",
 };
 
-function getProductArray(order: any): any[] {
+function getProductArray(order: Record<string, unknown>): Record<string, unknown>[] {
   if (!order) return [];
   if (Array.isArray(order.items)) return order.items;
   if (Array.isArray(order.cart)) return order.cart;
@@ -17,12 +17,12 @@ function getProductArray(order: any): any[] {
   return [];
 }
 
-const TicketCaisse = ({ order, hideButton = false }: { order: any, hideButton?: boolean }) => {
+const TicketCaisse = ({ order, hideButton = false }: { order: Record<string, unknown>, hideButton?: boolean }) => {
   const ticketRef = useRef<HTMLDivElement>(null);
   if (!order) return null;
   const items = getProductArray(order);
-  const date = order.created_at ? new Date(order.created_at).toLocaleDateString("fr-FR") : "";
-  const time = order.created_at ? new Date(order.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "";
+  const date = order.created_at ? new Date(String(order.created_at)).toLocaleDateString("fr-FR") : "";
+  const time = order.created_at ? new Date(String(order.created_at)).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "";
   const total = Number(order.prix_ttc || order.total || 0);
   const remise = Number(order.remise || 0);
   const totalHT = Number(order.prix_ht || 0);
@@ -83,10 +83,10 @@ const TicketCaisse = ({ order, hideButton = false }: { order: any, hideButton?: 
             </thead>
             <tbody>
               {items.length > 0 ? (
-                items.map((item: any, idx: number) => (
+                items.map((item: Record<string, unknown>, idx: number) => (
                   <tr key={idx}>
-                    <td className="text-left py-1 border-b border-dashed border-gray-200">{item.name || item.title}</td>
-                    <td className="text-center py-1 border-b border-dashed border-gray-200">{item.qty ?? item.quantity ?? 1}</td>
+                    <td className="text-left py-1 border-b border-dashed border-gray-200">{String(item.name || item.title)}</td>
+                    <td className="text-center py-1 border-b border-dashed border-gray-200">{String(item.qty ?? item.quantity ?? 1)}</td>
                     <td className="text-right py-1 border-b border-dashed border-gray-200">{Number(item.price).toFixed(2)}</td>
                   </tr>
                 ))

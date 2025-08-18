@@ -66,7 +66,7 @@ export default function FactureCreateClient() {
       const factureData = { ...form, numero };
       await factureService.createFacture(factureData);
       router.push("/admin/facture");
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError("Erreur lors de la création de la facture.");
     } finally {
       setLoading(false);

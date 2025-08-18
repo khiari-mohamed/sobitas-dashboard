@@ -1,5 +1,6 @@
 import ClientsEditForm from "@/components/clients/ClientsEditForm";
 
-export default function ClientsEditPage({ params }: { params: { id: string } }) {
-  return <ClientsEditForm id={params.id} />;
+export default async function ClientsEditPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <ClientsEditForm id={id} />;
 }

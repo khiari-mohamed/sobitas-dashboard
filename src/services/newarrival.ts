@@ -48,7 +48,7 @@ export const getNewArrivalConfig = async () => {
   }
 };
 
-export const updateNewArrivalConfig = async (config: any) => {
+export const updateNewArrivalConfig = async (config: { sectionTitle: string; sectionDescription: string; maxDisplay: number; showOnFrontend: boolean; productOrder: string[] }) => {
   try {
     const res = await axios.post('/products/admin/newarrival-config', config);
     return res.data;

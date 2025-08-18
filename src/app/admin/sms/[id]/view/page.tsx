@@ -1,5 +1,4 @@
 import SMSViewClient from '@/components/sms/SMSViewClient';
-import { useParams } from 'next/navigation';
 
 export default function SMSViewPage() {
 

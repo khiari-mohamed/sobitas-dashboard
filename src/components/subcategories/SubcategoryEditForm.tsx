@@ -9,14 +9,14 @@ import RichTextEditor from "@/components/ui/RichTextEditor";
 export default function SubcategoryEditForm({ subcategory }: { subcategory: SubCategory }) {
   const router = useRouter();
   const [form, setForm] = useState<Partial<SubCategory>>({ ...subcategory });
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Array<{ _id: string; designation_fr?: string; designation?: string; name?: string }>>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    getCategories().then(setCategories);
+    getCategories().then((cats) => setCategories(cats));
   }, []);
 
-  const handleChange = (key: string, value: any) => {
+  const handleChange = (key: string, value: unknown) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -24,7 +24,7 @@ export default function SubcategoryEditForm({ subcategory }: { subcategory: SubC
     e.preventDefault();
     setLoading(true);
     try {
-      const categoryId = typeof form.category === "string" ? form.category : (form.category as any)?._id || "";
+      const categoryId = typeof form.category === "string" ? form.category : (form.category as Record<string, unknown>)?._id || "";
       
       await updateSubCategory(subcategory._id, {
         name: form.designation_fr || form.name || "Untitled",
@@ -45,7 +45,7 @@ export default function SubcategoryEditForm({ subcategory }: { subcategory: SubC
         zone1: form.zone1 || "",
         zone2: form.zone2 || "",
         zone3: form.zone3 || "",
-      } as any);
+      } as Partial<SubCategory>);
       router.push("/admin/subcategories");
     } finally {
       setLoading(false);
@@ -60,13 +60,13 @@ export default function SubcategoryEditForm({ subcategory }: { subcategory: SubC
           <label className="block text-xl font-semibold mb-2">Catégorie</label>
           <select
             className="w-full border p-4 rounded text-base"
-            value={typeof form.category === "string" ? form.category : (form.category as any)?._id || ""}
+            value={String(typeof form.category === "string" ? form.category : (form.category as Record<string, unknown>)?._id || "")}
             onChange={e => handleChange("category", e.target.value)}
             required
           >
             <option value="">Sélectionner une catégorie...</option>
             {categories.map((cat) => (
-              <option key={cat._id} value={cat._id}>{cat.designation_fr || cat.designation || cat.name}</option>
+              <option key={String(cat._id)} value={String(cat._id)}>{String(cat.designation_fr || cat.designation || cat.name)}</option>
             ))}
           </select>
         </div>

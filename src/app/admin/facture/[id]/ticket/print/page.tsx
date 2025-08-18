@@ -1,12 +1,13 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, use } from "react";
 import TicketCaisse from "@/components/facture/TicketCaisse";
 import factureService from "@/services/facture";
+import { Facture } from "@/types/facture";
 import "@/components/facture/ticket-print.css";
 
-export default function TicketPrintPage({ params }: { params: { id: string } }) {
-  const id = params.id;
-  const [order, setOrder] = useState<any>(null);
+export default function TicketPrintPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const [order, setOrder] = useState<Facture | null>(null);
 
   useEffect(() => {
     factureService.fetchFactureById(id).then(setOrder);
@@ -24,7 +25,7 @@ export default function TicketPrintPage({ params }: { params: { id: string } }) 
 
   return (
     <div style={{ width: "80mm", height: "250mm", margin: "0 auto" }}>
-      <TicketCaisse order={order} hideButton />
+      <TicketCaisse order={order as unknown as Record<string, unknown>} hideButton />
     </div>
   );
 }

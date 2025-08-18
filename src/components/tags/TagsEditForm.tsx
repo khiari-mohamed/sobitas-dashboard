@@ -36,8 +36,8 @@ export default function TagsEditForm({ id }: { id: string }) {
     try {
       await updateTag(id, form);
       router.push("/admin/tags");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la modification du tag");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur lors de la modification du tag");
     } finally {
       setLoading(false);
     }

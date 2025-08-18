@@ -14,15 +14,15 @@ export const fetchSystemMessageById = async (id: string): Promise<SystemMessage>
   return data;
 };
 
-export const createSystemMessage = async (systemMessage: any): Promise<SystemMessage> => {
+export const createSystemMessage = async (systemMessage: Partial<SystemMessage>): Promise<SystemMessage> => {
   const cleanData = Object.fromEntries(
-    Object.entries(systemMessage).filter(([_, value]) => value !== undefined && value !== '')
+    Object.entries(systemMessage).filter(([, value]) => value !== undefined && value !== '')
   );
   const { data } = await axiosInstance.post<SystemMessage>(RESOURCE, cleanData);
   return data;
 };
 
-export const updateSystemMessage = async (id: string, systemMessage: any): Promise<SystemMessage> => {
+export const updateSystemMessage = async (id: string, systemMessage: Partial<SystemMessage>): Promise<SystemMessage> => {
   const cleanData = Object.fromEntries(
     Object.entries(systemMessage).filter(([key, value]) => 
       value !== undefined && 

@@ -5,7 +5,7 @@ export async function fetchUsers() {
   return res.json();
 }
 
-export async function addUser(data) {
+export async function addUser(data: unknown) {
   const res = await fetch(`${API_URL}/users`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -14,7 +14,7 @@ export async function addUser(data) {
   return res.json();
 }
 
-export async function updateUser(id, data) {
+export async function updateUser(id: string, data: unknown) {
   const res = await fetch(`${API_URL}/users/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -23,7 +23,7 @@ export async function updateUser(id, data) {
   return res.json();
 }
 
-export async function deleteUser(id) {
+export async function deleteUser(id: string) {
   const res = await fetch(`${API_URL}/users/${id}`, {
     method: "DELETE",
   });

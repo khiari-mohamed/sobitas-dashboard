@@ -36,7 +36,7 @@ export default function BlogControlClient() {
         
         if (configData) {
           setSectionTitle(configData.sectionTitle || "Blog & FAQ");
-          setSectionDescription(configData.sectionDescription || "Découvrez nos conseils d'experts et trouvez les réponses à vos questions sur la nutrition sportive");
+          setSectionDescription(configData.sectionDescription || "Découvrez nos conseils dexperts et trouvez les réponses à vos questions sur la nutrition sportive");
           setMaxDisplay(configData.maxDisplay || 4);
           setShowOnFrontend(configData.showOnFrontend !== false);
         }
@@ -170,7 +170,7 @@ export default function BlogControlClient() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Nombre d'articles à afficher</label>
+            <label className="block text-sm font-medium mb-2">Nombre de articles à afficher</label>
             <select
               value={maxDisplay}
               onChange={(e) => { setMaxDisplay(Number(e.target.value)); setHasChanges(true); }}
@@ -395,7 +395,7 @@ export default function BlogControlClient() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
-              <h3 className="text-xl font-bold mb-4">Modifier l'article de blog</h3>
+              <h3 className="text-xl font-bold mb-4">Modifier larticle de blog</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Titre</label>
@@ -425,7 +425,7 @@ export default function BlogControlClient() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Rôle de l'auteur</label>
+                  <label className="block text-sm font-medium mb-1">Rôle de lauteur</label>
                   <input
                     type="text"
                     value={editingBlog.author_role || ""}

@@ -12,7 +12,7 @@ const templateTypes = [
   { id: "custom", name: "Custom (Nouveau)" },
 ];
 
-const samplePayloads: Record<string, any> = {
+const samplePayloads: Record<string, Record<string, unknown>> = {
   "order-confirmation": {
     customerName: "Test User",
     orderNumber: "CMD-TEST",
@@ -169,7 +169,7 @@ export default function EmailTemplatesCreateClient() {
           />
           {type === "custom" && (
             <div className="text-gray-500 text-sm mt-2">
-              Utilisez n'importe quel HTML pour créer un template personnalisé. Le nom du template sera utilisé comme identifiant.
+              Utilisez n&apos;importe quel HTML pour créer un template personnalisé. Le nom du template sera utilisé comme identifiant.
             </div>
           )}
         </div>

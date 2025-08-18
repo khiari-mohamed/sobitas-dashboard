@@ -16,12 +16,12 @@ export const fetchPageById = async (id: string): Promise<Page> => {
   return res.data.data;
 };
 
-export const createPage = async (pageData: any): Promise<Page> => {
+export const createPage = async (pageData: Partial<Page>): Promise<Page> => {
   const res = await axios.post('/pages', pageData);
   return res.data.data;
 };
 
-export const updatePage = async (id: string, pageData: any): Promise<Page> => {
+export const updatePage = async (id: string, pageData: Partial<Page>): Promise<Page> => {
   const res = await axios.put(`/pages/${id}`, pageData);
   return res.data.data;
 };

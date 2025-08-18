@@ -6,7 +6,11 @@ import { createService } from "@/services/services";
 import { ServiceItem } from "@/types/services";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 
-const initialState: Partial<ServiceItem> = {
+interface ServiceFormState extends Omit<ServiceItem, 'icon'> {
+  icon: string | File;
+}
+
+const initialState: Partial<ServiceFormState> = {
   id: "",
   designation_fr: "",
   description_fr: "",
@@ -17,7 +21,7 @@ const initialState: Partial<ServiceItem> = {
 
 export default function ServicesCreateClient() {
   const router = useRouter();
-  const [form, setForm] = useState<any>(initialState);
+  const [form, setForm] = useState<Partial<ServiceFormState>>(initialState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [iconPreview, setIconPreview] = useState<string | null>(null);
@@ -46,8 +50,8 @@ export default function ServicesCreateClient() {
     try {
       await createService(form as ServiceItem);
       router.push("/admin/services");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la création du service");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Erreur lors de la création du service");
     } finally {
       setLoading(false);
     }

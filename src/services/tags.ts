@@ -15,15 +15,15 @@ export const fetchTagById = async (id: string): Promise<Tag> => {
   return data;
 };
 
-export const createTag = async (tag: any): Promise<Tag> => {
+export const createTag = async (tag: Partial<Tag>): Promise<Tag> => {
   const cleanData = Object.fromEntries(
-    Object.entries(tag).filter(([_, value]) => value !== undefined && value !== '')
+    Object.entries(tag).filter(([, value]) => value !== undefined && value !== '')
   );
   const { data } = await axiosInstance.post<Tag>(RESOURCE, cleanData);
   return data;
 };
 
-export const updateTag = async (id: string, tag: any): Promise<Tag> => {
+export const updateTag = async (id: string, tag: Partial<Tag>): Promise<Tag> => {
   const cleanData = Object.fromEntries(
     Object.entries(tag).filter(([key, value]) => 
       value !== undefined && 

@@ -53,7 +53,7 @@ export const fetchBlogConfig = async () => {
   }
 };
 
-export const saveBlogConfig = async (config: any) => {
+export const saveBlogConfig = async (config: { sectionTitle: string; sectionDescription: string; maxDisplay: number; showOnFrontend: boolean; blogOrder: string[] }) => {
   try {
     const res = await axios.post("/blog/config", config);
     return res.data;

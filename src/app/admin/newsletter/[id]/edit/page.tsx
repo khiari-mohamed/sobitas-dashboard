@@ -1,5 +1,6 @@
 import NewsletterEditForm from "@/components/newsletter/NewsletterEditForm";
 
-export default function NewsletterEditPage({ params }: { params: { id: string } }) {
-  return <NewsletterEditForm id={params.id} />;
+export default async function NewsletterEditPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <NewsletterEditForm id={id} />;
 }

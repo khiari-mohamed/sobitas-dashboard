@@ -72,7 +72,7 @@ export default function NewArrivalControlClient() {
     }
   }, [products, maxDisplay]);
 
-  const updateConfig = (updates: Partial<any>) => {
+  const updateConfig = (updates: { sectionTitle?: string; sectionDescription?: string; maxDisplay?: number; showOnFrontend?: boolean }) => {
     if (updates.sectionTitle !== undefined) setSectionTitle(updates.sectionTitle);
     if (updates.sectionDescription !== undefined) setSectionDescription(updates.sectionDescription);
     if (updates.maxDisplay !== undefined) setMaxDisplay(updates.maxDisplay);

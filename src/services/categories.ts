@@ -6,7 +6,7 @@ export type { Category } from '@/types/category';
 export const getCategories = async (): Promise<Category[]> => {
   try {
     const { data } = await axios.get('/categories');
-    return data.map((cat: any) => ({
+    return data.map((cat: Category) => ({
       ...cat,
       designation_fr: cat.designation_fr || cat.designation,
       products: cat.products || []
@@ -50,14 +50,14 @@ export const getCategoryBySlug = async (slug: string): Promise<Category> => {
 /**
  * Create a new category (Dashboard/Admin only)
  */
-export const createCategory = async (categoryData: any, imageFile?: File | null) => {
+export const createCategory = async (categoryData: Partial<Category>, imageFile?: File | null) => {
   try {
     // Always use FormData to handle both cases
     const formData = new FormData();
     
     // Add all form fields
     Object.keys(categoryData).forEach(key => {
-      const value = categoryData[key];
+      const value = categoryData[key as keyof Category];
       // Only send fields that are not empty, not null, not undefined
       if (value !== undefined && value !== null && value !== "") {
         formData.append(key, String(value));
@@ -81,7 +81,7 @@ export const createCategory = async (categoryData: any, imageFile?: File | null)
 /**
  * Update a category (Dashboard/Admin only)
  */
-export const updateCategory = async (id: string, categoryData: any, imageFile?: File | null) => {
+export const updateCategory = async (id: string, categoryData: Partial<Category>, imageFile?: File | null) => {
   try {
     console.log('Updating category:', id, categoryData, 'hasFile:', !!imageFile);
     
@@ -90,7 +90,7 @@ export const updateCategory = async (id: string, categoryData: any, imageFile?: 
     
     // Add all form fields
     Object.keys(categoryData).forEach(key => {
-      const value = categoryData[key];
+      const value = categoryData[key as keyof Category];
       if (value !== undefined && value !== null) {
         formData.append(key, String(value));
       }
@@ -105,7 +105,7 @@ export const updateCategory = async (id: string, categoryData: any, imageFile?: 
     const response = await axios.put(`/categories/admin/update-with-file/${id}`, formData);
     console.log('Update response:', response.data);
     return response.data;
-  } catch (error: any) {
+  } catch (error) {
     console.error('Update category error:', error);
     throw error;
   }

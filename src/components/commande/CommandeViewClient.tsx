@@ -118,11 +118,11 @@ export default function CommandeViewClient({ id }: { id: string }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {commande.cart.map((item: any) => (
-                  <tr key={item._id || item.title}>
-                    <td className="px-4 py-2">{item.title}</td>
-                    <td className="px-4 py-2">{item.quantity}</td>
-                    <td className="px-4 py-2">{item.price}</td>
+                {commande.cart.map((item: Record<string, unknown>) => (
+                  <tr key={String(item._id || item.title)}>
+                    <td className="px-4 py-2">{String(item.title)}</td>
+                    <td className="px-4 py-2">{String(item.quantity)}</td>
+                    <td className="px-4 py-2">{String(item.price)}</td>
                   </tr>
                 ))}
               </tbody>

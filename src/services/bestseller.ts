@@ -31,7 +31,7 @@ export async function fetchAllBestSellers(): Promise<BestSeller[]> {
   }
 }
 
-export async function updateBestSeller(id: string, data: Partial<BestSeller>): Promise<any> {
+export async function updateBestSeller(id: string, data: Partial<BestSeller>): Promise<{ success: boolean; data: BestSeller }> {
   try {
     const response = await axiosInstance.put(`/products/admin/update/${id}`, data);
     return response.data;
@@ -60,7 +60,7 @@ export async function getBestSellerConfig(): Promise<BestSellerConfig> {
   }
 }
 
-export async function updateBestSellerConfig(config: Partial<BestSellerConfig>): Promise<any> {
+export async function updateBestSellerConfig(config: Partial<BestSellerConfig>): Promise<{ success: boolean; data: BestSellerConfig }> {
   try {
     const response = await axiosInstance.post('/products/admin/bestseller-config', config);
     return response.data;
@@ -70,7 +70,7 @@ export async function updateBestSellerConfig(config: Partial<BestSellerConfig>):
   }
 }
 
-export async function updateBestSellerOrder(productOrder: string[]): Promise<any> {
+export async function updateBestSellerOrder(productOrder: string[]): Promise<{ success: boolean; data: { productOrder: string[] } }> {
   try {
     const response = await axiosInstance.put('/products/admin/bestseller-order', { productOrder });
     return response.data;

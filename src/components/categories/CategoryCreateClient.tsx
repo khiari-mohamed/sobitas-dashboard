@@ -5,11 +5,11 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FaArrowLeft } from "react-icons/fa";
 import { createCategory } from "@/services/categories";
-import type { Category } from "@/types/category";
+// import type { Category } from "@/types/category";
 
 const Editor = dynamic(() => import("@/components/ui/RichTextEditor"), { ssr: false });
 
-const emptyCategory: Omit<Category, "_id" | "id" | "image" | "product_liste_cover" | "products" | "subCategories" | "subcategories" | "createdAt" | "updatedAt" | "created_by" | "updated_by"> = {
+const emptyCategory = {
   designation: "",
   slug: "",
   cover: "",
@@ -65,7 +65,7 @@ export default function CategoryCreateClient() {
   const [image, setImage] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleChange = (key: FieldType, value: any) => {
+  const handleChange = (key: FieldType, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 

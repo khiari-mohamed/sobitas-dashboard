@@ -44,7 +44,7 @@ export const getMusculationConfig = async () => {
   return res.data;
 };
 
-export const updateMusculationConfig = async (config: any) => {
+export const updateMusculationConfig = async (config: { sectionTitle: string; sectionDescription: string; maxDisplay: number; showOnFrontend: boolean; productOrder: string[] }) => {
   const res = await axios.post('/products/admin/musculation-config', config);
   return res.data;
 };

@@ -12,7 +12,7 @@ export async function loginAdmin(username: string, password: string) {
 }
 
 export async function registerAdmin(username: string, password: string, role?: string) {
-  const body: any = { username, password };
+  const body: { username: string; password: string; role?: string } = { username, password };
   if (typeof role === "string" && role.trim() !== "") {
     body.role = role;
   }

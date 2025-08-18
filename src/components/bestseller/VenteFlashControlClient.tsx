@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { fetchAllVenteFlash, updateVenteFlash, deleteVenteFlash, createVenteFlash, uploadImage } from "@/services/venteFlash";
-import { VenteFlash } from "@/types/venteflash";
+import { VenteFlash } from "@/types/venteFlash";
 import dynamic from "next/dynamic";
 import styles from './VenteFlashControl.module.css';
 import { getVenteFlashConfig, saveVenteFlashConfig } from '@/utils/venteFlashConfig';
@@ -18,7 +18,7 @@ export default function VenteFlashControlClient() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [maxDisplay, setMaxDisplay] = useState(4);
   const [sectionTitle, setSectionTitle] = useState("Ventes Flash");
-  const [sectionDescription, setSectionDescription] = useState("Profitez de nos offres exclusives avant qu'il ne soit trop tard!");
+  const [sectionDescription, setSectionDescription] = useState("Profitez de nos offres exclusives avant qu&apos;il ne soit trop tard!");
   const [showOnFrontend, setShowOnFrontend] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newProduct, setNewProduct] = useState<Partial<VenteFlash>>({});
@@ -489,7 +489,7 @@ export default function VenteFlashControlClient() {
                               }
                             }}
                             className="absolute inset-0 opacity-0 cursor-pointer"
-                            title="Changer l'image"
+                            title="Changer l&apos;image"
                             disabled={updating === product._id}
                           />
                         </>
@@ -614,7 +614,7 @@ export default function VenteFlashControlClient() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Date d'expiration</label>
+                  <label className="block text-sm font-medium mb-1">Date d&apos;expiration</label>
                   <input
                     type="datetime-local"
                     value={editingProduct.promo_expiration_date ? new Date(editingProduct.promo_expiration_date).toISOString().slice(0, 16) : ""}
@@ -658,7 +658,7 @@ export default function VenteFlashControlClient() {
                       value={editingProduct.cover || ""}
                       onChange={(e) => setEditingProduct({...editingProduct, cover: e.target.value})}
                       className="w-full border p-2 rounded"
-                      placeholder="Ou entrez l'URL de l'image"
+                      placeholder="Ou entrez l&apos;URL de l&apos;image"
                     />
                     {editingProduct.cover && (
                       <img src={getImageSrc(editingProduct)} alt="Preview" className="w-20 h-20 object-cover rounded" />
@@ -756,7 +756,7 @@ export default function VenteFlashControlClient() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Date d'expiration</label>
+                  <label className="block text-sm font-medium mb-1">Date d&apos;expiration</label>
                   <input
                     type="datetime-local"
                     value={newProduct.promo_expiration_date || ""}
@@ -799,7 +799,7 @@ export default function VenteFlashControlClient() {
                     value={newProduct.cover || ""}
                     onChange={(e) => setNewProduct({...newProduct, cover: e.target.value})}
                     className="w-full border p-2 rounded"
-                    placeholder="Ou entrez l'URL de l'image"
+                    placeholder="Ou entrez l&apos;URL de l&apos;image"
                   />
                   {newProduct.cover && (
                     <img src={newProduct.cover} alt="Preview" className="w-20 h-20 object-cover rounded" />

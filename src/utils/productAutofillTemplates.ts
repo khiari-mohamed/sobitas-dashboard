@@ -2,7 +2,7 @@
 
 export type ProductAutofillTemplate = {
   match: (input: string) => boolean;
-  fields: Partial<Record<string, any>>;
+  fields: Partial<Record<string, string | number | boolean>>;
 };
 
 export const productAutofillTemplates: ProductAutofillTemplate[] = [
@@ -37,7 +37,7 @@ export const productAutofillTemplates: ProductAutofillTemplate[] = [
   },
   // Add more intelligent templates like for "whey", "creatine", etc.
   {
-    match: (_input) => true, // default fallback
+    match: () => true, // default fallback
     fields: {
       designation_fr: "Produit générique",
       codeProduct: "GEN-0001",

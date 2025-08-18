@@ -1,12 +1,13 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import FactureCreateClient from "@/components/facture/FactureCreateClient";
 import TicketCaisseCreate from "@/components/facture/TicketCaisseCreate";
 import BonCommandeCreate from "@/components/facture/BonCommandeCreate";
 import FactureTVACreate from "@/components/facture/FactureTVACreate";
 
-export default function FactureCreatePage() {
+function FactureCreateContent() {
   const searchParams = useSearchParams();
   const component = searchParams.get('component');
 
@@ -23,4 +24,12 @@ export default function FactureCreatePage() {
   }
 
   return <FactureCreateClient />;
+}
+
+export default function FactureCreatePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FactureCreateContent />
+    </Suspense>
+  );
 }

@@ -55,8 +55,8 @@ export default function ReviewsEditForm({ id }: { id: string }) {
       } else {
         setError("ID manquant pour la mise à jour");
       }
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la mise à jour de l'avis");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Erreur lors de la mise à jour de l&apos;avis");
     } finally {
       setLoading(false);
     }
@@ -64,7 +64,7 @@ export default function ReviewsEditForm({ id }: { id: string }) {
 
   return (
     <div className="bg-white p-8 shadow-xl w-full max-w-[1600px] mx-auto mt-8 border">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Modifier l'avis</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-8">Modifier l&apos;avis</h1>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-8">
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">ID</label>
@@ -113,7 +113,7 @@ export default function ReviewsEditForm({ id }: { id: string }) {
         {error && <div className="text-red-500 mb-4 col-span-2">{error}</div>}
         <div className="col-span-1">
           <button type="submit" className="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 text-xl border-none" disabled={loading}>
-            {loading ? "Mise à jour..." : "Mettre à jour l'avis"}
+            {loading ? "Mise à jour..." : "Mettre à jour l&apos;avis"}
           </button>
         </div>
       </form>

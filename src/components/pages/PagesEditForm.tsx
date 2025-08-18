@@ -35,8 +35,8 @@ export default function PagesEditForm({ id }: { id: string }) {
       );
       await updatePage(id, cleanData);
       router.push("/admin/pages");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la modification de la page");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur lors de la modification de la page");
     } finally {
       setLoading(false);
     }

@@ -17,7 +17,7 @@ export default function BrandTable() {
   const [deleteBrand, setDeleteBrand] = useState<Brand | null>(null);
   const [deleteSelectionOpen, setDeleteSelectionOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [totalBrands, setTotalBrands] = useState(0);
+  // const [totalBrands, setTotalBrands] = useState(0);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -29,7 +29,7 @@ export default function BrandTable() {
       .then((data) => {
         if (!ignore) {
           setBrands(data);
-          setTotalBrands(data.length);
+          // setTotalBrands(data.length);
         }
       })
       .catch(console.error)

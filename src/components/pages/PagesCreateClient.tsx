@@ -36,8 +36,8 @@ export default function PagesCreateClient() {
       );
       await createPage(cleanData);
       router.push("/admin/pages");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la création de la page");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur lors de la création de la page");
     } finally {
       setLoading(false);
     }

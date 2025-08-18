@@ -32,9 +32,8 @@ export interface Category {
   updated_at?: string;
   createdAt?: string;
   updatedAt?: string;
-  products?: any[];
-  subCategories?: any[];
-  subcategories?: any[];
+  products?: string[];
+  subCategories?: Category[];
+  subcategories?: Category[];
   status?: string;
-  [key: string]: any;
 }

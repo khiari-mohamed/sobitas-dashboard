@@ -66,8 +66,8 @@ export default function HomePage() {
         axios.get('/commande')
       ]);
       
-      let allClients: any[] = [];
-      let allCommandes: any[] = [];
+      let allClients: Array<{ name?: string; phone_1?: string; email?: string }> = [];
+      let allCommandes: Array<{ email?: string; phone?: string; nom?: string; prenom?: string }> = [];
       
       // Get clients data
       if (clientsResponse.status === 'fulfilled') {
@@ -164,7 +164,7 @@ export default function HomePage() {
         <form onSubmit={handleSearch} className="flex flex-col md:flex-row md:items-center gap-4">
           {/* Label */}
           <label className="text-sm font-semibold text-black whitespace-nowrap">
-            Chercher l'historique de votre Client
+            Chercher l&apos;historique de votre Client
           </label>
 
           {/* Input with up/down arrows */}

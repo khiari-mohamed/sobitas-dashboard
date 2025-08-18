@@ -10,7 +10,7 @@ import { FaEdit, FaArrowLeft } from "react-icons/fa";
 export default function ClientsViewClient({ id }: { id: string }) {
   const [client, setClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  // const router = useRouter();
 
   useEffect(() => {
     setLoading(true);

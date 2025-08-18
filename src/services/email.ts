@@ -32,7 +32,7 @@ export const sendOrderShipped = async (payload: OrderShippedPayload): Promise<{ 
   return data;
 };
 
-export const fetchEmailTemplates = async (): Promise<any[]> => {
+export const fetchEmailTemplates = async (): Promise<Array<{ type: string; subject: string; html: string; createdAt: string }>> => {
   const { data } = await axiosInstance.get(`${EMAIL_BASE}/templates`);
   return data;
 };

@@ -6,7 +6,7 @@ export const getPackById = async (id: string): Promise<Pack | null> => {
   try {
     const res = await axios.get(`/admin/packs/get/${id}`);
     return res.data.data || null;
-  } catch (e) {
+  } catch {
     return null;
   }
 };
@@ -78,8 +78,8 @@ export const deletePack = async (id: string) => {
   try {
     const res = await axios.delete(`/admin/packs/admin/delete/${id}`);
     return res.data;
-  } catch (error: any) {
-    console.error('Delete pack error:', error.response?.data || error.message);
+  } catch (error) {
+    console.error('Delete pack error:', error);
     throw error;
   }
 };
@@ -94,8 +94,8 @@ export const bulkDeletePacks = async (ids: string[]) => {
       },
     });
     return res.data;
-  } catch (error: any) {
-    console.error('Bulk delete error:', error.response?.data || error.message);
+  } catch (error) {
+    console.error('Bulk delete error:', error);
     throw error;
   }
 };
@@ -105,8 +105,8 @@ export const getFrontendPackConfig = async () => {
   try {
     const res = await axios.get('/admin/packs/frontend/config');
     return res.data;
-  } catch (error: any) {
-    console.error('Frontend config error:', error.response?.data || error.message);
+  } catch (error) {
+    console.error('Frontend config error:', error);
     throw error;
   }
 };
@@ -126,7 +126,7 @@ export const fetchPackConfig = async () => {
   }
 };
 
-export const savePackConfig = async (config: any) => {
+export const savePackConfig = async (config: { sectionTitle: string; sectionDescription: string; maxDisplay: number; showOnFrontend: boolean; packOrder: string[] }) => {
   try {
     const res = await axios.post("/pack/config", config);
     return res.data;

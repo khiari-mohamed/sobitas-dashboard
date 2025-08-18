@@ -9,7 +9,7 @@ export const fetchAllTestimonials = async (): Promise<Testimonial[]> => {
     
     // Handle different response structures
     if (Array.isArray(res.data)) {
-      return res.data.map((item: any) => ({
+      return res.data.map((item: Testimonial) => ({
         ...item,
         _id: item._id || item.id,
         authorName: item.user?.name || item.authorName || "Utilisateur",
@@ -19,7 +19,7 @@ export const fetchAllTestimonials = async (): Promise<Testimonial[]> => {
       })) as Testimonial[];
     }
     if (res.data?.data && Array.isArray(res.data.data)) {
-      return res.data.data.map((item: any) => ({
+      return res.data.data.map((item: Testimonial) => ({
         ...item,
         _id: item._id || item.id,
         authorName: item.user?.name || item.authorName || "Utilisateur",
@@ -72,7 +72,7 @@ export const fetchTestimonialConfig = async () => {
   }
 };
 
-export const saveTestimonialConfig = async (config: any) => {
+export const saveTestimonialConfig = async (config: { sectionTitle: string; sectionDescription: string; maxDisplay: number; showOnFrontend: boolean; testimonialOrder: string[] }) => {
   try {
     console.log('Sending config to API:', config);
     const res = await axios.post("/testimonial/config", config);

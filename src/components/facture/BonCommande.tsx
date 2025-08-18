@@ -11,14 +11,14 @@ const COMPANY = {
 };
 const ORANGE = "#FF4301";
 
-function getProductArray(order: any): any[] {
+function getProductArray(order: Record<string, unknown>): Record<string, unknown>[] {
   if (!order) return [];
   if (Array.isArray(order.cart) && order.cart.length > 0) return order.cart;
   if (Array.isArray(order.products) && order.products.length > 0) return order.products;
   if (Array.isArray(order.items) && order.items.length > 0) return order.items;
-  if (order.cart && typeof order.cart === "object" && !Array.isArray(order.cart)) return [order.cart];
-  if (order.products && typeof order.products === "object" && !Array.isArray(order.products)) return [order.products];
-  if (order.items && typeof order.items === "object" && !Array.isArray(order.items)) return [order.items];
+  if (order.cart && typeof order.cart === "object" && !Array.isArray(order.cart)) return [order.cart as Record<string, unknown>];
+  if (order.products && typeof order.products === "object" && !Array.isArray(order.products)) return [order.products as Record<string, unknown>];
+  if (order.items && typeof order.items === "object" && !Array.isArray(order.items)) return [order.items as Record<string, unknown>];
   return [];
 }
 
@@ -26,7 +26,7 @@ function numberToFrenchWords(n: number): string {
   return n2words(n, { lang: "fr" });
 }
 
-const BonCommande = ({ order, printRef }: { order: any; printRef?: React.Ref<HTMLDivElement> }) => {
+const BonCommande = ({ order, printRef }: { order: Record<string, unknown>; printRef?: React.Ref<HTMLDivElement> }) => {
   if (!order) return null;
   const cart = getProductArray(order);
   const client = {
@@ -50,8 +50,8 @@ const BonCommande = ({ order, printRef }: { order: any; printRef?: React.Ref<HTM
     pays: order.livraison_pays || "",
     phone: order.livraison_phone || "",
   };
-  const dateCommande = order.created_at ? new Date(order.created_at).toLocaleDateString("fr-FR") : "";
-  const dateLivraison = order.date_livraison ? new Date(order.date_livraison).toLocaleDateString("fr-FR") : "";
+  const dateCommande = order.created_at ? new Date(String(order.created_at)).toLocaleDateString("fr-FR") : "";
+  const dateLivraison = order.date_livraison ? new Date(String(order.date_livraison)).toLocaleDateString("fr-FR") : "";
 
   // Totals
   const totalHT = cart.reduce((sum, item) => sum + Number(item.price ?? 0) * Number(item.quantity ?? 1), 0);
@@ -99,7 +99,7 @@ const BonCommande = ({ order, printRef }: { order: any; printRef?: React.Ref<HTM
             </span>
             <span className="text-xs text-gray-500 mt-2">Date de la commande : {dateCommande}</span>
             <span className="text-xs text-gray-500">Date de livraison : {dateLivraison}</span>
-            <span className="text-xs text-gray-500">N° : <span className="font-semibold">{order.numero_bl || order.numero}</span></span>
+            <span className="text-xs text-gray-500">N° : <span className="font-semibold">{String(order.numero_bl || order.numero)}</span></span>
           </div>
         </div>
         {/* Orange thin line */}
@@ -110,25 +110,25 @@ const BonCommande = ({ order, printRef }: { order: any; printRef?: React.Ref<HTM
           <div className="flex-1">
             <div className="font-semibold text-sm text-blue-700 mb-1">Client</div>
             <div className="text-xs text-gray-700 leading-tight">
-              <div>{client.prenom} {client.nom}</div>
-              <div>{client.adresse1}</div>
-              {client.adresse2 && <div>{client.adresse2}</div>}
-              <div>{client.ville}{client.code_postale ? `, ${client.code_postale}` : ""}</div>
-              <div>{client.pays}</div>
-              <div>Email : {client.email}</div>
-              <div>Tél : {client.phone}</div>
+              <div>{String(client.prenom)} {String(client.nom)}</div>
+              <div>{String(client.adresse1)}</div>
+              {client.adresse2 && <div>{String(client.adresse2)}</div>}
+              <div>{String(client.ville)}{client.code_postale ? `, ${String(client.code_postale)}` : ""}</div>
+              <div>{String(client.pays)}</div>
+              <div>Email : {String(client.email)}</div>
+              <div>Tél : {String(client.phone)}</div>
             </div>
           </div>
           {/* Delivery */}
           <div className="flex-1">
             <div className="font-semibold text-sm text-blue-700 mb-1">Adresse de livraison</div>
             <div className="text-xs text-gray-700 leading-tight">
-              <div>{delivery.prenom} {delivery.nom}</div>
-              <div>{delivery.adresse1}</div>
-              {delivery.adresse2 && <div>{delivery.adresse2}</div>}
-              <div>{delivery.ville}{delivery.code_postale ? `, ${delivery.code_postale}` : ""}</div>
-              <div>{delivery.pays}</div>
-              <div>Tél : {delivery.phone || "N/A"}</div>
+              <div>{String(delivery.prenom)} {String(delivery.nom)}</div>
+              <div>{String(delivery.adresse1)}</div>
+              {delivery.adresse2 && <div>{String(delivery.adresse2)}</div>}
+              <div>{String(delivery.ville)}{delivery.code_postale ? `, ${String(delivery.code_postale)}` : ""}</div>
+              <div>{String(delivery.pays)}</div>
+              <div>Tél : {String(delivery.phone || "N/A")}</div>
             </div>
           </div>
         </div>
@@ -145,12 +145,12 @@ const BonCommande = ({ order, printRef }: { order: any; printRef?: React.Ref<HTM
             </thead>
             <tbody>
               {cart.length > 0 ? (
-                cart.map((item: any, idx: number) => (
+                cart.map((item: Record<string, unknown>, idx: number) => (
                   <tr key={idx} className="border-t hover:bg-orange-50">
-                    <td className="p-1">{item.title || item.name || item.product_name || "Produit"}</td>
-                    <td className="p-1 text-right">{item.quantity ?? item.qty ?? 1}</td>
+                    <td className="p-1">{String(item.title || item.name || item.product_name || "Produit")}</td>
+                    <td className="p-1 text-right">{String(item.quantity ?? item.qty ?? 1)}</td>
                     <td className="p-1 text-right">{Number(item.price ?? 0).toLocaleString("fr-TN", { style: "currency", currency: "TND" })}</td>
-                    <td className="p-1 text-right">{Number((item.price ?? 0) * (item.quantity ?? item.qty ?? 1)).toLocaleString("fr-TN", { style: "currency", currency: "TND" })}</td>
+                    <td className="p-1 text-right">{(Number(item.price ?? 0) * Number(item.quantity ?? item.qty ?? 1)).toLocaleString("fr-TN", { style: "currency", currency: "TND" })}</td>
                   </tr>
                 ))
               ) : (

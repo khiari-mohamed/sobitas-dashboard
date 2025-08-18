@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
+// import Link from "next/link";
 import { FaEdit, FaTrash, FaArrowLeft } from "react-icons/fa";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 import { useRouter } from "next/navigation";
@@ -27,17 +27,17 @@ export default function CategoryViewClient({ category, id }: { category: Categor
   };
 
   // Helper to get a value from both camelCase and snake_case
-  function getField<T = any>(obj: any, ...keys: string[]): T | undefined {
+  function getField<T = unknown>(obj: Record<string, unknown>, ...keys: string[]): T | undefined {
     for (const key of keys) {
       if (obj && obj[key] !== undefined && obj[key] !== null && obj[key] !== "") {
-        return obj[key];
+        return obj[key] as T;
       }
     }
     return undefined;
   }
 
   // Helper to render date fields
-  function renderDateField(category: any) {
+  function renderDateField(category: Record<string, unknown>) {
     const updated = getField(category, "updatedAt", "updated_at");
     const created = getField(category, "createdAt", "created_at");
     if (updated) {
@@ -79,7 +79,7 @@ export default function CategoryViewClient({ category, id }: { category: Categor
         open={showDelete}
         onClose={() => setShowDelete(false)}
         onConfirm={handleDelete}
-        productName={category.designation || category.designation_fr || category.title}
+        productName={String(category.designation || category.designation_fr || category.title || 'Category')}
       />
       <div className="bg-white shadow-lg p-10 w-full max-w-screen-2xl mx-auto">
         <h2 className="text-3xl font-extrabold text-gray-800 mb-3">Couverture</h2>
@@ -123,7 +123,7 @@ export default function CategoryViewClient({ category, id }: { category: Categor
         <div className="text-2xl text-gray-900 mb-6 font-semibold">{category.designation || category.designation_fr || category.title || "—"}</div>
         <Divider />
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Description</h3>
-        <div className="mb-6 text-lg leading-relaxed bg-gray-50 border rounded p-4">{renderHTML(category.description_fr)}</div>
+        <div className="mb-6 text-lg leading-relaxed bg-gray-50 border rounded p-4">{renderHTML(category.description_fr as string)}</div>
         <Divider />
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Couverture liste de produits</h3>
         <div className="flex flex-col items-center mb-6">
@@ -154,51 +154,51 @@ export default function CategoryViewClient({ category, id }: { category: Categor
         <Divider />
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Enregistrement</h3>
         <div className="mb-6 text-lg">
-          {renderDateField(category)}
+          {renderDateField(category as unknown as Record<string, unknown>)}
         </div>
         <Divider />
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Alt Cover (SEO)</h3>
         <div className="mb-6 text-lg">
-          {getField(category, "alt_cover", "altCover") || "—"}
+          {getField(category as unknown as Record<string, unknown>, "alt_cover", "altCover") || "—"}
         </div>
         <Divider />
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Description Cover (SEO)</h3>
         <div className="mb-6 text-lg">
-          {getField(category, "description_cover", "descriptionCover") || "—"}
+          {getField(category as unknown as Record<string, unknown>, "description_cover", "descriptionCover") || "—"}
         </div>
         <Divider />
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Meta ( name;content/name;content/name;content......)</h3>
         <div className="mb-6 text-lg">
-          {getField(category, "meta", "Meta") || "—"}
+          {getField(category as unknown as Record<string, unknown>, "meta", "Meta") || "—"}
         </div>
         <Divider />
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Schema description (seo)</h3>
         <div className="mb-6 text-lg">
-          {getField(category, "schema_description", "schemaDescription") || "—"}
+          {getField(category as unknown as Record<string, unknown>, "schema_description", "schemaDescription") || "—"}
         </div>
         <Divider />
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Valeurs nutritionnelles</h3>
         <div className="mb-6 text-lg leading-relaxed bg-gray-50 border rounded p-4">
-          {renderHTML(getField(category, "nutrition_values", "nutritionValues"))}
+          {renderHTML(getField(category as unknown as Record<string, unknown>, "nutrition_values", "nutritionValues") as string)}
         </div>
         <Divider />
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Questions</h3>
         <div className="mb-6 text-lg leading-relaxed bg-gray-50 border rounded p-4">
-          {renderHTML(getField(category, "questions", "Questions"))}
+          {renderHTML(getField(category as unknown as Record<string, unknown>, "questions", "Questions") as string)}
         </div>
         <Divider />
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Plus de détails</h3>
         <div className="mb-6 text-lg leading-relaxed bg-gray-50 border rounded p-4">
-          {renderHTML(getField(category, "more_details", "moreDetails"))}
+          {renderHTML(getField(category as unknown as Record<string, unknown>, "more_details", "moreDetails") as string)}
         </div>
         <Divider />
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Sous-catégories</h3>
         <div className="mb-6 text-lg">
-          {Array.isArray(getField(category, "subCategories", "subcategories")) && getField(category, "subCategories", "subcategories").length > 0 ? (
+          {Array.isArray(getField(category as unknown as Record<string, unknown>, "subCategories", "subcategories")) && (getField(category as unknown as Record<string, unknown>, "subCategories", "subcategories") as unknown[]).length > 0 ? (
             <ul className="list-disc ml-6">
-              {getField(category, "subCategories", "subcategories").map((sub: any, idx: number) => (
-                <li key={sub._id || sub.slug || idx}>
-                  {getField(sub, "designation_fr", "designation", "name") || sub.slug || sub._id}
+              {(getField(category as unknown as Record<string, unknown>, "subCategories", "subcategories") as Record<string, unknown>[]).map((sub: Record<string, unknown>, idx: number) => (
+                <li key={String(sub._id || sub.slug || idx)}>
+                  {String(getField(sub, "designation_fr", "designation", "name") || sub.slug || sub._id)}
                 </li>
               ))}
             </ul>

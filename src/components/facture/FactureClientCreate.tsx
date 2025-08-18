@@ -132,7 +132,7 @@ export default function FactureClientCreate() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Date d'échéance</label>
+            <label className="block text-sm font-medium mb-1">Date d&apos;échéance</label>
             <input
               type="date"
               value={factureInfo.date_echeance}
@@ -233,7 +233,7 @@ export default function FactureClientCreate() {
                 value={clientInfo.client_nif}
                 onChange={(e) => setClientInfo({...clientInfo, client_nif: e.target.value})}
                 className="w-full border rounded px-3 py-2"
-                placeholder="Numéro d'identification fiscale"
+                placeholder="Numéro d&apos;identification fiscale"
               />
             </div>
           </div>

@@ -14,13 +14,13 @@ export const fetchAnnonceById = async (id: string): Promise<Annonce> => {
   return data;
 };
 
-export const createAnnonce = async (annonce: any): Promise<Annonce> => {
+export const createAnnonce = async (annonce: Record<string, unknown>): Promise<Annonce> => {
   // Handle file uploads first
-  const formData: any = { ...annonce };
+  const formData: Record<string, unknown> = { ...annonce };
   
   // Upload files if they exist
   for (const [key, value] of Object.entries(annonce)) {
-    if (value && typeof value === 'object' && value.constructor === File) {
+    if (value instanceof File) {
       try {
         const uploadFormData = new FormData();
         uploadFormData.append('file', value as File);
@@ -36,19 +36,19 @@ export const createAnnonce = async (annonce: any): Promise<Annonce> => {
   }
   
   const cleanData = Object.fromEntries(
-    Object.entries(formData).filter(([_, value]) => value !== undefined && value !== '' && !(value && typeof value === 'object' && value.constructor === File))
+    Object.entries(formData).filter(([_, value]) => value !== undefined && value !== '' && !(value instanceof File))
   );
   const { data } = await axiosInstance.post<Annonce>(RESOURCE, cleanData);
   return data;
 };
 
-export const updateAnnonce = async (id: string, annonce: any): Promise<Annonce> => {
+export const updateAnnonce = async (id: string, annonce: Record<string, unknown>): Promise<Annonce> => {
   const formData = new FormData();
   
   // Add all fields to FormData
   for (const [key, value] of Object.entries(annonce)) {
     if (key !== '_id' && key !== '__v' && key !== 'createdAt' && key !== 'updatedAt') {
-      if (value && typeof value === 'object' && value.constructor === File) {
+      if (value instanceof File) {
         formData.append(key, value as File);
       } else if (value !== undefined && value !== '') {
         formData.append(key, String(value));

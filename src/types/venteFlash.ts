@@ -43,5 +43,4 @@ export interface VenteFlash {
     url: string;
     img_id: string;
   }>;
-  [key: string]: any;
 }

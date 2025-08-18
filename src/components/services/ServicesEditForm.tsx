@@ -6,7 +6,11 @@ import { fetchServiceById, updateService } from "@/services/services";
 import { ServiceItem } from "@/types/services";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 
-const initialState: Partial<ServiceItem> = {
+interface ServiceFormState extends Omit<ServiceItem, 'icon'> {
+  icon: string | File;
+}
+
+const initialState: Partial<ServiceFormState> = {
   id: "",
   designation_fr: "",
   description_fr: "",
@@ -17,7 +21,7 @@ const initialState: Partial<ServiceItem> = {
 
 export default function ServicesEditForm({ id }: { id: string }) {
   const router = useRouter();
-  const [form, setForm] = useState<any>(initialState);
+  const [form, setForm] = useState<Partial<ServiceFormState>>(initialState);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [iconPreview, setIconPreview] = useState<string | null>(null);
@@ -65,10 +69,14 @@ export default function ServicesEditForm({ id }: { id: string }) {
     setLoading(true);
     setError(null);
     try {
-      await updateService(id, form);
+      const serviceData: Partial<ServiceItem> = {
+        ...form,
+        icon: typeof form.icon === 'string' ? form.icon : undefined
+      };
+      await updateService(id, serviceData);
       router.push("/admin/services");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la modification du service");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Erreur lors de la modification du service");
     } finally {
       setLoading(false);
     }

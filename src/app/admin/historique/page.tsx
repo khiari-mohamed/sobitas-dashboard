@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "@/lib/axios";
 import { FileText, User, Receipt, MapPin } from "lucide-react";
@@ -40,6 +40,9 @@ interface Order {
   prenom?: string;
   phone?: string;
   email?: string;
+  billing_localite?: string;
+  ville?: string;
+  pays?: string;
 }
 
 interface Invoice {
@@ -62,7 +65,7 @@ interface Invoice {
   type?: string;
 }
 
-export default function HistoriquePage() {
+function HistoriquePageContent() {
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get("search") || "";
   
@@ -86,7 +89,7 @@ export default function HistoriquePage() {
         ]);
         
         let allClients: Client[] = [];
-        let allCommandes: any[] = [];
+        let allCommandes: Order[] = [];
         
         // Get clients data
         if (clientsResponse.status === 'fulfilled') {
@@ -123,7 +126,7 @@ export default function HistoriquePage() {
         });
         
         // Search in commandes for clients not in clients table
-        const commandeClients = allCommandes.filter(commande => {
+        const commandeClients = allCommandes.filter((commande: Order) => {
           const email = commande.email || '';
           const phone = commande.phone || '';
           const nom = commande.nom || '';
@@ -220,7 +223,7 @@ export default function HistoriquePage() {
         console.log('No client data found, using search term:', searchTerm);
         
         // Filter commandes directly by search term
-        const clientCommandes = allCommandes.filter((record: any) => {
+        const clientCommandes = allCommandes.filter((record: Order) => {
           const recordEmail = record.email || '';
           const recordPhone = record.phone || '';
           const recordNom = record.nom || '';
@@ -268,7 +271,7 @@ export default function HistoriquePage() {
       }
       
       // Function to check if a record matches the client
-      const matchesClient = (record: any) => {
+      const matchesClient = (record: Order) => {
         const recordEmail = record.email || '';
         const recordPhone = record.phone || '';
         const recordNom = record.nom || '';
@@ -342,12 +345,12 @@ export default function HistoriquePage() {
   return (
     <div className="p-3 sm:p-6 max-w-full overflow-hidden">
       <h1 className="text-xl sm:text-2xl font-bold text-[#222A3F] mb-4 sm:mb-6 break-words">
-        Historique Client - Recherche: "{searchTerm}"
+        Historique Client - Recherche: &quot;{searchTerm}&quot;
       </h1>
 
       {clients.length === 0 ? (
         <div className="bg-white p-4 sm:p-6 rounded shadow-sm border text-center">
-          <p className="text-gray-600 text-sm sm:text-base">Aucun client trouvé pour "{searchTerm}"</p>
+          <p className="text-gray-600 text-sm sm:text-base">Aucun client trouvé pour &quot;{searchTerm}&quot;</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
@@ -561,4 +564,12 @@ export default function HistoriquePage() {
       )}
     </div>
   );
-} 
+}
+
+export default function HistoriquePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HistoriquePageContent />
+    </Suspense>
+  );
+}

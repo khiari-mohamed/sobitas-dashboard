@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import factureService from "@/services/facture";
 
-export default function DocumentEditForm({ order, doc, onSave }: { order: any; doc: string; onSave?: () => void }) {
-  const [form, setForm] = useState<any>(order);
+export default function DocumentEditForm({ order, doc, onSave }: { order: Record<string, unknown>; doc: string; onSave?: () => void }) {
+  const [form, setForm] = useState<Record<string, unknown>>(order);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -10,7 +10,7 @@ export default function DocumentEditForm({ order, doc, onSave }: { order: any; d
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setForm((prev: any) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,10 +19,10 @@ export default function DocumentEditForm({ order, doc, onSave }: { order: any; d
     setError(null);
     setSuccess(false);
     try {
-      await factureService.updateFacture(form._id || form.id, form);
+      await factureService.updateFacture(String(form._id || form.id), form);
       setSuccess(true);
       if (onSave) onSave();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError("Erreur lors de la mise à jour du document.");
     } finally {
       setLoading(false);
@@ -43,7 +43,7 @@ export default function DocumentEditForm({ order, doc, onSave }: { order: any; d
           {key === "note" || key === "historique" ? (
             <textarea
               name={key}
-              value={form[key] || ""}
+              value={String(form[key] || "")}
               onChange={handleChange}
               className="w-full border p-3 rounded"
             />
@@ -51,7 +51,7 @@ export default function DocumentEditForm({ order, doc, onSave }: { order: any; d
             <input
               type="text"
               name={key}
-              value={form[key] || ""}
+              value={String(form[key] || "")}
               onChange={handleChange}
               className="w-full border p-3 rounded"
             />

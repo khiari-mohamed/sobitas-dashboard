@@ -26,7 +26,7 @@ const initialState: Partial<Annonce> = {
 
 export default function AnnouncesCreateClient() {
   const router = useRouter();
-  const [form, setForm] = useState<any>(initialState);
+  const [form, setForm] = useState<Partial<Annonce>>(initialState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [imagePreviews, setImagePreviews] = useState<{ [key: string]: string | null }>({});
@@ -54,10 +54,10 @@ export default function AnnouncesCreateClient() {
     setError(null);
     try {
       // You may need to handle file upload as multipart/form-data if backend expects it
-      await createAnnonce(form as Annonce);
+      await createAnnonce(form as unknown as Record<string, unknown>);
       router.push("/admin/announces");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la création de l'annonce");
+    } catch (err) {
+      setError((err as Error).message || "Erreur lors de la création de l'annonce");
     } finally {
       setLoading(false);
     }

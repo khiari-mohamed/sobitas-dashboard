@@ -40,8 +40,8 @@ export default function ReviewsCreateClient() {
     try {
       await postReview(form as Review);
       router.push("/admin/reviews");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la création de l'avis");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur lors de la création de l'avis");
     } finally {
       setLoading(false);
     }

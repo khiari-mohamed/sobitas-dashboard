@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useRef, useState } from "react";
+import React, { useState, useRef } from "react";
 
 // PC and mobile frontend slide images (from HeroCarousel)
 const initialPCSlides = [

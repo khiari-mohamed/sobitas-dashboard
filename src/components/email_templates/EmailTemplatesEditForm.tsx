@@ -5,7 +5,7 @@ import axiosInstance from "@/lib/axios";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import { FaArrowLeft } from "react-icons/fa";
 
-const samplePayloads: Record<string, any> = {
+const samplePayloads: Record<string, Record<string, unknown>> = {
   "order-confirmation": {
     customerName: "Test User",
     orderNumber: "CMD-TEST",

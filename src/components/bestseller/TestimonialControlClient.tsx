@@ -53,19 +53,19 @@ export default function TestimonialControlClient() {
     }
   }, [testimonials, maxDisplay]);
 
-  const updateConfig = (field: string, value: any) => {
+  const updateConfig = (field: string, value: string | number | boolean) => {
     switch (field) {
       case 'sectionTitle':
-        setSectionTitle(value);
+        setSectionTitle(String(value));
         break;
       case 'sectionDescription':
-        setSectionDescription(value);
+        setSectionDescription(String(value));
         break;
       case 'maxDisplay':
-        setMaxDisplay(value);
+        setMaxDisplay(Number(value));
         break;
       case 'showOnFrontend':
-        setShowOnFrontend(value);
+        setShowOnFrontend(Boolean(value));
         break;
     }
     setHasChanges(true);
@@ -80,7 +80,7 @@ export default function TestimonialControlClient() {
         sectionDescription,
         maxDisplay,
         showOnFrontend,
-        testimonialOrder: testimonials.map(t => t._id || t.id).filter(Boolean)
+        testimonialOrder: testimonials.map(t => t._id || t.id).filter(Boolean) as string[]
       };
       console.log('Saving config:', config);
       const result = await saveTestimonialConfig(config);
@@ -427,7 +427,7 @@ export default function TestimonialControlClient() {
               <h3 className="text-xl font-bold mb-4">Modifier le témoignage</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Nom de l'auteur</label>
+                  <label className="block text-sm font-medium mb-1">Nom de l&apos;auteur</label>
                   <input
                     type="text"
                     value={editingTestimonial.authorName}
@@ -465,7 +465,7 @@ export default function TestimonialControlClient() {
                   value={editingTestimonial.comment}
                   onChange={(e) => setEditingTestimonial({...editingTestimonial, comment: e.target.value})}
                   className="w-full border p-2 rounded h-32"
-                  placeholder="Commentaire du client..."
+                  placeholder="Commentaire du client&hellip;"
                 />
               </div>
               <div className="flex justify-end gap-4 mt-6">

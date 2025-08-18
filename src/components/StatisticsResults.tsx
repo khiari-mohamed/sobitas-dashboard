@@ -106,8 +106,8 @@ export default function StatisticsResults({ module, startDate, endDate, chartTyp
 
       // Transform revenue data for main chart
       const mainChart = {
-        labels: revenueData.map((item: any) => item.label || new Date(item.date).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' })),
-        data: revenueData.map((item: any) => item.totalRevenue || 0)
+        labels: revenueData.map((item: Record<string, unknown>) => (item.label as string) || new Date(item.date as string).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' })),
+        data: revenueData.map((item: Record<string, unknown>) => (item.totalRevenue as number) || 0)
       };
 
       // Transform year over year data
@@ -129,19 +129,19 @@ export default function StatisticsResults({ module, startDate, endDate, chartTyp
 
       setData({
         mainChart,
-        categoryPerformance: categoryData.map((item: any) => ({
-          name: item.categoryName || item.name,
-          totalSales: item.totalRevenue || item.totalSales || 0
+        categoryPerformance: categoryData.map((item: Record<string, unknown>) => ({
+          name: (item.categoryName as string) || (item.name as string),
+          totalSales: (item.totalRevenue as number) || (item.totalSales as number) || 0
         })),
-        promoCodeStats: promoData.map((item: any) => ({
-          code: item.code,
-          usageCount: item.totalUses || item.usageCount || 0,
-          totalDiscount: item.totalDiscount || 0
+        promoCodeStats: promoData.map((item: Record<string, unknown>) => ({
+          code: item.code as string,
+          usageCount: (item.totalUses as number) || (item.usageCount as number) || 0,
+          totalDiscount: (item.totalDiscount as number) || 0
         })),
-        salesByCountry: countryData.map((item: any) => ({
-          country: item.country,
-          sales: item.sales || 0,
-          orders: item.orders || 0
+        salesByCountry: countryData.map((item: Record<string, unknown>) => ({
+          country: item.country as string,
+          sales: (item.sales as number) || 0,
+          orders: (item.orders as number) || 0
         })),
         yearOverYear,
         metrics: {
@@ -164,7 +164,7 @@ export default function StatisticsResults({ module, startDate, endDate, chartTyp
   const getMainChartData = () => {
     if (!data?.mainChart) return null;
     
-    const moduleConfig = getModuleConfig(module as any);
+    const moduleConfig = getModuleConfig(module as "Commande" | "Facture TVA" | "Bon de commande" | "Produit" | "Redirection" | "Review" | "Seo Page" | "Ticket" | "User");
 
     return {
       labels: data.mainChart.labels,

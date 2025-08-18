@@ -41,8 +41,8 @@ export default function ContactEditForm() {
         message: form.message,
       });
       router.push("/admin/contact");
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Erreur lors de la modification du contact.");
+    } catch (err: unknown) {
+      setError((err as Error)?.message || "Erreur lors de la modification du contact.");
     } finally {
       setSaving(false);
     }

@@ -58,8 +58,8 @@ export default function FaqsEditForm({ id }: { id: string }) {
       };
       await updateFaq(id, submitData);
       router.push("/admin/faqs");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la modification de la FAQ");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur lors de la modification de la FAQ");
     } finally {
       setLoading(false);
     }

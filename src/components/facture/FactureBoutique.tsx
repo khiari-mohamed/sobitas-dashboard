@@ -15,18 +15,18 @@ function numberToFrenchWords(n: number): string {
   return n2words(n, { lang: "fr" });
 }
 
-function getProductArray(order: any): any[] {
+function getProductArray(order: Record<string, unknown>): Record<string, unknown>[] {
   if (!order) return [];
   if (Array.isArray(order.cart) && order.cart.length > 0) return order.cart;
   if (Array.isArray(order.products) && order.products.length > 0) return order.products;
   if (Array.isArray(order.items) && order.items.length > 0) return order.items;
-  if (order.cart && typeof order.cart === "object" && !Array.isArray(order.cart)) return [order.cart];
-  if (order.products && typeof order.products === "object" && !Array.isArray(order.products)) return [order.products];
-  if (order.items && typeof order.items === "object" && !Array.isArray(order.items)) return [order.items];
+  if (order.cart && typeof order.cart === "object" && !Array.isArray(order.cart)) return [order.cart as Record<string, unknown>];
+  if (order.products && typeof order.products === "object" && !Array.isArray(order.products)) return [order.products as Record<string, unknown>];
+  if (order.items && typeof order.items === "object" && !Array.isArray(order.items)) return [order.items as Record<string, unknown>];
   return [];
 }
 
-const FactureBoutique = ({ order, printRef }: { order: any; printRef?: React.Ref<HTMLDivElement> }) => {
+const FactureBoutique = ({ order, printRef }: { order: Record<string, unknown>; printRef?: React.Ref<HTMLDivElement> }) => {
   if (!order) return null;
   const cart = getProductArray(order);
   const totalHT = Number(order.prix_ht || 0);
@@ -63,7 +63,7 @@ const FactureBoutique = ({ order, printRef }: { order: any; printRef?: React.Ref
     phone: order.livraison_phone || "",
   };
   const dateEmission = order.created_at
-    ? new Date(order.created_at).toLocaleString("fr-FR", {
+    ? new Date(String(order.created_at)).toLocaleString("fr-FR", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
@@ -104,7 +104,7 @@ const FactureBoutique = ({ order, printRef }: { order: any; printRef?: React.Ref
               FACTURE BOUTIQUE
             </span>
             <span className="text-xs text-gray-700 mt-2">Date démission : {dateEmission}</span>
-            <span className="text-xs text-gray-700">N° : <span className="font-semibold">{order.numero}</span></span>
+            <span className="text-xs text-gray-700">N° : <span className="font-semibold">{String(order.numero)}</span></span>
           </div>
         </div>
         <div className="w-full h-0.5 mb-4" style={{ background: ORANGE, borderRadius: 2 }} />
@@ -113,22 +113,22 @@ const FactureBoutique = ({ order, printRef }: { order: any; printRef?: React.Ref
           <div className="flex-1">
             <div className="font-semibold text-sm text-blue-700 mb-1">Facturé à</div>
             <div className="text-xs text-gray-700 leading-tight">
-              <div>{billing.prenom} {billing.nom}</div>
-              <div>{billing.adresse1}</div>
-              <div>{billing.pays}</div>
-              <div>Email : {billing.email}</div>
-              <div>Tél : {billing.phone}</div>
+              <div>{String(billing.prenom)} {String(billing.nom)}</div>
+              <div>{String(billing.adresse1)}</div>
+              <div>{String(billing.pays)}</div>
+              <div>Email : {String(billing.email)}</div>
+              <div>Tél : {String(billing.phone)}</div>
             </div>
           </div>
           <div className="flex-1">
             <div className="font-semibold text-sm text-blue-700 mb-1">Livraison</div>
             <div className="text-xs text-gray-700 leading-tight">
-              <div>{shipping.prenom} {shipping.nom}</div>
-              <div>{shipping.adresse1}</div>
-              {shipping.adresse2 && <div>{shipping.adresse2}</div>}
-              <div>{shipping.ville}{shipping.code_postale ? `, ${shipping.code_postale}` : ""}</div>
-              <div>{shipping.pays}</div>
-              <div>Tél : {shipping.phone || "N/A"}</div>
+              <div>{String(shipping.prenom)} {String(shipping.nom)}</div>
+              <div>{String(shipping.adresse1)}</div>
+              {shipping.adresse2 && <div>{String(shipping.adresse2)}</div>}
+              <div>{String(shipping.ville)}{shipping.code_postale ? `, ${String(shipping.code_postale)}` : ""}</div>
+              <div>{String(shipping.pays)}</div>
+              <div>Tél : {String(shipping.phone || "N/A")}</div>
             </div>
           </div>
         </div>
@@ -146,13 +146,13 @@ const FactureBoutique = ({ order, printRef }: { order: any; printRef?: React.Ref
             </thead>
             <tbody>
               {cart.length > 0 ? (
-                cart.map((item: any, idx: number) => (
+                cart.map((item: Record<string, unknown>, idx: number) => (
                   <tr key={idx} className="border-t hover:bg-orange-50">
-                    <td className="p-1">{item.title || item.name || item.product_name || "Produit"}</td>
-                    <td className="p-1 text-right">{item.quantity ?? item.qty ?? 1}</td>
+                    <td className="p-1">{String(item.title || item.name || item.product_name || "Produit")}</td>
+                    <td className="p-1 text-right">{String(item.quantity ?? item.qty ?? 1)}</td>
                     <td className="p-1 text-right">{Number(item.price ?? item.unit_price ?? 0).toLocaleString("fr-TN", { style: "currency", currency: "TND" })}</td>
                     <td className="p-1 text-right">{item.tva ? Number(item.tva).toLocaleString("fr-TN", { style: "currency", currency: "TND" }) : "0,000 TND"}</td>
-                    <td className="p-1 text-right">{Number((item.price ?? item.unit_price ?? 0) * (item.quantity ?? item.qty ?? 1)).toLocaleString("fr-TN", { style: "currency", currency: "TND" })}</td>
+                    <td className="p-1 text-right">{(Number(item.price ?? item.unit_price ?? 0) * Number(item.quantity ?? item.qty ?? 1)).toLocaleString("fr-TN", { style: "currency", currency: "TND" })}</td>
                   </tr>
                 ))
               ) : (

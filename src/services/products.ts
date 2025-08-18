@@ -1,7 +1,7 @@
 // src/services/products.ts
 "use server";
 import axiosInstance from "../lib/axios";
-import { Product, FlashSaleProduct } from "../types/product";
+import { Product, FlashSaleProduct, Review } from "../types/product";
 export type { Product } from "../types/product";
 
 type Pagination = {
@@ -10,73 +10,67 @@ type Pagination = {
   total: number;
 };
 
-type ProductListResponse = {
-  products: Product[];
-  pagination: Pagination;
-};
 
-// Type guard for product responses
-function isProductResponse(data: any): data is ProductListResponse {
-  return (
-    Array.isArray(data?.products) &&
-    typeof data?.pagination === "object" &&
-    data.pagination !== null
-  );
-}
 
 // Normalization function to map backend fields to frontend Product type
-function normalizeProduct(raw: any): Product {
+function normalizeProduct(raw: Record<string, unknown>): Product {
+  const safeString = (val: unknown): string => typeof val === 'string' ? val : '';
+  const safeNumber = (val: unknown): number => typeof val === 'number' ? val : Number(val) || 0;
+  const safeBool = (val: unknown): boolean => typeof val === 'boolean' ? val : Boolean(val);
+  const safeArray = (val: unknown): unknown[] => Array.isArray(val) ? val : [];
+  const safeObj = (val: unknown): Record<string, unknown> => (val && typeof val === 'object' && !Array.isArray(val)) ? val as Record<string, unknown> : {};
+  
   return {
-    title: raw.title || raw.designation_fr || raw.designation || "",
-    price: Number(raw.price ?? raw.prix ?? 0),
-    discountedPrice: Number(raw.discountedPrice ?? raw.promo ?? raw.promo_ht ?? raw.price ?? raw.prix ?? 0),
-    id: Number(raw.id ?? raw._id ?? 0),
+    title: safeString(raw.title || raw.designation_fr || raw.designation),
+    price: safeNumber(raw.price ?? raw.prix ?? 0),
+    discountedPrice: safeNumber(raw.discountedPrice ?? raw.promo ?? raw.promo_ht ?? raw.price ?? raw.prix ?? 0),
+    id: safeNumber(raw.id ?? raw._id ?? 0),
     imgs: {
-      thumbnails: raw.images?.map((img: any) => img.url) || (raw.mainImage?.url ? [raw.mainImage.url] : []),
-      previews: raw.images?.map((img: any) => img.url) || (raw.mainImage?.url ? [raw.mainImage.url] : []),
+      thumbnails: safeArray(raw.images).map((img: unknown) => safeString(safeObj(img).url)) || (safeObj(raw.mainImage).url ? [safeString(safeObj(raw.mainImage).url)] : []),
+      previews: safeArray(raw.images).map((img: unknown) => safeString(safeObj(img).url)) || (safeObj(raw.mainImage).url ? [safeString(safeObj(raw.mainImage).url)] : []),
     },
-    currency: raw.currency || "TND",
-    _id: raw._id || "",
-    designation: raw.designation || "",
-    slug: raw.slug || "",
-    oldPrice: Number(raw.oldPrice ?? raw.prix_ht ?? raw.promo ?? 0) || undefined,
-    mainImage: raw.mainImage || { url: "" },
-    images: raw.images || [],
-    inStock: raw.inStock ?? (raw.rupture === "0" ? true : false),
-    reviews: raw.reviews || [],
-    features: raw.features || [],
-    aroma_ids: raw.aroma_ids || [],
-    brand: raw.brand || "",
-    smallDescription: raw.smallDescription || raw.description_cover || "",
-    description: raw.description || raw.description_fr || "",
-    meta_description_fr: raw.meta_description_fr || "",
-    category: raw.category || "",
-    subCategory: raw.subCategory || [],
-    venteflashDate: raw.venteflashDate || undefined,
-    isFlashSale: raw.isFlashSale || false,
-    discountPercentage: raw.discountPercentage || undefined,
-    type: raw.type || "",
-    isNewProduct: raw.isNewProduct !== undefined ? raw.isNewProduct : raw.isNewArrival !== undefined ? raw.isNewArrival : raw.new_product === "1",
-    isBestSeller: raw.isBestSeller !== undefined ? raw.isBestSeller : raw.bestSellerSection !== undefined ? raw.bestSellerSection : raw.best_seller === "1",
-    isOutOfStock: raw.isOutOfStock ?? (raw.rupture === "1" ? true : false),
-    isPublished: raw.isPublished !== undefined ? raw.isPublished : raw.publier === "1",
-    aggregateRating: raw.aggregateRating ?? (raw.note ? Number(raw.note) : undefined),
-    promoExpirationDate: raw.promoExpirationDate ?? raw.promo_expiration_date ?? undefined,
-    sous_categorie_id: raw.sous_categorie_id ?? raw.sousCategorieId ?? raw.subCategoryId ?? "",
-    cover: raw.cover || raw.mainImage?.url || "",
-    nutrition_values: raw.nutrition_values || "",
-    questions: raw.questions || "",
-    zone1: raw.zone1 || "",
-    zone2: raw.zone2 || "",
-    zone3: raw.zone3 || "",
-    zone4: raw.zone4 || "",
-    content_seo: raw.content_seo || raw.contentSeo || "",
-    meta: raw.meta || "",
-    pack: raw.pack || "",
-    rupture: raw.rupture || false,
-    status: raw.status || true,
-    qte: raw.qte || 0,
-    quantity: raw.quantity || raw.qte || 0
+    currency: safeString(raw.currency) || "TND",
+    _id: safeString(raw._id),
+    designation: safeString(raw.designation),
+    slug: safeString(raw.slug),
+    oldPrice: safeNumber(raw.oldPrice ?? raw.prix_ht ?? raw.promo ?? 0) || undefined,
+    mainImage: safeObj(raw.mainImage).url ? safeObj(raw.mainImage) as { url: string } : { url: "" },
+    images: safeArray(raw.images) as { url: string }[],
+    inStock: safeBool(raw.inStock ?? (raw.rupture === "0" ? true : false)),
+    reviews: safeArray(raw.reviews) as Review[],
+    features: safeArray(raw.features) as string[],
+    aroma_ids: safeArray(raw.aroma_ids) as string[],
+    brand: safeString(raw.brand),
+    smallDescription: safeString(raw.smallDescription || raw.description_cover),
+    description: safeString(raw.description || raw.description_fr),
+    meta_description_fr: safeString(raw.meta_description_fr),
+    category: safeString(raw.category),
+    subCategory: safeArray(raw.subCategory) as (string | { _id: string; designation: string })[],
+    venteflashDate: raw.venteflashDate as Date | undefined,
+    isFlashSale: safeBool(raw.isFlashSale),
+    discountPercentage: raw.discountPercentage as number | undefined,
+    type: safeString(raw.type),
+    isNewProduct: safeBool(raw.isNewProduct !== undefined ? raw.isNewProduct : raw.isNewArrival !== undefined ? raw.isNewArrival : raw.new_product === "1"),
+    isBestSeller: safeBool(raw.isBestSeller !== undefined ? raw.isBestSeller : raw.bestSellerSection !== undefined ? raw.bestSellerSection : raw.best_seller === "1"),
+    isOutOfStock: safeBool(raw.isOutOfStock ?? (raw.rupture === "1" ? true : false)),
+    isPublished: safeBool(raw.isPublished !== undefined ? raw.isPublished : raw.publier === "1"),
+    aggregateRating: raw.aggregateRating as number | undefined ?? (raw.note ? safeNumber(raw.note) : undefined),
+    promoExpirationDate: raw.promoExpirationDate as Date | undefined ?? raw.promo_expiration_date as Date | undefined,
+    sous_categorie_id: safeString(raw.sous_categorie_id ?? raw.sousCategorieId ?? raw.subCategoryId),
+    cover: safeString(raw.cover || safeObj(raw.mainImage).url),
+    nutrition_values: safeString(raw.nutrition_values),
+    questions: safeString(raw.questions),
+    zone1: safeString(raw.zone1),
+    zone2: safeString(raw.zone2),
+    zone3: safeString(raw.zone3),
+    zone4: safeString(raw.zone4),
+    content_seo: safeString(raw.content_seo || raw.contentSeo),
+    meta: safeString(raw.meta),
+    pack: safeString(raw.pack),
+    rupture: safeString(raw.rupture),
+    status: safeBool(raw.status ?? true),
+    qte: safeNumber(raw.qte) as React.ReactNode,
+    quantity: safeNumber(raw.quantity || raw.qte) as React.ReactNode
   };
 }
 // Helper function to transform images with ID support
@@ -108,7 +102,9 @@ const calculateReviews = (product: Product) => {
 };
 
 // Helper to safely extract product arrays with pagination support
-const extractProductData = (data: any) => {
+const extractProductData = (data: Record<string, unknown>) => {
+  const safeObj = (val: unknown): Record<string, unknown> => (val && typeof val === 'object' && !Array.isArray(val)) ? val as Record<string, unknown> : {};
+  
   // Case 1: { products: [...] }
   if (Array.isArray(data?.products)) {
     return {
@@ -117,16 +113,16 @@ const extractProductData = (data: any) => {
     };
   }
   // Case 2: { data: { products: [...] } }
-  if (Array.isArray(data?.data?.products)) {
+  if (Array.isArray(safeObj(data?.data).products)) {
     return {
-      products: data.data.products,
-      pagination: data.data.pagination ?? data.pagination ?? null
+      products: safeObj(data?.data).products as unknown[],
+      pagination: safeObj(data?.data).pagination ?? data.pagination ?? null
     };
   }
   // Case 3: { data: [...] }
   if (Array.isArray(data?.data)) {
     return {
-      products: data.data,
+      products: data.data as unknown[],
       pagination: data.pagination ?? null
     };
   }
@@ -163,7 +159,7 @@ export async function getTopProductsFeature(): Promise<Product[]> {
     });
 
     const { products } = extractProductData(response.data);
-    const result = products.map((raw: any) => {
+    const result = products.map((raw: Record<string, unknown>) => {
       const product = normalizeProduct(raw);
       return {
         ...product,
@@ -196,7 +192,7 @@ export async function getNewProductsFeature(): Promise<Product[]> {
     });
 
     const { products } = extractProductData(response.data);
-    const result = products.map((raw: any) => {
+    const result = products.map((raw: Record<string, unknown>) => {
       const product = normalizeProduct(raw);
       return {
         ...product,
@@ -229,7 +225,7 @@ export async function getVenteFlashProductFeature(): Promise<FlashSaleProduct[]>
     });
 
     const { products } = extractProductData(response.data);
-    const result = products.map((raw: any) => {
+    const result = products.map((raw: Record<string, unknown>) => {
       const product = normalizeProduct(raw);
       return {
         ...product,
@@ -271,7 +267,7 @@ export async function getMaterielDeMusculationProductFeature(): Promise<Product[
     });
 
     const { products } = extractProductData(response.data);
-    const result = products.map((raw: any) => {
+    const result = products.map((raw: Record<string, unknown>) => {
       const product = normalizeProduct(raw);
       return {
         ...product,
@@ -327,7 +323,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 
 export async function getProductListPage(query: string): Promise<{
   products: Product[];
-  pagination: any;
+  pagination: { page: number; limit: number; total: number } | null;
 }> {
   const cacheKey = getCacheKey('product-list', query);
   try {
@@ -349,7 +345,7 @@ export async function getProductListPage(query: string): Promise<{
 
     const { products, pagination } = extractProductData(productsData);
     const result = {
-      products: products.map((raw: any) => {
+      products: products.map((raw: Record<string, unknown>) => {
         const product = normalizeProduct(raw);
         return {
           ...product,
@@ -357,7 +353,7 @@ export async function getProductListPage(query: string): Promise<{
           ...calculateReviews(product)
         };
       }),
-      pagination
+      pagination: pagination as { page: number; limit: number; total: number } | null
     };
 
 
@@ -410,7 +406,7 @@ export async function getRelatedProducts(categoryId: string): Promise<Product[]>
     });
 
     const { products } = extractProductData(response.data);
-    const result = products.map((raw: any) => {
+    const result = products.map((raw: Record<string, unknown>) => {
       const product = normalizeProduct(raw);
       return {
         ...product,
@@ -446,7 +442,7 @@ export async function getLatestProducts(limit: number = 3): Promise<Product[]> {
     });
 
     const { products } = extractProductData(response.data);
-    const result = products.map((raw: any) => {
+    const result = products.map((raw: Record<string, unknown>) => {
       const product = normalizeProduct(raw);
       return {
         ...product,
@@ -485,7 +481,7 @@ function isValidProductId(id: string) {
  * Toggle the published status of a product (admin only).
  * @param productId The product's _id
  */
-export async function toggleProductStatus(productId: string): Promise<any> {
+export async function toggleProductStatus(productId: string): Promise<{ success: boolean; data: Product }> {
   if (!isValidObjectId(productId)) {
     throw new Error("Invalid product ID");
   }
@@ -495,7 +491,7 @@ export async function toggleProductStatus(productId: string): Promise<any> {
 }
 
 
-export async function createProduct(productData: any, mainImageFile?: File | null, imageFiles?: File[]) {
+export async function createProduct(productData: Partial<Product>, mainImageFile?: File | null, imageFiles?: File[]) {
   const formData = new FormData();
   // ...append fields as above...
   if (mainImageFile) formData.append("mainImage", mainImageFile);
@@ -509,11 +505,11 @@ export async function createProduct(productData: any, mainImageFile?: File | nul
 }
 
 
-export async function updateProduct(productId: string, productData: any, mainImageFile?: File | null, imageFiles?: File[]) {
+export async function updateProduct(productId: string, productData: Partial<Product>, mainImageFile?: File | null, imageFiles?: File[]) {
   const formData = new FormData();
   // ...append fields as in createProduct...
-  formData.append("designation", productData.designation);
-  formData.append("price", String(productData.price));
+  if (productData.designation) formData.append("designation", productData.designation);
+  if (productData.price !== undefined) formData.append("price", String(productData.price));
   formData.append("oldPrice", String(productData.oldPrice || 0));
   // ...other fields...
   if (mainImageFile) formData.append("mainImage", mainImageFile);

@@ -1,5 +1,6 @@
 import TagsEditForm from "@/components/tags/TagsEditForm";
 
-export default function TagsEditPage({ params }: { params: { id: string } }) {
-  return <TagsEditForm id={params.id} />;
+export default async function TagsEditPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <TagsEditForm id={id} />;
 }

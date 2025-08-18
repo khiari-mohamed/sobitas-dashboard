@@ -52,7 +52,7 @@ export async function fetchProductById(id: string): Promise<Product> {
 
 
 // Bulk create products
-export async function createProductsBulk(products: Product[]): Promise<any> {
+export async function createProductsBulk(products: Product[]): Promise<{ success: boolean; message: string; data?: Product[] }> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/products/bulk`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

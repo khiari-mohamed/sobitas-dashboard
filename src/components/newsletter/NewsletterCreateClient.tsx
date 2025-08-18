@@ -29,8 +29,8 @@ export default function NewsletterCreateClient() {
     try {
       await createNewsletter(form as Newsletter);
       router.push("/admin/newsletter");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la création de l'abonné");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur lors de la création de l'abonné");
     } finally {
       setLoading(false);
     }

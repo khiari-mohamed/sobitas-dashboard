@@ -91,8 +91,8 @@ export default function CoordinatesCreateClient() {
       // You may need to handle file upload separately if backend expects multipart/form-data
       await createCoordinate(form as Coordinates);
       router.push("/admin/coordinates");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la création de la coordonnée");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Erreur lors de la création de la coordonnée");
     } finally {
       setLoading(false);
     }

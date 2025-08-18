@@ -10,21 +10,22 @@ function renderHTML(html: string | null | undefined) {
   return <div dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
-function getCategory(cat: any): string {
+function getCategory(cat: Record<string, unknown>): string {
   if (!cat) return "—";
   if (typeof cat === "string") return cat;
-  return cat.designation_fr || cat.designation || cat.title || cat.slug || cat._id || JSON.stringify(cat) || "—";
+  return String(cat.designation_fr || cat.designation || cat.title || cat.slug || cat._id || JSON.stringify(cat) || "—");
 }
 
-function getBrand(product: any): string {
+function getBrand(product: Record<string, unknown>): string {
   if (typeof product.brand === "object" && product.brand) {
-    return product.brand.designation_fr || product.brand.designation || product.brand.title || product.brand.slug || product.brand._id || JSON.stringify(product.brand);
+    const brand = product.brand as Record<string, unknown>;
+    return String(brand.designation_fr || brand.designation || brand.title || brand.slug || brand._id || JSON.stringify(brand));
   }
-  return product.brand || product.brand_id || "—";
+  return String(product.brand || product.brand_id || "—");
 }
 
-function getDate(product: any, key: string): string {
-  return product[key] || product[key.replace('_', '')] || "—";
+function getDate(product: Record<string, unknown>, key: string): string {
+  return String(product[key] || product[key.replace('_', '')] || "—");
 }
 
 function Divider() {
@@ -48,11 +49,10 @@ function Highlight({ value, yes, no, yesClass, noClass }: { value: boolean, yes:
   );
 }
 
-export default function ProductViewClient({ product, id }: { product: any; id: string }) {
-  const mainImage = product.mainImage?.url
-    || (product.cover ? "/" + product.cover.replace(/^\/+/, "") : null);
+export default function ProductViewClient({ product, id }: { product: Record<string, unknown>; id: string }) {
+  const mainImage = (product.mainImage as Record<string, unknown>)?.url
+    || (product.cover ? "/" + String(product.cover).replace(/^\/+/, "") : null);
   const galleryImages = Array.isArray(product.images) ? product.images : [];
-  const category = getCategory(product.category);
   const subCategories = Array.isArray(product.subCategory)
     ? product.subCategory.map(getCategory).filter(Boolean)
     : [];
@@ -93,13 +93,13 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
         open={showDelete}
         onClose={() => setShowDelete(false)}
         onConfirm={handleDelete}
-        productName={product.designation_fr || product.title || product.designation}
+        productName={String(product.designation_fr || product.title || product.designation)}
       />
 
       <div className="bg-white shadow-lg p-10 w-full max-w-screen-2xl mx-auto">
         {/* Désignation */}
         <h2 className="text-3xl font-extrabold text-gray-800 mb-3">Désignation</h2>
-        <div className="text-2xl text-gray-900 mb-6 font-semibold">{product.designation_fr || product.title || product.designation || "—"}</div>
+        <div className="text-2xl text-gray-900 mb-6 font-semibold">{String(product.designation_fr || product.title || product.designation || "—")}</div>
         <Divider />
 
         {/* Couverture */}
@@ -107,8 +107,8 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
         <div className="flex flex-col items-center mb-6">
           <div className="w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] md:w-[500px] md:h-[500px] flex items-center justify-center">
             <Image
-              src={mainImage || "/images/placeholder.png"}
-              alt={product.designation_fr || product.title || "Product image"}
+              src={String(mainImage || "/images/placeholder.png")}
+              alt={String(product.designation_fr || product.title || "Product image")}
               width={500}
               height={500}
               className="object-contain border rounded w-full h-full"
@@ -117,10 +117,10 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
           </div>
           {galleryImages.length > 0 && (
             <div className="flex gap-3 flex-wrap mt-4">
-              {galleryImages.map((img: any, idx: number) => (
+              {galleryImages.map((img: Record<string, unknown>, idx: number) => (
                 <Image
                   key={idx}
-                  src={img.url || "/images/placeholder.png"}
+                  src={String((img as Record<string, unknown>).url || "/images/placeholder.png")}
                   alt={`Gallery ${idx + 1}`}
                   width={80}
                   height={80}
@@ -139,7 +139,7 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
 
         {/* Sous-catégorie ID */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Sous-catégorie ID</h3>
-        <div className="mb-6 text-lg">{product.sous_categorie_id ?? product.sousCategorieId ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.sous_categorie_id ?? product.sousCategorieId ?? "—")}</div>
         <Divider />
 
         {/* Marque */}
@@ -149,64 +149,64 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
 
         {/* Brand ID */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Brand ID</h3>
-        <div className="mb-6 text-lg">{product.brand_id ?? product.brandId ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.brand_id ?? product.brandId ?? "—")}</div>
         <Divider />
 
         {/* Qte */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Qte</h3>
-        <div className="mb-6 text-lg">{product.qte ?? product.quantity ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.qte ?? product.quantity ?? "—")}</div>
         <Divider />
 
         {/* Prix */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Prix</h3>
-        <div className="mb-6 text-lg">{product.prix ?? product.price ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.prix ?? product.price ?? "—")}</div>
         <Divider />
 
         {/* Prix HT */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Prix HT</h3>
-        <div className="mb-6 text-lg">{product.prix_ht ?? product.prixHt ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.prix_ht ?? product.prixHt ?? "—")}</div>
         <Divider />
 
         {/* Promo */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Promo</h3>
-        <div className="mb-6 text-lg">{product.promo ?? product.promoHt ?? product.oldPrice ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.promo ?? product.promoHt ?? product.oldPrice ?? "—")}</div>
         <Divider />
 
         {/* Promo HT */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Promo HT</h3>
-        <div className="mb-6 text-lg">{product.promo_ht ?? product.promoHt ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.promo_ht ?? product.promoHt ?? "—")}</div>
         <Divider />
 
-        {/* Date d'expiration du promo (Ventes Flash) */}
-        <h3 className="text-2xl font-bold text-gray-700 mb-3">Date d'expiration du promo (Ventes Flash)</h3>
-        <div className="mb-6 text-lg">{product.promo_expiration_date ?? "—"}</div>
+        {/* Date d&apos;expiration du promo (Ventes Flash) */}
+        <h3 className="text-2xl font-bold text-gray-700 mb-3">Date d&apos;expiration du promo (Ventes Flash)</h3>
+        <div className="mb-6 text-lg">{String(product.promo_expiration_date ?? "—")}</div>
         <Divider />
 
         {/* Meta Description */}
-        <LargeTextSection title="Meta Description" content={product.meta_description_fr} />
+        <LargeTextSection title="Meta Description" content={String(product.meta_description_fr || '')} />
         <Divider />
 
         {/* Description */}
-        <LargeTextSection title="Description" content={product.description_fr || product.description || product.descriptionFr} />
+        <LargeTextSection title="Description" content={String((product.description_fr || product.description || product.descriptionFr) || '')} />
         <Divider />
 
         {/* Questions */}
-        <LargeTextSection title="Questions" content={product.questions} />
+        <LargeTextSection title="Questions" content={String(product.questions || '')} />
         <Divider />
 
         {/* Nutrition Values */}
-        <LargeTextSection title="Nutrition Values" content={product.nutrition_values} />
+        <LargeTextSection title="Nutrition Values" content={String(product.nutrition_values || '')} />
         <Divider />
 
         {/* Content SEO */}
-        <LargeTextSection title="Content SEO" content={product.content_seo ?? product.contentSeo} />
+        <LargeTextSection title="Content SEO" content={String((product.content_seo ?? product.contentSeo) || '')} />
         <Divider />
 
         {/* Publier */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Publier</h3>
         <div className="mb-6 text-lg">
           <Highlight
-            value={product.publier === "1" || product.status}
+            value={!!(product.publier === "1" || product.status)}
             yes="Publier"
             no="Non"
             yesClass="bg-teal-500 text-white"
@@ -217,14 +217,14 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
 
         {/* Slug */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Slug</h3>
-        <div className="mb-6 text-lg">{product.slug ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.slug ?? "—")}</div>
         <Divider />
 
         {/* Pack */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Pack</h3>
         <div className="mb-6 text-lg">
           <Highlight
-            value={product.pack === "1"}
+            value={!!(product.pack === "1")}
             yes="Oui"
             no="Non"
             yesClass="bg-teal-500 text-white"
@@ -242,7 +242,7 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
         <h3 className="text-2xl font-bold text-gray-700 mb-3">New Product</h3>
         <div className="mb-6 text-lg">
           <Highlight
-            value={product.new_product === "1"}
+            value={!!(product.new_product === "1")}
             yes="Oui"
             no="Non"
             yesClass="bg-orange-500 text-white"
@@ -255,7 +255,7 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
         <h3 className="text-2xl font-bold text-gray-700 mb-3">isFeatured</h3>
         <div className="mb-6 text-lg">
           <Highlight
-            value={product.isFeatured === "1"}
+            value={!!(product.isFeatured === "1")}
             yes="Oui"
             no="Non"
             yesClass="bg-purple-500 text-white"
@@ -268,7 +268,7 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
         <h3 className="text-2xl font-bold text-gray-700 mb-3">isNewArrival</h3>
         <div className="mb-6 text-lg">
           <Highlight
-            value={product.isNewArrival === "1"}
+            value={!!(product.isNewArrival === "1")}
             yes="Oui"
             no="Non"
             yesClass="bg-indigo-500 text-white"
@@ -290,16 +290,16 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
         </div>
         <Divider />
 
-        {/* Nombre d'etoiles */}
-        <h3 className="text-2xl font-bold text-gray-700 mb-3">Nombre d'etoiles</h3>
-        <div className="mb-6 text-lg">{product.note ?? "—"}</div>
+        {/* Nombre d&apos;etoiles */}
+        <h3 className="text-2xl font-bold text-gray-700 mb-3">Nombre d&apos;etoiles</h3>
+        <div className="mb-6 text-lg">{String(product.note ?? "—")}</div>
         <Divider />
 
         {/* Meilleures ventes */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Meilleures ventes</h3>
         <div className="mb-6 text-lg">
           <Highlight
-            value={product.best_seller === "1"}
+            value={!!(product.best_seller === "1")}
             yes="Oui"
             no="Non"
             yesClass="bg-yellow-500 text-white"
@@ -312,7 +312,7 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
         <h3 className="text-2xl font-bold text-gray-700 mb-3">bestSellerSection</h3>
         <div className="mb-6 text-lg">
           <Highlight
-            value={product.bestSellerSection}
+            value={!!product.bestSellerSection}
             yes="Oui"
             no="Non"
             yesClass="bg-yellow-600 text-white"
@@ -325,7 +325,7 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
         <h3 className="text-2xl font-bold text-gray-700 mb-3">inStock</h3>
         <div className="mb-6 text-lg">
           <Highlight
-            value={product.inStock}
+            value={!!product.inStock}
             yes="Oui"
             no="Non"
             yesClass="bg-green-500 text-white"
@@ -346,56 +346,56 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
 
         {/* Meta (name;content/name;content...) */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Meta ( name;content/name;content/name;content......)</h3>
-        <div className="mb-6 text-lg">{product.meta ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.meta ?? "—")}</div>
         <Divider />
 
         {/* Code Produit */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Code Produit</h3>
-        <div className="mb-6 text-lg">{product.code_product ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.code_product ?? "—")}</div>
         <Divider />
 
         {/* Alt Cover (SEO) */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Alt Cover (SEO)</h3>
-        <div className="mb-6 text-lg">{product.alt_cover ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.alt_cover ?? "—")}</div>
         <Divider />
 
         {/* Description Cover (SEO) */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Description Cover (SEO)</h3>
-        <div className="mb-6 text-lg">{product.description_cover ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.description_cover ?? "—")}</div>
         <Divider />
 
         {/* Enregistrement */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Enregistrement</h3>
-        <div className="mb-6 text-lg">{product.updated_at ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.updated_at ?? "—")}</div>
         <Divider />
 
         {/* Schema description (seo) */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Schema description (seo)</h3>
-        <div className="mb-6 text-lg"><pre className="whitespace-pre-wrap text-base">{product.schema_description ?? "—"}</pre></div>
+        <div className="mb-6 text-lg"><pre className="whitespace-pre-wrap text-base">{String(product.schema_description ?? "—")}</pre></div>
         <Divider />
 
         {/* Review (SEO) */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Review (SEO)</h3>
-        <div className="mb-6 text-lg">{product.review ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.review ?? "—")}</div>
         <Divider />
 
         {/* AggregateRating (SEO) */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">AggregateRating ( SEO)</h3>
-        <div className="mb-6 text-lg">{product.aggregateRating ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.aggregateRating ?? "—")}</div>
         <Divider />
 
         {/* Tabilation Zone 1-4 */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Tabilation Zone 1</h3>
-        <div className="mb-6 text-lg">{product.zone1 ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.zone1 ?? "—")}</div>
         <Divider />
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Tabilation Zone2</h3>
-        <div className="mb-6 text-lg">{product.zone2 ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.zone2 ?? "—")}</div>
         <Divider />
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Tabilation Zone3</h3>
-        <div className="mb-6 text-lg">{product.zone3 ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.zone3 ?? "—")}</div>
         <Divider />
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Tabilation Zone4</h3>
-        <div className="mb-6 text-lg">{product.zone4 ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.zone4 ?? "—")}</div>
         <Divider />
 
         {/* Créé le */}
@@ -405,12 +405,12 @@ export default function ProductViewClient({ product, id }: { product: any; id: s
 
         {/* Créé par */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Créé par</h3>
-        <div className="mb-6 text-lg">{product.created_by ?? product.createdBy ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.created_by ?? product.createdBy ?? "—")}</div>
         <Divider />
 
         {/* Modifié par */}
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Modifié par</h3>
-        <div className="mb-6 text-lg">{product.updated_by ?? product.updatedBy ?? "—"}</div>
+        <div className="mb-6 text-lg">{String(product.updated_by ?? product.updatedBy ?? "—")}</div>
       </div>
     </div>
   );

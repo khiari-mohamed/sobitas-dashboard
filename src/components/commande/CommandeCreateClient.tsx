@@ -66,7 +66,7 @@ export default function CommandeCreateClient() {
       const commandeData = { ...form, numero };
       await commandeService.createCommande(commandeData);
       router.push("/admin/commande");
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError("Erreur lors de la création de la commande.");
     } finally {
       setLoading(false);

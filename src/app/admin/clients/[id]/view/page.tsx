@@ -1,5 +1,6 @@
 import ClientsViewClient from "@/components/clients/ClientsViewClient";
 
-export default function ClientsViewPage({ params }: { params: { id: string } }) {
-  return <ClientsViewClient id={params.id} />;
+export default async function ClientsViewPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <ClientsViewClient id={id} />;
 }

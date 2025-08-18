@@ -46,7 +46,7 @@ export default function BrandCreateEditForm({ initialBrand, mode, onSubmit, load
     }
   }, [initialBrand]);
 
-  const handleChange = (key: string, value: any) => {
+  const handleChange = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 

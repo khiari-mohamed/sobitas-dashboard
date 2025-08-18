@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
-import { FaSearch } from "react-icons/fa"
+import { FaSearch } from "react-icons/fa";
 
 import emailService, { fetchEmailTemplates, deleteEmailTemplate } from "@/services/email";
 
@@ -25,7 +25,7 @@ function TestEmailModal({ open, onClose, onSend, loading, error, email, setEmail
         <input
           type="email"
           className="border p-2 rounded w-full mb-3"
-          placeholder="Entrez l'email de test"
+          placeholder="Entrez l&apos;email de test"
           value={email}
           onChange={e => setEmail(e.target.value)}
           disabled={loading}
@@ -79,12 +79,12 @@ const templateTypes = [
 const defaultItemsPerPage = 10;
 
 export default function EmailTemplatesTable() {
-  const [templates, setTemplates] = useState<any[]>(templateTypes);
+  const [templates, setTemplates] = useState<Record<string, unknown>[]>(templateTypes);
   const [testEmailLoading, setTestEmailLoading] = useState<string | null>(null);
   const [testEmail, setTestEmail] = useState<string>("");
   const [testResult, setTestResult] = useState<string | null>(null);
   const [testModalOpen, setTestModalOpen] = useState(false);
-  const [testModalTemplate, setTestModalTemplate] = useState<any>(null);
+  const [testModalTemplate, setTestModalTemplate] = useState<Record<string, unknown> | null>(null);
   const [testModalError, setTestModalError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -114,7 +114,7 @@ export default function EmailTemplatesTable() {
   }, [search]);
 
   const filtered = templates.filter((t) =>
-    (t.name || "")
+    String(t.name || "")
       .toLowerCase()
       .includes(search.toLowerCase())
   );
@@ -133,7 +133,7 @@ export default function EmailTemplatesTable() {
     if (deleteTemplateId) {
       try {
         await deleteEmailTemplate(deleteTemplateId);
-        setTemplates((prev) => prev.filter(t => t.id !== deleteTemplateId));
+        setTemplates((prev) => prev.filter(t => String(t.id) !== deleteTemplateId));
         setDeleteTemplateId(null);
       } catch (error) {
         console.error('Error deleting template:', error);
@@ -146,7 +146,7 @@ export default function EmailTemplatesTable() {
       for (const id of selectedIds) {
         await deleteEmailTemplate(id);
       }
-      setTemplates((prev) => prev.filter(t => !selectedIds.includes(t.id)));
+      setTemplates((prev) => prev.filter(t => !selectedIds.includes(String(t.id))));
       setSelectedIds([]);
       setDeleteSelectionOpen(false);
     } catch (error) {
@@ -160,14 +160,14 @@ export default function EmailTemplatesTable() {
         open={!!deleteTemplateId}
         onClose={() => setDeleteTemplateId(null)}
         onConfirm={handleConfirmDelete}
-        productName={templates.find(t => t.id === deleteTemplateId)?.name || "Template"}
+        productName={String(templates.find(t => String(t.id) === deleteTemplateId)?.name || "Template")}
       />
       <ConfirmDeleteModal
         open={deleteSelectionOpen}
         onClose={() => setDeleteSelectionOpen(false)}
         onConfirm={handleConfirmDeleteSelection}
         productName={selectedIds.length === 1
-          ? (templates.find(t => t.id === selectedIds[0])?.name)
+          ? String(templates.find(t => String(t.id) === selectedIds[0])?.name || "Template")
           : `${selectedIds.length} templates`}
       />
       <TestEmailModal
@@ -175,7 +175,7 @@ export default function EmailTemplatesTable() {
         onClose={() => setTestModalOpen(false)}
         onSend={async () => {
           if (!testModalTemplate) return;
-          setTestEmailLoading(testModalTemplate.id);
+          setTestEmailLoading(String(testModalTemplate.id));
           setTestModalError(null);
           setTestResult(null);
           try {
@@ -231,13 +231,12 @@ export default function EmailTemplatesTable() {
                 total: "15",
               });
             } else {
-              // For custom templates, show error (no sendTestTemplate implemented)
               throw new Error("Envoi de test non supporté pour ce template personnalisé.");
             }
             setTestResult(result?.message || "Email envoyé !");
             setTestModalOpen(false);
-          } catch (err: any) {
-            setTestModalError(err.message || "Erreur lors de l'envoi de l'email");
+          } catch (err: unknown) {
+            setTestModalError((err as Error).message || "Erreur lors de l&apos;envoi de l&apos;email");
           } finally {
             setTestEmailLoading(null);
           }
@@ -248,7 +247,7 @@ export default function EmailTemplatesTable() {
         setEmail={setTestEmail}
       />
       <div className="flex flex-col sm:flex-row gap-3 mb-4 items-start sm:items-center">
-        <h2 className="text-xl font-semibold text-gray-700">Templates d'emails</h2>
+        <h2 className="text-xl font-semibold text-gray-700">Templates d&apos;emails</h2>
         <div className="flex flex-wrap gap-2 ml-auto">
           <button
             className="bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-2 rounded"
@@ -287,12 +286,12 @@ export default function EmailTemplatesTable() {
               <th className="px-4 py-2">
                 <input
                   type="checkbox"
-                  checked={selectedIds.length > 0 && currentTemplates.every(t => selectedIds.includes(t.id))}
+                  checked={selectedIds.length > 0 && currentTemplates.every(t => selectedIds.includes(String(t.id)))}
                   onChange={e => {
                     if (e.target.checked) {
-                      setSelectedIds(Array.from(new Set([...selectedIds, ...currentTemplates.map(t => t.id)])));
+                      setSelectedIds(Array.from(new Set([...selectedIds, ...currentTemplates.map(t => String(t.id))])));
                     } else {
-                      setSelectedIds(selectedIds.filter(id => !currentTemplates.map(t => t.id).includes(id)));
+                      setSelectedIds(selectedIds.filter(id => !currentTemplates.map(t => String(t.id)).includes(id)));
                     }
                   }}
                 />
@@ -307,37 +306,37 @@ export default function EmailTemplatesTable() {
           </thead>
           <tbody className="divide-y divide-gray-100">
             {currentTemplates.map((t) => (
-              <tr key={t.id}>
+              <tr key={String(t.id)}>
                 <td className="px-4 py-2">
                   <input
                     type="checkbox"
-                    checked={selectedIds.includes(t.id)}
+                    checked={selectedIds.includes(String(t.id))}
                     onChange={e => {
                       if (e.target.checked) {
-                        setSelectedIds(prev => [...prev, t.id]);
+                        setSelectedIds(prev => [...prev, String(t.id)]);
                       } else {
-                        setSelectedIds(prev => prev.filter(id => id !== t.id));
+                        setSelectedIds(prev => prev.filter(id => id !== String(t.id)));
                       }
                     }}
                   />
                 </td>
-                <td className="px-4 py-2 text-blue-600 underline cursor-pointer" onClick={() => router.push(`/admin/email_templates/${t.id}/view`)}>
-                  {t.id}
+                <td className="px-4 py-2 text-blue-600 underline cursor-pointer" onClick={() => router.push(`/admin/email_templates/${String(t.id)}/view`)}>
+                  {String(t.id)}
                 </td>
-                <td className="px-4 py-2">{t.name}</td>
-                <td className="px-4 py-2">{t.subject}</td>
-                <td className="px-4 py-2">{t.type}</td>
-                <td className="px-4 py-2">{t.updated_at ? new Date(t.updated_at).toLocaleString() : "—"}</td>
+                <td className="px-4 py-2">{String(t.name)}</td>
+                <td className="px-4 py-2">{String(t.subject)}</td>
+                <td className="px-4 py-2">{String(t.type)}</td>
+                <td className="px-4 py-2">{t.updated_at && String(t.updated_at) !== "—" ? new Date(String(t.updated_at)).toLocaleString() : "—"}</td>
                 <td className="px-4 py-2 space-x-1">
                   <button
                     className="bg-yellow-400 text-white px-2 py-1 rounded text-xs"
-                    onClick={() => router.push(`/admin/email_templates/${t.id}/view`)}
+                    onClick={() => router.push(`/admin/email_templates/${String(t.id)}/view`)}
                   >
                     👁 Vue
                   </button>
                   <button
                     className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
-                    onClick={() => router.push(`/admin/email_templates/${t.id}/edit`)}
+                    onClick={() => router.push(`/admin/email_templates/${String(t.id)}/edit`)}
                   >
                     ✏️ Éditer
                   </button>
@@ -356,7 +355,7 @@ export default function EmailTemplatesTable() {
                   </button>
                   <button
                     className="bg-red-500 text-white px-2 py-1 rounded text-xs"
-                    onClick={() => handleDelete(t.id)}
+                    onClick={() => handleDelete(String(t.id))}
                   >
                     🗑 Supprimer
                   </button>

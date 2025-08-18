@@ -14,15 +14,15 @@ export const fetchSeoPageById = async (id: string): Promise<SeoPage> => {
   return data;
 };
 
-export const createSeoPage = async (seoPage: any): Promise<SeoPage> => {
+export const createSeoPage = async (seoPage: Partial<SeoPage>): Promise<SeoPage> => {
   const cleanData = Object.fromEntries(
-    Object.entries(seoPage).filter(([_, value]) => value !== undefined && value !== '')
+    Object.entries(seoPage).filter(([, value]) => value !== undefined && value !== '')
   );
   const { data } = await axiosInstance.post<SeoPage>(RESOURCE, cleanData);
   return data;
 };
 
-export const updateSeoPage = async (id: string, seoPage: any): Promise<SeoPage> => {
+export const updateSeoPage = async (id: string, seoPage: Partial<SeoPage>): Promise<SeoPage> => {
   const cleanData = Object.fromEntries(
     Object.entries(seoPage).filter(([key, value]) => 
       value !== undefined && 

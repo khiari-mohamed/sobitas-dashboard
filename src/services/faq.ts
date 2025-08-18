@@ -39,7 +39,7 @@ export const fetchFaqById = async (id: string): Promise<FAQ> => {
 // Create new FAQ
 export const createFaq = async (faqData: CreateFaqDto): Promise<FAQ> => {
   const cleanData = Object.fromEntries(
-    Object.entries(faqData).filter(([_, value]) => value !== undefined && value !== '')
+    Object.entries(faqData).filter(([, value]) => value !== undefined && value !== '')
   );
   const res = await axios.post<ApiResponse<FAQ>>('/faqs', cleanData);
   return res.data.data;
@@ -48,7 +48,7 @@ export const createFaq = async (faqData: CreateFaqDto): Promise<FAQ> => {
 // Update existing FAQ by MongoDB _id
 export const updateFaq = async (id: string, faqData: UpdateFaqDto): Promise<FAQ> => {
   const cleanData = Object.fromEntries(
-    Object.entries(faqData).filter(([_, value]) => value !== undefined && value !== '')
+    Object.entries(faqData).filter(([, value]) => value !== undefined && value !== '')
   );
   const res = await axios.put<ApiResponse<FAQ>>(`/faqs/${id}`, cleanData);
   return res.data.data;

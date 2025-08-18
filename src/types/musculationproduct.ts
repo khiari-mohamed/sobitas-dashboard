@@ -50,5 +50,4 @@ export interface MusculationProduct {
     url: string;
     img_id: string;
   }>;
-  [key: string]: any;
 }

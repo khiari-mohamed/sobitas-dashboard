@@ -14,15 +14,15 @@ export const fetchNewsletterById = async (id: string): Promise<Newsletter> => {
   return data;
 };
 
-export const createNewsletter = async (newsletter: any): Promise<Newsletter> => {
+export const createNewsletter = async (newsletter: Partial<Newsletter>): Promise<Newsletter> => {
   const cleanData = Object.fromEntries(
-    Object.entries(newsletter).filter(([_, value]) => value !== undefined && value !== '')
+    Object.entries(newsletter).filter(([, value]) => value !== undefined && value !== '')
   );
   const { data } = await axiosInstance.post<Newsletter>(RESOURCE, cleanData);
   return data;
 };
 
-export const updateNewsletter = async (id: string, newsletter: any): Promise<Newsletter> => {
+export const updateNewsletter = async (id: string, newsletter: Partial<Newsletter>): Promise<Newsletter> => {
   const cleanData = Object.fromEntries(
     Object.entries(newsletter).filter(([key, value]) => 
       value !== undefined && 

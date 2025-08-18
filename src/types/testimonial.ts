@@ -18,7 +18,6 @@ export interface Testimonial {
   authorImg?: string;
   review?: string;
   status?: string;
-  [key: string]: any;
 }
 
 export interface TestimonialConfig {

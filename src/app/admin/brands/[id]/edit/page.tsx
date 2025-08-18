@@ -3,12 +3,13 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { fetchBrandById, updateBrand } from "@/utils/brands";
 import BrandCreateEditForm from "@/components/brands/BrandCreateEditForm";
+import { Brand } from "@/types/brand";
 
 export default function BrandEditPage() {
   const params = useParams();
   const router = useRouter();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
-  const [brand, setBrand] = useState<any>(null);
+  const [brand, setBrand] = useState<Brand | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -20,11 +21,10 @@ export default function BrandEditPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleSubmit = async (updatedBrand: any, logoFile?: File | null) => {
+  const handleSubmit = async (updatedBrand: Partial<Brand>) => {
     if (!id) return;
     setSaving(true);
     try {
-      // If you want to handle logo upload, do it here
       await updateBrand(id as string, updatedBrand);
       router.push("/admin/brands");
     } finally {

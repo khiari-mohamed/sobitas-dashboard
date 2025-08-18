@@ -29,8 +29,8 @@ export default function TagsCreateClient() {
     try {
       await createTag(form as Tag);
       router.push("/admin/tags");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la création du tag");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur lors de la création du tag");
     } finally {
       setLoading(false);
     }

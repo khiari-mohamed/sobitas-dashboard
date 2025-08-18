@@ -38,8 +38,8 @@ export default function BlogCreateClient() {
   if (form.cover) {
     if (typeof form.cover === "string") {
       coverPreview = (form.cover as string).startsWith("http") ? form.cover as string : "/uploads/" + (form.cover as string).replace(/^\/+/ , "");
-    } else if (typeof (form.cover as any)?.url === "string") {
-      const url = (form.cover as any).url;
+    } else if (typeof (form.cover as unknown as Record<string, unknown>)?.url === "string") {
+      const url = (form.cover as unknown as Record<string, unknown>).url as string;
       coverPreview = url.startsWith("http") ? url : "/uploads/" + url.replace(/^\/+/ , "");
     } else if (form.cover instanceof File) {
       coverPreview = URL.createObjectURL(form.cover);
@@ -111,7 +111,7 @@ export default function BlogCreateClient() {
         <div className="mb-6">
           <RichTextEditor
             value={form.description || ""}
-            onChange={val => setForm((prev: any) => ({ ...prev, description: val }))}
+            onChange={val => setForm((prev) => ({ ...prev, description: val }))}
             label="Description"
           />
         </div>
@@ -177,7 +177,7 @@ export default function BlogCreateClient() {
         <div className="mb-6">
           <RichTextEditor
             value={form.content_seo || ""}
-            onChange={val => setForm((prev: any) => ({ ...prev, content_seo: val }))}
+            onChange={val => setForm((prev) => ({ ...prev, content_seo: val }))}
             label="Schema description (seo)"
           />
         </div>

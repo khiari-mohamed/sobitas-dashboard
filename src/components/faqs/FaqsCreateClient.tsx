@@ -1,9 +1,7 @@
 "use client";
-
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createFaq, getNextFaqId } from "@/services/faq";
-import { FAQ } from "@/types/faq";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 
 export default function FaqsCreateClient() {
@@ -46,8 +44,8 @@ export default function FaqsCreateClient() {
       };
       await createFaq(submitData);
       router.push("/admin/faqs");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la création de la FAQ");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur lors de la création de la FAQ");
     } finally {
       setLoading(false);
     }

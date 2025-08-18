@@ -330,7 +330,7 @@ export default function MediaManager() {
             }}
           >
             <div className="mb-4">
-              <h2 className="text-xl font-bold mb-2">Rogner l'image</h2>
+              <h2 className="text-xl font-bold mb-2">Rogner l&apos;image</h2>
               {croppingImage && (
                 <div className="relative w-full h-96 bg-gray-100 flex items-center justify-center">
                   <ReactCrop

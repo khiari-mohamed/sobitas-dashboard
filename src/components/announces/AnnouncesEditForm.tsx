@@ -26,7 +26,7 @@ const initialState: Partial<Annonce> = {
 
 export default function AnnouncesEditForm({ id }: { id: string }) {
   const router = useRouter();
-  const [form, setForm] = useState<any>(initialState);
+  const [form, setForm] = useState<Partial<Annonce>>(initialState);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [imagePreviews, setImagePreviews] = useState<{ [key: string]: string | null }>({});
@@ -68,7 +68,7 @@ export default function AnnouncesEditForm({ id }: { id: string }) {
     }
   };
 
-  const getFileName = (fileOrString: any) => {
+  const getFileName = (fileOrString: string | File | null | undefined) => {
     if (!fileOrString) return "";
     if (typeof fileOrString === "string") return fileOrString.split("/").pop();
     if (fileOrString.name) return fileOrString.name;
@@ -83,8 +83,8 @@ export default function AnnouncesEditForm({ id }: { id: string }) {
       // You may need to handle file upload as multipart/form-data if backend expects it
       await updateAnnonce(id, form);
       router.push("/admin/announces");
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la modification de l'annonce");
+    } catch (err) {
+      setError((err as Error).message || "Erreur lors de la modification de l&apos;annonce");
     } finally {
       setLoading(false);
     }
@@ -94,7 +94,7 @@ export default function AnnouncesEditForm({ id }: { id: string }) {
 
   return (
     <div className="bg-white p-8 shadow-xl w-full max-w-[1600px] mx-auto mt-8 border">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Modifier l'annonce</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-8">Modifier l&apos;annonce</h1>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* ID (readonly) */}
         <div className="mb-6">

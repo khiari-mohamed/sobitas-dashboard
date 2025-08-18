@@ -12,9 +12,9 @@ async function getCategory(id: string) {
   }
 }
 
-export default async function CategoryViewPage(props: { params: { id: string } }) {
-  const { params } = await props;
-  const category = await getCategory(params.id);
+export default async function CategoryViewPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const category = await getCategory(id);
   if (!category) return notFound();
-  return <CategoryViewClient category={category} id={params.id} />;
+  return <CategoryViewClient category={category} id={id} />;
 }

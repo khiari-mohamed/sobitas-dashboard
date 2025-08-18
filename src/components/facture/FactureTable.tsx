@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaSearch } from "react-icons/fa";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
@@ -9,7 +9,7 @@ import { Facture } from "@/types/facture";
 
 const defaultItemsPerPage = 10;
 
-export default function FactureTable() {
+function FactureTableContent() {
   const [factures, setFactures] = useState<Facture[]>([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -320,5 +320,13 @@ export default function FactureTable() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function FactureTable() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FactureTableContent />
+    </Suspense>
   );
 }

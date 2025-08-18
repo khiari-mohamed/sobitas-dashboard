@@ -22,17 +22,17 @@ export default function CoordinatesViewClient({ id }: { id: string }) {
   if (loading) return <div className="text-center py-12">Chargement...</div>;
   if (error || !coordinate) return <div className="text-center py-12 text-red-500">{error || "Coordonnée introuvable"}</div>;
 
-  const renderField = (label: string, value: any, isLink = false, isImage = false, isRich = false) => (
+  const renderField = (label: string, value: unknown, isLink = false, isImage = false, isRich = false) => (
     <div className="mb-6">
       <label className="block text-xl font-semibold mb-2">{label}</label>
       {isImage && value ? (
-        <img src={value.startsWith('/') ? value : `/${value}`} alt={label} width={200} height={100} style={{ objectFit: 'contain' }} className="border rounded" />
+        <img src={String(value).startsWith('/') ? String(value) : `/${String(value)}`} alt={label} width={200} height={100} style={{ objectFit: 'contain' }} className="border rounded" />
       ) : isLink && value ? (
-        <a href={value} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">{value}</a>
+        <a href={String(value)} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">{String(value)}</a>
       ) : isRich && value ? (
-        <div className="w-full border p-4 text-base bg-gray-50 min-h-[60px]" dangerouslySetInnerHTML={{ __html: value }} />
+        <div className="w-full border p-4 text-base bg-gray-50 min-h-[60px]" dangerouslySetInnerHTML={{ __html: String(value) }} />
       ) : (
-        <div className="w-full border p-4 text-base bg-gray-100 rounded">{value || "—"}</div>
+        <div className="w-full border p-4 text-base bg-gray-100 rounded">{String(value || "—")}</div>
       )}
     </div>
   );

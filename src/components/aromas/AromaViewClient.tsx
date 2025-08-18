@@ -3,11 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getAromaById } from "@/services/aroma";
-import { Button } from "@/components/ui/button";
 import { FaEdit } from "react-icons/fa";
 
 export default function AromaViewClient({ id }: { id: string }) {
-  const [aroma, setAroma] = useState<any>(null);
+  const [aroma, setAroma] = useState<{ id: string; designation_fr: string; created_at: string; updated_at: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -44,7 +43,7 @@ export default function AromaViewClient({ id }: { id: string }) {
           Retourner à la liste
         </button>
       </div>
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Détails de l'arôme</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-8">Détails de l&apos;arôme</h1>
       <div className="mb-6">
         <span className="block text-xl font-semibold mb-2">ID</span>
         <span className="text-lg">{aroma.id}</span>
