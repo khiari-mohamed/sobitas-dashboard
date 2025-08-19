@@ -2,7 +2,6 @@ import React from "react";
 import clsx from "clsx";
 import {
   Home,
-  Settings,
   ShoppingBag,
   Boxes,
   Tags,
@@ -27,9 +26,6 @@ import SidebarSiteParamsDropdown from "@/components/SidebarSiteParamsDropdown";
 import SidebarCommunicationDropdown from "@/components/SidebarCommunicationDropdown";
 import SidebarControlFrontDropdown from "@/components/SidebarControlFrontDropdown";
 
-
-
-
 interface SidebarProps {
   isOpen: boolean;
   isCollapsed: boolean;
@@ -38,7 +34,6 @@ interface SidebarProps {
 
 const navItems = [
   { label: "Accueil", icon: Home, href: "/" },
-  { label: "Paramètres", icon: Settings, href: "/settings" },
   { label: "Produits", icon: ShoppingBag, href: "/produits" },
   { label: "Catégories", icon: Boxes, href: "/admin/categories" },
   { label: "Sous-catégories", icon: Tags, href: "/admin/subcategories" },
@@ -52,8 +47,6 @@ const navItems = [
   { label: "media", icon: FileText, href: "/admin/media" },
   { label: "Paiements", icon: CreditCard, href: "/admin/payments" },
   { label: "Packs", icon: CreditCard, href: "/admin/packs" },
-  
-
 ];
 
 function SidebarFactureDropdown({
@@ -225,14 +218,34 @@ export default function Sidebar({ isOpen, isCollapsed, closeSidebar }: SidebarPr
           <SidebarSiteParamsDropdown isCollapsed={isCollapsed} closeSidebar={closeSidebar} />
           <SidebarCommunicationDropdown isCollapsed={isCollapsed} closeSidebar={closeSidebar} />
           <SidebarControlFrontDropdown isCollapsed={isCollapsed} closeSidebar={closeSidebar} />
-
         </nav>
 
         {/* Logout */}
         <div className={clsx("px-3 pb-6 flex justify-start", isCollapsed ? "md:justify-center md:group-hover/sidebar:justify-start" : "")}>
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-white/80 hover:bg-white/10 transition-colors">
+          <button
+            onClick={async () => {
+              try {
+                const authService = (await import('@/services/auth')).default;
+                await authService.adminLogout();
+                window.location.href = '/login';
+              } catch (error) {
+                console.error('Logout error:', error);
+                // Force logout even if API call fails
+                localStorage.removeItem('admin_token');
+                localStorage.removeItem('admin_username');
+                localStorage.removeItem('admin_role');
+                window.location.href = '/login';
+              }
+            }}
+            className={clsx(
+              "flex items-center gap-3 px-3 py-2 rounded-md text-white/80 hover:bg-white/10 transition-colors w-full",
+              isCollapsed ? "md:justify-center md:group-hover/sidebar:justify-start" : ""
+            )}
+          >
             <LogOut className="w-5 h-5" />
-            <span className={clsx("inline", isCollapsed ? "md:hidden md:group-hover/sidebar:inline" : "")}>Déconnexion</span>
+            <span className={clsx("inline", isCollapsed ? "md:hidden md:group-hover/sidebar:inline" : "")}>
+              Déconnexion
+            </span>
           </button>
         </div>
       </aside>

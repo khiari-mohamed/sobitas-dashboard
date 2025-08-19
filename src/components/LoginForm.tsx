@@ -79,14 +79,19 @@ export default function LoginForm() {
         role: 'admin'
       });
 
-      if (response.data.token) {
-        localStorage.setItem('admin_token', response.data.token);
-        localStorage.setItem('admin_username', response.data.adminUsername);
-        localStorage.setItem('admin_role', response.data.adminRole);
-        router.push('/');
+      if (response.data.message) {
+        setError('');
+        alert('Registration successful! Please login.');
+        setIsSignup(false);
       }
     } catch (error) {
-      setError((error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Registration failed');
+      console.error('Registration error:', error);
+      if ((error as Error & {code?: string})?.code === 'ERR_NETWORK' || (error as Error)?.message === 'Network Error') {
+        setError('Server not available. Please check if the backend is running on localhost:5000');
+      } else {
+        const errorMsg = (error as {response?: {data?: {message?: string}}, message?: string})?.response?.data?.message || (error as Error)?.message || 'Registration failed';
+        setError(errorMsg);
+      }
     } finally {
       setLoading(false);
     }
