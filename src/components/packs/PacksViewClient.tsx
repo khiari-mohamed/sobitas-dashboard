@@ -26,6 +26,26 @@ export default function PacksViewClient({ id }: { id: string }) {
     fetchPack();
   }, [id]);
 
+  // Refresh data when component mounts or id changes
+  useEffect(() => {
+    const handleRefresh = () => {
+      const fetchPack = async () => {
+        try {
+          const packs = await fetchAllPacks();
+          const foundPack = packs.find(p => p._id === id);
+          setPack(foundPack || null);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+      fetchPack();
+    };
+    
+    // Listen for navigation events to refresh data
+    window.addEventListener('focus', handleRefresh);
+    return () => window.removeEventListener('focus', handleRefresh);
+  }, [id]);
+
   if (loading) return <div className="p-8">Chargement...</div>;
   if (!pack) return <div className="p-8">Pack non trouvé</div>;
 
@@ -68,11 +88,11 @@ export default function PacksViewClient({ id }: { id: string }) {
         </div>
         <div>
           <h3 className="text-xl font-semibold mb-2">Prix</h3>
-          <p className="text-gray-700 mb-4">{pack.prix} TND</p>
+          <p className="text-gray-700 mb-4">{pack.prix || pack.price} TND</p>
         </div>
         <div>
           <h3 className="text-xl font-semibold mb-2">Promo</h3>
-          <p className="text-gray-700 mb-4">{pack.promo || "Aucune"} {pack.promo && "TND"}</p>
+          <p className="text-gray-700 mb-4">{pack.promo || pack.oldPrice || "Aucune"} {(pack.promo || pack.oldPrice) && "TND"}</p>
         </div>
         <div>
           <h3 className="text-xl font-semibold mb-2">Quantité</h3>
@@ -113,6 +133,10 @@ export default function PacksViewClient({ id }: { id: string }) {
           }`}>
             {pack.new_product === "1" ? "Oui" : "Non"}
           </span>
+        </div>
+        <div>
+          <h3 className="text-xl font-semibold mb-2">Ordre d&rsquo;affichage</h3>
+          <p className="text-gray-700 mb-4">{pack.displayOrder || 0}</p>
         </div>
         <div>
           <h3 className="text-xl font-semibold mb-2">Créé le</h3>
@@ -174,6 +198,34 @@ export default function PacksViewClient({ id }: { id: string }) {
         <div className="mt-8">
           <h3 className="text-xl font-semibold mb-2">Contenu SEO</h3>
           <p className="text-gray-700">{pack.content_seo}</p>
+        </div>
+      )}
+
+      {pack.zone1 && (
+        <div className="mt-8">
+          <h3 className="text-xl font-semibold mb-2">Zone 1</h3>
+          <p className="text-gray-700">{pack.zone1}</p>
+        </div>
+      )}
+
+      {pack.zone2 && (
+        <div className="mt-8">
+          <h3 className="text-xl font-semibold mb-2">Zone 2</h3>
+          <p className="text-gray-700">{pack.zone2}</p>
+        </div>
+      )}
+
+      {pack.zone3 && (
+        <div className="mt-8">
+          <h3 className="text-xl font-semibold mb-2">Zone 3</h3>
+          <p className="text-gray-700">{pack.zone3}</p>
+        </div>
+      )}
+
+      {pack.zone4 && (
+        <div className="mt-8">
+          <h3 className="text-xl font-semibold mb-2">Zone 4</h3>
+          <p className="text-gray-700">{pack.zone4}</p>
         </div>
       )}
     </div>

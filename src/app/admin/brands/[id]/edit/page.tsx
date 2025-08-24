@@ -21,11 +21,11 @@ export default function BrandEditPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleSubmit = async (updatedBrand: Partial<Brand>) => {
+  const handleSubmit = async (updatedBrand: Partial<Brand>, logoFile?: File | null) => {
     if (!id) return;
     setSaving(true);
     try {
-      await updateBrand(id as string, updatedBrand);
+      await updateBrand(id as string, updatedBrand, logoFile);
       router.push("/admin/brands");
     } finally {
       setSaving(false);

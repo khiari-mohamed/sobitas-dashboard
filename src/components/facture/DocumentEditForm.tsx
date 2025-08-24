@@ -22,7 +22,7 @@ export default function DocumentEditForm({ order, doc, onSave }: { order: Record
       await factureService.updateFacture(String(form._id || form.id), form);
       setSuccess(true);
       if (onSave) onSave();
-    } catch (err: unknown) {
+    } catch {
       setError("Erreur lors de la mise à jour du document.");
     } finally {
       setLoading(false);

@@ -25,6 +25,7 @@ const emptyBrand: Partial<Brand> = {
   nutrition_values: "",
   questions: "",
   more_details: "",
+  slug: "",
 };
 
 export default function BrandCreateEditForm({ initialBrand, mode, onSubmit, loading }: BrandCreateEditFormProps) {
@@ -191,6 +192,15 @@ export default function BrandCreateEditForm({ initialBrand, mode, onSubmit, load
           value={form.more_details || ""}
           onChange={val => handleChange("more_details", val)}
         />
+        <div>
+          <label className="block text-xl font-semibold mb-2">Slug</label>
+          <input
+            type="text"
+            className="w-full border p-4 rounded text-base"
+            value={form.slug || ""}
+            onChange={e => handleChange("slug", e.target.value)}
+          />
+        </div>
         <div className="flex gap-4">
           <button
             type="submit"

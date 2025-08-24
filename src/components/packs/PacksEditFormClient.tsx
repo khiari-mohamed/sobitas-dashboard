@@ -22,7 +22,13 @@ export default function PacksEditForm({ id }: { id: string }) {
         const packs = await fetchAllPacks();
         const pack = packs.find(p => p._id === id);
         if (pack) {
-          setForm(pack);
+          // Map API response fields to form fields
+          setForm({
+            ...pack,
+            designation_fr: pack.designation_fr || pack.designation || "",
+            prix: pack.prix || pack.price?.toString() || "",
+            promo: pack.promo || pack.oldPrice?.toString() || ""
+          });
         }
       } catch (err) {
         console.error(err);
@@ -44,7 +50,9 @@ export default function PacksEditForm({ id }: { id: string }) {
     setLoading(true);
     setError(null);
     try {
-      await updatePack(id, form, selectedFile || undefined);
+      const result = await updatePack(id, form, selectedFile || undefined);
+      console.log('Update result:', result);
+      // Redirect to packs table
       router.push("/admin/packs");
     } catch (err: unknown) {
       setError((err as Error).message || "Erreur lors de la mise à jour du pack");
@@ -151,7 +159,7 @@ export default function PacksEditForm({ id }: { id: string }) {
               </div>
             )}
             <p className="text-sm text-gray-500">
-              Vous pouvez soit saisir un chemin d&apos;image, soit télécharger un fichier
+              Vous pouvez soit saisir un chemin d&rsquo;image, soit télécharger un fichier
             </p>
           </div>
         </div>
@@ -184,6 +192,46 @@ export default function PacksEditForm({ id }: { id: string }) {
           />
         </div>
         <div className="mb-6">
+          <label className="block text-xl font-semibold mb-2">Zone 1</label>
+          <input
+            type="text"
+            name="zone1"
+            value={form.zone1 || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+          />
+        </div>
+        <div className="mb-6">
+          <label className="block text-xl font-semibold mb-2">Zone 2</label>
+          <input
+            type="text"
+            name="zone2"
+            value={form.zone2 || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+          />
+        </div>
+        <div className="mb-6">
+          <label className="block text-xl font-semibold mb-2">Zone 3</label>
+          <input
+            type="text"
+            name="zone3"
+            value={form.zone3 || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+          />
+        </div>
+        <div className="mb-6">
+          <label className="block text-xl font-semibold mb-2">Zone 4</label>
+          <input
+            type="text"
+            name="zone4"
+            value={form.zone4 || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+          />
+        </div>
+        <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Statut</label>
           <select
             name="status"
@@ -192,8 +240,8 @@ export default function PacksEditForm({ id }: { id: string }) {
             className="w-full border p-4 text-base"
           >
             <option value="">Sélectionner un statut</option>
-            <option value="active">Actif</option>
-            <option value="inactive">Inactif</option>
+            <option value="1">Actif</option>
+            <option value="0">Inactif</option>
           </select>
         </div>
         <div className="mb-6">
@@ -208,6 +256,89 @@ export default function PacksEditForm({ id }: { id: string }) {
             <option value="1">Oui</option>
             <option value="0">Non</option>
           </select>
+        </div>
+        <div className="mb-6">
+          <label className="block text-xl font-semibold mb-2">Note</label>
+          <input
+            type="number"
+            name="note"
+            value={form.note || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+            min="0"
+            max="5"
+            step="0.1"
+          />
+        </div>
+        <div className="mb-6">
+          <label className="block text-xl font-semibold mb-2">Best Seller</label>
+          <select
+            name="best_seller"
+            value={form.best_seller || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+          >
+            <option value="">Sélectionner</option>
+            <option value="1">Oui</option>
+            <option value="0">Non</option>
+          </select>
+        </div>
+        <div className="mb-6">
+          <label className="block text-xl font-semibold mb-2">Nouveau Produit</label>
+          <select
+            name="new_product"
+            value={form.new_product || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+          >
+            <option value="">Sélectionner</option>
+            <option value="1">Oui</option>
+            <option value="0">Non</option>
+          </select>
+        </div>
+        <div className="mb-6">
+          <label className="block text-xl font-semibold mb-2">Rupture</label>
+          <select
+            name="rupture"
+            value={form.rupture || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+          >
+            <option value="">Sélectionner</option>
+            <option value="1">En rupture</option>
+            <option value="0">En stock</option>
+          </select>
+        </div>
+        <div className="mb-6">
+          <label className="block text-xl font-semibold mb-2">Alt Cover</label>
+          <input
+            type="text"
+            name="alt_cover"
+            value={form.alt_cover || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+          />
+        </div>
+        <div className="mb-6">
+          <label className="block text-xl font-semibold mb-2">Description Cover</label>
+          <textarea
+            name="description_cover"
+            value={form.description_cover || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+            rows={3}
+          />
+        </div>
+        <div className="mb-6">
+          <label className="block text-xl font-semibold mb-2">Ordre d&rsquo;affichage</label>
+          <input
+            type="number"
+            name="displayOrder"
+            value={form.displayOrder || ""}
+            onChange={handleChange}
+            className="w-full border p-4 text-base"
+            min="0"
+          />
         </div>
         {error && <div className="text-red-500 mb-4">{error}</div>}
         <div className="flex gap-4">
