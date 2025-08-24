@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { fetchAllPacks, deletePack, bulkDeletePacks } from "@/services/pack";
 import { Pack } from "@/types/pack";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 import { FaSearch } from "react-icons/fa";
+import { getPackImageWithFallback } from "@/utils/imageUtils";
 
 const defaultItemsPerPage = 10;
 
@@ -90,16 +90,7 @@ export default function PacksTable() {
     setDeleteSelectionOpen(false);
   };
 
-  const getPackImage = (pack: Pack, index: number) => {
-    if (pack.mainImage?.url) return pack.mainImage.url;
-    if (pack.cover && pack.cover !== "undefined") {
-      if (pack.cover.startsWith('http') || pack.cover.startsWith('/')) {
-        return pack.cover;
-      }
-      return `/${pack.cover.replace(/^\/+/, "")}`;
-    }
-    return "/images/placeholder.png";
-  };
+
 
   return (
     <div className="bg-white rounded shadow-sm p-4 w-full max-w-[1800px] mx-auto">
@@ -208,13 +199,25 @@ export default function PacksTable() {
                 </td>
                 <td className="px-4 py-2">
                   <div className="flex justify-center items-center">
-                    <Image
-                      src={getPackImage(pack, index)}
+                    <img
+                      src={(() => {
+                        const { src } = getPackImageWithFallback(pack as unknown as Record<string, unknown>);
+                        return src;
+                      })()}
                       alt="cover"
                       width={100}
                       height={100}
                       className="rounded object-contain border border-gray-200 shadow"
                       style={{ width: 100, height: 100 }}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        const { fallback } = getPackImageWithFallback(pack as unknown as Record<string, unknown>);
+                        if (fallback && target.src !== fallback) {
+                          target.src = fallback;
+                        } else {
+                          target.src = "/images/placeholder.png";
+                        }
+                      }}
                     />
                   </div>
                 </td>

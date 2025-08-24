@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getBlogs, updateBlog } from "@/services/blog.service";
 import RichTextEditor from "@/components/ui/RichTextEditor";
+import { getBlogImageWithFallback } from "@/utils/imageUtils";
 
 export default function BlogEditForm({ id }: { id: string }) {
   const [form, setForm] = useState<Record<string, unknown> | null>(null);
@@ -31,21 +31,14 @@ export default function BlogEditForm({ id }: { id: string }) {
     setForm((prev) => prev ? { ...prev, cover: file } : null);
   };
 
-  // Compute preview URL for cover image (same logic as table)
+  // Compute preview URL for cover image
   let coverPreview = "/images/placeholder.png";
   if (form?.cover) {
     if (form.cover instanceof File) {
       coverPreview = URL.createObjectURL(form.cover);
-    } else if (typeof form.cover === "string" && form.cover.startsWith('/blogs/')) {
-      // New uploaded images
-      coverPreview = form.cover;
-    } else if (typeof form.cover === "object" && form.cover && 'url' in form.cover) {
-      // Object format
-      const coverObj = form.cover as { url: string };
-      coverPreview = coverObj.url.startsWith("http") ? coverObj.url : coverObj.url;
-    } else if (typeof form.cover === "string" && form.cover !== "") {
-      // Old uploads format
-      coverPreview = form.cover.startsWith('/') ? form.cover : `/uploads/${form.cover}`;
+    } else {
+      const { src } = getBlogImageWithFallback(form);
+      coverPreview = src;
     }
   }
 
@@ -104,13 +97,25 @@ export default function BlogEditForm({ id }: { id: string }) {
           />
           {coverPreview && (
             <div style={{ marginTop: 12 }}>
-              <Image
+              <img
                 src={coverPreview}
                 alt="Aperçu"
                 width={200}
                 height={200}
                 style={{ width: 200, height: 200, objectFit: "cover" }}
-                loading="lazy"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  if (form?.cover && !(form.cover instanceof File)) {
+                    const { fallback } = getBlogImageWithFallback(form);
+                    if (fallback && target.src !== fallback) {
+                      target.src = fallback;
+                    } else {
+                      target.src = "/images/placeholder.png";
+                    }
+                  } else {
+                    target.src = "/images/placeholder.png";
+                  }
+                }}
               />
             </div>
           )}

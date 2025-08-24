@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import { Brand } from "@/types/brand";
+import { getBrandImageWithFallback } from "@/utils/imageUtils";
 
 interface BrandCreateEditFormProps {
   initialBrand?: Partial<Brand>;
@@ -89,22 +89,15 @@ export default function BrandCreateEditForm({ initialBrand, mode, onSubmit, load
           />
           {logoPreview && (
             <div className="mt-2 flex items-center">
-              <Image
+              <img
                 src={
                   // If it's a File object URL, use it directly
                   logoPreview && logoPreview.startsWith('blob:')
                     ? logoPreview
-                  // Priority 1: New uploaded images (start with /brands/)
-                  : logoPreview && logoPreview.startsWith('/brands/')
-                    ? logoPreview
-                  // Priority 2: HTTP URLs
-                  : logoPreview && logoPreview.startsWith('http')
-                    ? logoPreview
-                  // Priority 3: Old dashboard format (brands/April2025/file.webp)
-                  : logoPreview && logoPreview !== ""
-                    ? logoPreview.startsWith('/') ? logoPreview : `/dashboard/${logoPreview}`
-                  // Fallback: Placeholder
-                  : "/images/placeholder.png"
+                    : (() => {
+                        const { src } = getBrandImageWithFallback({ logo: logoPreview });
+                        return src;
+                      })()
                 }
                 alt="Logo preview"
                 width={200}
@@ -113,7 +106,16 @@ export default function BrandCreateEditForm({ initialBrand, mode, onSubmit, load
                 style={{ width: 200, height: 62, background: "#fff", border: "1px solid #eee" }}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  target.src = "/images/placeholder.png";
+                  if (!logoPreview?.startsWith('blob:')) {
+                    const { fallback } = getBrandImageWithFallback({ logo: logoPreview });
+                    if (fallback && target.src !== fallback) {
+                      target.src = fallback;
+                    } else {
+                      target.src = "/images/placeholder.png";
+                    }
+                  } else {
+                    target.src = "/images/placeholder.png";
+                  }
                 }}
               />
             </div>

@@ -1,11 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Brand } from "@/types/brand";
 import { getAllBrands } from "@/utils/brands";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 import { FaSearch } from "react-icons/fa";
+import { getBrandImageWithFallback } from "@/utils/imageUtils";
 
 const defaultItemsPerPage = 10;
 
@@ -173,20 +173,11 @@ export default function BrandTable() {
                 </td>
                 <td className="px-4 py-2">
                   <div className="flex justify-center items-center">
-                    <Image
-                      src={
-                        // Priority 1: New uploaded images (start with /brands/)
-                        brand.logo && brand.logo.startsWith('/brands/')
-                          ? brand.logo
-                        // Priority 2: HTTP URLs
-                        : brand.logo && brand.logo.startsWith('http')
-                          ? brand.logo
-                        // Priority 3: Old dashboard format (brands/April2025/file.webp)
-                        : brand.logo && brand.logo !== ""
-                          ? brand.logo.startsWith('/') ? brand.logo : `/dashboard/${brand.logo}`
-                        // Fallback: Placeholder
-                        : "/images/placeholder.png"
-                      }
+                    <img
+                      src={(() => {
+                        const { src } = getBrandImageWithFallback(brand as unknown as Record<string, unknown>);
+                        return src;
+                      })()}
                       alt={brand.designation_fr || "Logo"}
                       width={48}
                       height={48}
@@ -194,7 +185,12 @@ export default function BrandTable() {
                       style={{ width: 48, height: 48 }}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.src = "/images/placeholder.png";
+                        const { fallback } = getBrandImageWithFallback(brand as unknown as Record<string, unknown>);
+                        if (fallback && target.src !== fallback) {
+                          target.src = fallback;
+                        } else {
+                          target.src = "/images/placeholder.png";
+                        }
                       }}
                     />
                   </div>

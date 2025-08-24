@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchAnnonceById, updateAnnonce } from "@/services/annonces";
 import { Annonce } from "@/types/annonces";
+import { getAnnouncesImageWithFallback } from "@/utils/imageUtils";
 
 const initialState: Partial<Annonce> = {
   id: "",
@@ -39,13 +40,13 @@ export default function AnnouncesEditForm({ id }: { id: string }) {
         // Set previews for existing images
         [1,2,3,4,5,6].forEach(n => {
           if (annonce[`image_${n}` as keyof Annonce]) {
-            const imagePath = (annonce[`image_${n}` as keyof Annonce] as string).startsWith('/') ? (annonce[`image_${n}` as keyof Annonce] as string) : `/${annonce[`image_${n}` as keyof Annonce]}`;
-            setImagePreviews(prev => ({ ...prev, [`image_${n}`]: imagePath }));
+            const { src } = getAnnouncesImageWithFallback(annonce as unknown as Record<string, unknown>, `image_${n}`);
+            setImagePreviews(prev => ({ ...prev, [`image_${n}`]: src }));
           }
         });
         if (annonce.products_default_cover) {
-          const coverPath = annonce.products_default_cover.startsWith('/') ? annonce.products_default_cover : `/${annonce.products_default_cover}`;
-          setImagePreviews(prev => ({ ...prev, products_default_cover: coverPath }));
+          const { src } = getAnnouncesImageWithFallback(annonce as unknown as Record<string, unknown>, 'products_default_cover');
+          setImagePreviews(prev => ({ ...prev, products_default_cover: src }));
         }
       })
       .catch(() => setError("Annonce introuvable"))
@@ -114,7 +115,25 @@ export default function AnnouncesEditForm({ id }: { id: string }) {
                 className="w-full border p-2 text-base"
               />
               {imagePreviews[`image_${n}`] && (
-                <img src={imagePreviews[`image_${n}`] as string} alt={`img${n} preview`} className="mt-2 border rounded" style={{ width: 100, height: 60, objectFit: 'contain' }} />
+                <img 
+                  src={imagePreviews[`image_${n}`] as string} 
+                  alt={`img${n} preview`} 
+                  className="mt-2 border rounded" 
+                  style={{ width: 100, height: 60, objectFit: 'contain' }}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (form[`image_${n}` as keyof Annonce] && typeof form[`image_${n}` as keyof Annonce] === 'string') {
+                      const { fallback } = getAnnouncesImageWithFallback(form as unknown as Record<string, unknown>, `image_${n}`);
+                      if (fallback && target.src !== fallback) {
+                        target.src = fallback;
+                      } else {
+                        target.src = "/images/placeholder.png";
+                      }
+                    } else {
+                      target.src = "/images/placeholder.png";
+                    }
+                  }}
+                />
               )}
               <div className="text-xs text-gray-500 mt-1">{getFileName(form[`image_${n}` as keyof Annonce])}</div>
             </div>
@@ -135,7 +154,25 @@ export default function AnnouncesEditForm({ id }: { id: string }) {
             className="w-full border p-2 text-base"
           />
           {imagePreviews.products_default_cover && (
-            <img src={imagePreviews.products_default_cover as string} alt="default cover preview" className="mt-2 border rounded" style={{ width: 100, height: 60, objectFit: 'contain' }} />
+            <img 
+              src={imagePreviews.products_default_cover as string} 
+              alt="default cover preview" 
+              className="mt-2 border rounded" 
+              style={{ width: 100, height: 60, objectFit: 'contain' }}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                if (form.products_default_cover && typeof form.products_default_cover === 'string') {
+                  const { fallback } = getAnnouncesImageWithFallback(form as unknown as Record<string, unknown>, 'products_default_cover');
+                  if (fallback && target.src !== fallback) {
+                    target.src = fallback;
+                  } else {
+                    target.src = "/images/placeholder.png";
+                  }
+                } else {
+                  target.src = "/images/placeholder.png";
+                }
+              }}
+            />
           )}
           <div className="text-xs text-gray-500 mt-1">{getFileName(form.products_default_cover)}</div>
         </div>

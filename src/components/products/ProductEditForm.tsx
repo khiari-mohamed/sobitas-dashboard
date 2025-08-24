@@ -2,10 +2,11 @@
 
 import React, { useRef } from "react";
 import dynamic from "next/dynamic";
-import Image from "next/image";
+
 import { useRouter } from "next/navigation";
 import { FaArrowLeft } from "react-icons/fa";
 import axios from "@/lib/axios";
+import { getProductImageWithFallback } from "@/utils/imageUtils";
 
 // Dynamically load TinyMCE editor (client only)
 const Editor = dynamic(() => import("@/components/ui/RichTextEditor"), { ssr: false });
@@ -176,7 +177,10 @@ export default function ProductEditForm({ product }: ProductEditFormProps) {
   const mainImage =
     form.newCover
       ? URL.createObjectURL(form.newCover as File)
-      : String((form.mainImage as Record<string, unknown>)?.url || (form.cover ? `/${String(form.cover).replace(/^\/+/ , "")}` : "/images/placeholder.png"));
+      : (() => {
+          const { src } = getProductImageWithFallback(form);
+          return src;
+        })();
 
   const renderField = (field: Record<string, unknown>) => {
     const key = field.key as string;
@@ -189,12 +193,23 @@ export default function ProductEditForm({ product }: ProductEditFormProps) {
       return (
         <div key={key} className="mb-6">
           <label className="block text-xl font-semibold mb-2">{label}</label>
-          <Image
+          <img
             src={String(mainImage)}
             alt={String(form.alt_cover || "Image produit")}
             width={200}
             height={200}
             className="border rounded object-contain"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              if (!form.newCover) {
+                const { fallback } = getProductImageWithFallback(form);
+                if (fallback && target.src !== fallback) {
+                  target.src = fallback;
+                } else {
+                  target.src = "/images/placeholder.png";
+                }
+              }
+            }}
           />
           <input
             ref={fileInputRef}

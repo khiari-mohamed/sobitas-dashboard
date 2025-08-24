@@ -1,9 +1,10 @@
 "use client";
 import React from "react";
-import Image from "next/image";
+
 import Link from "next/link";
 import { FaEdit, FaTrash, FaArrowLeft } from "react-icons/fa";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
+import { getProductImageWithFallback } from "@/utils/imageUtils";
 
 function renderHTML(html: string | null | undefined) {
   if (!html) return <span className="text-gray-400">—</span>;
@@ -50,8 +51,10 @@ function Highlight({ value, yes, no, yesClass, noClass }: { value: boolean, yes:
 }
 
 export default function ProductViewClient({ product, id }: { product: Record<string, unknown>; id: string }) {
-  const mainImage = (product.mainImage as Record<string, unknown>)?.url
-    || (product.cover ? "/" + String(product.cover).replace(/^\/+/, "") : null);
+  const mainImage = (() => {
+    const { src } = getProductImageWithFallback(product);
+    return src;
+  })();
   const galleryImages = Array.isArray(product.images) ? product.images : [];
   const subCategories = Array.isArray(product.subCategory)
     ? product.subCategory.map(getCategory).filter(Boolean)
@@ -106,25 +109,48 @@ export default function ProductViewClient({ product, id }: { product: Record<str
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Couverture</h3>
         <div className="flex flex-col items-center mb-6">
           <div className="w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] md:w-[500px] md:h-[500px] flex items-center justify-center">
-            <Image
-              src={String(mainImage || "/images/placeholder.png")}
+            <img
+              src={mainImage}
               alt={String(product.designation_fr || product.title || "Product image")}
               width={500}
               height={500}
               className="object-contain border rounded w-full h-full"
               style={{ maxWidth: 500, maxHeight: 500 }}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                const { fallback } = getProductImageWithFallback(product);
+                if (fallback && target.src !== fallback) {
+                  target.src = fallback;
+                } else {
+                  target.src = "/images/placeholder.png";
+                }
+              }}
             />
           </div>
           {galleryImages.length > 0 && (
             <div className="flex gap-3 flex-wrap mt-4">
               {galleryImages.map((img: Record<string, unknown>, idx: number) => (
-                <Image
+                <img
                   key={idx}
-                  src={String((img as Record<string, unknown>).url || "/images/placeholder.png")}
+                  src={(() => {
+                    const imgObj = { cover: (img as Record<string, unknown>).url as string };
+                    const { src } = getProductImageWithFallback(imgObj);
+                    return src;
+                  })()}
                   alt={`Gallery ${idx + 1}`}
                   width={80}
                   height={80}
                   className="rounded border object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    const imgObj = { cover: (img as Record<string, unknown>).url as string };
+                    const { fallback } = getProductImageWithFallback(imgObj);
+                    if (fallback && target.src !== fallback) {
+                      target.src = fallback;
+                    } else {
+                      target.src = "/images/placeholder.png";
+                    }
+                  }}
                 />
               ))}
             </div>

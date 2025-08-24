@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchSlideById, updateSlide } from "@/services/slides";
 import { Slide } from "@/types/slides";
+import { getSlidesImageWithFallback } from "@/utils/imageUtils";
 
 interface SlideFormState extends Omit<Slide, 'cover'> {
   cover: string | File;
@@ -37,8 +38,8 @@ export default function SlidesEditForm({ id }: { id: string }) {
       .then((slide) => {
         setForm(slide);
         if (slide.cover) {
-          const coverPath = slide.cover.startsWith('/') ? slide.cover : `/${slide.cover}`;
-          setCoverPreview(coverPath);
+          const { src } = getSlidesImageWithFallback(slide as unknown as Record<string, unknown>);
+          setCoverPreview(src);
         }
       })
       .catch(() => setError("Slide introuvable"))
@@ -108,7 +109,25 @@ export default function SlidesEditForm({ id }: { id: string }) {
             className="w-full border p-2 text-base"
           />
           {coverPreview && (
-            <img src={coverPreview} alt="cover preview" className="mt-2 border rounded" style={{ width: 200, height: 100, objectFit: 'contain' }} />
+            <img 
+              src={coverPreview} 
+              alt="cover preview" 
+              className="mt-2 border rounded" 
+              style={{ width: 200, height: 100, objectFit: 'contain' }}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                if (form.cover && typeof form.cover === 'string') {
+                  const { fallback } = getSlidesImageWithFallback(form as unknown as Record<string, unknown>);
+                  if (fallback && target.src !== fallback) {
+                    target.src = fallback;
+                  } else {
+                    target.src = "/images/placeholder.png";
+                  }
+                } else {
+                  target.src = "/images/placeholder.png";
+                }
+              }}
+            />
           )}
           <div className="text-xs text-gray-500 mt-1">{getFileName(form.cover)}</div>
         </div>

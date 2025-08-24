@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { fetchAnnonceById } from "@/services/annonces";
 import { Annonce } from "@/types/annonces";
 import { FaEdit, FaArrowLeft } from "react-icons/fa";
+import { getAnnouncesImageWithFallback } from "@/utils/imageUtils";
 
 export default function AnnouncesViewClient({ id }: { id: string }) {
   const router = useRouter();
@@ -48,7 +49,25 @@ export default function AnnouncesViewClient({ id }: { id: string }) {
             <div className="mb-6">
               <label className="block text-xl font-semibold mb-2">Image {n}</label>
               {annonce[`image_${n}` as keyof Annonce] ? (
-                <img src={(annonce[`image_${n}` as keyof Annonce] as string).startsWith('/') ? (annonce[`image_${n}` as keyof Annonce] as string) : `/${annonce[`image_${n}` as keyof Annonce]}`} alt={`img${n}`} width={200} height={100} className="object-contain border rounded" />
+                <img 
+                  src={(() => {
+                    const { src } = getAnnouncesImageWithFallback(annonce as unknown as Record<string, unknown>, `image_${n}`);
+                    return src;
+                  })()} 
+                  alt={`img${n}`} 
+                  width={200} 
+                  height={100} 
+                  className="object-contain border rounded"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    const { fallback } = getAnnouncesImageWithFallback(annonce as unknown as Record<string, unknown>, `image_${n}`);
+                    if (fallback && target.src !== fallback) {
+                      target.src = fallback;
+                    } else {
+                      target.src = "/images/placeholder.png";
+                    }
+                  }}
+                />
               ) : <div className="w-full border p-4 text-base bg-gray-100 rounded">—</div>}
             </div>
             <div className="mb-6">
@@ -62,7 +81,25 @@ export default function AnnouncesViewClient({ id }: { id: string }) {
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Default Cover</label>
           {annonce.products_default_cover ? (
-            <img src={annonce.products_default_cover.startsWith('/') ? annonce.products_default_cover : `/${annonce.products_default_cover}`} alt="default cover" width={200} height={100} className="object-contain border rounded" />
+            <img 
+              src={(() => {
+                const { src } = getAnnouncesImageWithFallback(annonce as unknown as Record<string, unknown>, 'products_default_cover');
+                return src;
+              })()} 
+              alt="default cover" 
+              width={200} 
+              height={100} 
+              className="object-contain border rounded"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                const { fallback } = getAnnouncesImageWithFallback(annonce as unknown as Record<string, unknown>, 'products_default_cover');
+                if (fallback && target.src !== fallback) {
+                  target.src = fallback;
+                } else {
+                  target.src = "/images/placeholder.png";
+                }
+              }}
+            />
           ) : <div className="w-full border p-4 text-base bg-gray-100 rounded">—</div>}
         </div>
         <div className="mb-6">

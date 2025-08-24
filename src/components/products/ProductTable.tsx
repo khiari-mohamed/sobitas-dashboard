@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Product } from "@/types/product";
 import { fetchAllProducts, ProductListResponse } from "@/utils/fetchProducts";
@@ -10,6 +9,7 @@ import { SubCategory } from "@/types/subcategory";
 import { FaSearch } from "react-icons/fa";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 import { deleteProduct as deleteProductAPI } from "@/services/products";
+import { getProductImageWithFallback } from "@/utils/imageUtils";
 
 const defaultItemsPerPage = 10;
 
@@ -77,24 +77,7 @@ export default function ProductTable() {
     }
   };
 
-  // --- IMAGE RESOLVER ---
-  function getProductImageUrl(product: Product) {
-    // Check mainImage.url first
-    if (product.mainImage?.url) {
-      if (/^https?:\/\//.test(product.mainImage.url)) {
-        return product.mainImage.url;
-      }
-      return "/" + product.mainImage.url.replace(/^\/+/, "");
-    }
-    // Then check cover
-    if (product.cover && /^https?:\/\//.test(product.cover)) {
-      return product.cover;
-    }
-    if (product.cover && product.cover.length > 0) {
-      return "/" + product.cover.replace(/^\/+/, "");
-    }
-    return "/images/placeholder.png";
-  }
+
 
   return (
     <div className="bg-white rounded shadow-sm p-4 w-full max-w-[1800px] mx-auto">
@@ -212,13 +195,25 @@ export default function ProductTable() {
                 </td>
                 <td className="px-4 py-2">
                   <div className="flex justify-center items-center">
-                    <Image
-                      src={getProductImageUrl(product)}
+                    <img
+                      src={(() => {
+                        const { src, fallback } = getProductImageWithFallback(product);
+                        return src;
+                      })()}
                       alt="cover"
                       width={100}
                       height={100}
                       className="rounded object-contain border border-gray-200 shadow"
                       style={{ width: 100, height: 100 }}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        const { fallback } = getProductImageWithFallback(product);
+                        if (fallback && target.src !== fallback) {
+                          target.src = fallback;
+                        } else {
+                          target.src = "/images/placeholder.png";
+                        }
+                      }}
                     />
                   </div>
                 </td>

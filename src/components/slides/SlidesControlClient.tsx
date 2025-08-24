@@ -69,7 +69,17 @@ export default function SlidesControlClient() {
         <div className="flex flex-wrap gap-6 mb-6">
           {pcSlides.map((src, idx) => (
             <div key={src + idx} className="flex flex-col items-center border p-4 rounded shadow-sm bg-gray-50">
-              <img src={src} alt={`pc slide ${idx + 1}`} width={200} height={100} className="object-contain border rounded mb-2" />
+              <img 
+                src={src} 
+                alt={`pc slide ${idx + 1}`} 
+                width={200} 
+                height={100} 
+                className="object-contain border rounded mb-2"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "/images/placeholder.png";
+                }}
+              />
               <span className="text-xs text-gray-500 mb-2">{src.split("/").pop()}</span>
               <div className="flex gap-2 mb-2">
                 <button
@@ -134,7 +144,17 @@ export default function SlidesControlClient() {
         <div className="flex flex-wrap gap-6 mb-6">
           {mobileSlides.map((src, idx) => (
             <div key={src + idx} className="flex flex-col items-center border p-4 rounded shadow-sm bg-gray-50">
-              <img src={src} alt={`mobile slide ${idx + 1}`} width={200} height={100} className="object-contain border rounded mb-2" />
+              <img 
+                src={src} 
+                alt={`mobile slide ${idx + 1}`} 
+                width={200} 
+                height={100} 
+                className="object-contain border rounded mb-2"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "/images/placeholder.png";
+                }}
+              />
               <span className="text-xs text-gray-500 mb-2">{src.split("/").pop()}</span>
               <div className="flex gap-2 mb-2">
                 <button

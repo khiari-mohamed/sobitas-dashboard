@@ -31,6 +31,19 @@ export default function MediaManager() {
   const [zoom, setZoom] = useState(1);
   const imageRef = useRef<HTMLImageElement | null>(null);
 
+  // Simple image URL function - serve from backend server
+  const getMediaImageUrl = (media: Media) => {
+    const filename = media.id;
+    if (!filename) return "/images/placeholder.png";
+    
+    // HTTP URLs - use directly
+    if (filename.startsWith('http')) return filename;
+    
+    const backendUrl = 'http://145.223.118.9:5000';
+    // Files are stored in backend's public/produits/August2025/ directory
+    return `${backendUrl}/produits/August2025/${filename}`;
+  };
+
   // Fetch folder tree on mount
   useEffect(() => {
     mediaService.fetchFolderTree().then(setFolderTree);
@@ -39,11 +52,9 @@ export default function MediaManager() {
   // Fetch media for selected folder
   useEffect(() => {
     if (selectedFolder) {
-      console.log('Fetching media for folder:', selectedFolder);
       setLoading(true);
       mediaService.fetchMediaByFolder(selectedFolder)
         .then(data => {
-          console.log('Media fetched for folder', selectedFolder, ':', data);
           setMediaList(data);
         })
         .finally(() => setLoading(false));
@@ -112,8 +123,8 @@ export default function MediaManager() {
     if (selectedMediaIds.length !== 1) return;
     const media = mediaList.find(m => m.id === selectedMediaIds[0]);
     if (!media) return;
-    const imagePath = media.id.startsWith('/produits') ? media.id : media.id.startsWith('public/') ? `/${media.id.replace('public/', 'uploads/')}` : media.id.startsWith('/') ? media.id : `/uploads/${media.id}`;
-    setCroppingImage(imagePath);
+    const src = getMediaImageUrl(media);
+    setCroppingImage(src);
     setCropModalOpen(true);
     setRotation(0);
     setZoom(1);
@@ -155,6 +166,7 @@ export default function MediaManager() {
     await mediaService.updateFolder(folder.id, { name: newName });
     mediaService.fetchFolderTree().then(setFolderTree);
   };
+  
   const handleDeleteFolder = async (folder: Folder) => {
     if (!window.confirm(`Supprimer le dossier "${folder.name}" ?`)) return;
     await mediaService.deleteFolder(folder.id);
@@ -225,38 +237,45 @@ export default function MediaManager() {
       return <div className="col-span-full text-center text-gray-400 py-12">Aucun média dans ce dossier.</div>;
     }
 
-    // Debug logging
-    console.log('Media list:', mediaList.map(m => ({ id: m.id, generatedPath: m.id.startsWith('public/') ? `/${m.id.replace('public/', '')}` : m.id.startsWith('/') ? m.id : `/${m.id}` })));
-
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
-        {mediaList.map(media => (
-          <div key={media.id} className={`bg-gray-50 border rounded p-4 flex flex-col items-center ${selectMode && selectedMediaIds.includes(media.id) ? 'ring-2 ring-blue-500' : ''}`}>
-            <div className="w-full flex items-center justify-center bg-white border mb-2" style={{ width: 360, height: 200, maxWidth: '100%' }}>
-              <img
-                src={media.id.startsWith('/produits') ? media.id : media.id.startsWith('public/') ? `/${media.id.replace('public/', 'uploads/')}` : media.id.startsWith('/') ? media.id : `/uploads/${media.id}`}
-                alt={media.id}
-                className="object-contain"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  maxWidth: 360,
-                  maxHeight: 200,
-                  ...(selectMode ? { cursor: 'pointer', border: selectedMediaIds.includes(media.id) ? '2px solid #3b82f6' : undefined } : {})
-                }}
-                onError={e => (e.currentTarget.src = "/images/placeholder.png")}
-                onClick={() => {
-                  if (selectMode) {
-                    setSelectedMediaIds(ids => ids.includes(media.id) ? ids.filter(i => i !== media.id) : [...ids, media.id]);
-                  }
-                }}
-              />
+        {mediaList.map(media => {
+          const src = getMediaImageUrl(media);
+          const mediaUrl = media.id;
+          
+          return (
+            <div key={media.id} className={`bg-gray-50 border rounded p-4 flex flex-col items-center ${selectMode && selectedMediaIds.includes(media.id) ? 'ring-2 ring-blue-500' : ''}`}>
+              <div className="w-full flex items-center justify-center bg-white border mb-2" style={{ width: 360, height: 200, maxWidth: '100%' }}>
+                <img
+                  src={src}
+                  alt={mediaUrl}
+                  className="object-contain"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    maxWidth: 360,
+                    maxHeight: 200,
+                    ...(selectMode ? { cursor: 'pointer', border: selectedMediaIds.includes(media.id) ? '2px solid #3b82f6' : undefined } : {})
+                  }}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.src.includes('placeholder.png')) {
+                      target.src = "/images/placeholder.png";
+                    }
+                  }}
+                  onClick={() => {
+                    if (selectMode) {
+                      setSelectedMediaIds(ids => ids.includes(media.id) ? ids.filter(i => i !== media.id) : [...ids, media.id]);
+                    }
+                  }}
+                />
+              </div>
+              <div className="text-xs text-gray-700 truncate w-full text-center">{mediaUrl}</div>
+              <div className="text-xs text-gray-500">{media.width}x{media.height}px</div>
+              <div className="text-xs text-gray-500">{(media.fileSize / 1024).toFixed(1)} KB</div>
             </div>
-            <div className="text-xs text-gray-700 truncate w-full text-center">{media.id}</div>
-            <div className="text-xs text-gray-500">{media.width}x{media.height}px</div>
-            <div className="text-xs text-gray-500">{(media.fileSize / 1024).toFixed(1)} KB</div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     );
   };
@@ -352,6 +371,10 @@ export default function MediaManager() {
                         transition: 'transform 0.1s',
                         display: 'block',
                         margin: '0 auto'
+                      }}
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        target.src = "/images/placeholder.png";
                       }}
                     />
                   </ReactCrop>

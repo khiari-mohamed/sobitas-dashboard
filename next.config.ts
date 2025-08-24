@@ -2,7 +2,30 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["admin.protein.tn"],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'admin.protein.tn',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'protein.tn',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: '145.223.118.9',
+        port: '5000',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5000',
+        pathname: '/**',
+      },
+    ],
   },
 };
 

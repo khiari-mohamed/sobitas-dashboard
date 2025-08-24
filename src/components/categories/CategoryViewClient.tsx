@@ -1,11 +1,11 @@
 "use client";
 import React from "react";
-import Image from "next/image";
 // import Link from "next/link";
 import { FaEdit, FaTrash, FaArrowLeft } from "react-icons/fa";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 import { useRouter } from "next/navigation";
 import { Category } from "@/types/category";
+import { getCategoryImageWithFallback } from "@/utils/imageUtils";
 
 function renderHTML(html: string | null | undefined) {
   if (!html) return <span className="text-gray-400">—</span>;
@@ -85,20 +85,11 @@ export default function CategoryViewClient({ category, id }: { category: Categor
         <h2 className="text-3xl font-extrabold text-gray-800 mb-3">Couverture</h2>
         <div className="flex flex-col items-center mb-6">
           <div className="w-[300px] h-[300px] flex items-center justify-center">
-            <Image
-              src={
-                // Priority 1: New uploaded images (start with /categories/)
-                category.cover && category.cover.startsWith('/categories/')
-                  ? category.cover
-                  // Priority 2: SVG icons by ID
-                  : category.id && category.id !== ""
-                  ? `/images/categories/${category.id}.svg`
-                  // Priority 3: Old PNG images by cover filename
-                  : category.cover && category.cover !== ""
-                  ? `/images/categories/${category.cover.split('/').pop()}`
-                  // Fallback: Placeholder
-                  : "/images/placeholder.png"
-              }
+            <img
+              src={(() => {
+                const { src } = getCategoryImageWithFallback(category as unknown as Record<string, unknown>);
+                return src;
+              })()}
               alt={category.alt_cover || category.designation || category.title || "Category image"}
               width={300}
               height={300}
@@ -106,8 +97,10 @@ export default function CategoryViewClient({ category, id }: { category: Categor
               style={{ maxWidth: 300, maxHeight: 300 }}
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                // Try fallbacks in order
-                if (category.id && category.id !== "") {
+                const { fallback } = getCategoryImageWithFallback(category as unknown as Record<string, unknown>);
+                if (fallback && target.src !== fallback) {
+                  target.src = fallback;
+                } else if (category.id && category.id !== "") {
                   target.src = `/images/categories/${category.id}.svg`;
                 } else if (category.cover && category.cover !== "") {
                   target.src = `/images/categories/${category.cover.split('/').pop()}`;
@@ -128,17 +121,12 @@ export default function CategoryViewClient({ category, id }: { category: Categor
         <h3 className="text-2xl font-bold text-gray-700 mb-3">Couverture liste de produits</h3>
         <div className="flex flex-col items-center mb-6">
           <div className="w-[300px] h-[300px] flex items-center justify-center">
-            <Image
-              src={
-                // Priority 1: New uploaded images (start with /categories/)
-                category.product_liste_cover && category.product_liste_cover.startsWith('/categories/')
-                  ? category.product_liste_cover
-                  // Priority 2: Old images by filename
-                  : category.product_liste_cover
-                  ? `/images/categories/${category.product_liste_cover.split('/').pop()}`
-                  // Fallback: Placeholder
-                  : "/images/placeholder.png"
-              }
+            <img
+              src={(() => {
+                const categoryObj = { cover: category.product_liste_cover };
+                const { src } = getCategoryImageWithFallback(categoryObj as unknown as Record<string, unknown>);
+                return src;
+              })()}
               alt="Couverture liste de produits"
               width={300}
               height={300}
@@ -146,7 +134,13 @@ export default function CategoryViewClient({ category, id }: { category: Categor
               style={{ maxWidth: 300, maxHeight: 300 }}
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                target.src = "/images/placeholder.png";
+                const categoryObj = { cover: category.product_liste_cover };
+                const { fallback } = getCategoryImageWithFallback(categoryObj as unknown as Record<string, unknown>);
+                if (fallback && target.src !== fallback) {
+                  target.src = fallback;
+                } else {
+                  target.src = "/images/placeholder.png";
+                }
               }}
             />
           </div>

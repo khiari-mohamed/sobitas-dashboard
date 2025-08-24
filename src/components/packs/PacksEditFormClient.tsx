@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { fetchAllPacks, updatePack } from "@/services/pack";
 import { Pack } from "@/types/pack";
+import { getPackImageWithFallback } from "@/utils/imageUtils";
 
 const Editor = dynamic(() => import("@/components/ui/RichTextEditor"), { ssr: false });
 
@@ -124,6 +125,31 @@ export default function PacksEditForm({ id }: { id: string }) {
               }}
               className="w-full border p-2 text-base"
             />
+            {form.cover && (
+              <div className="mt-2">
+                <img
+                  src={selectedFile ? form.cover : (() => {
+                    const { src } = getPackImageWithFallback(form);
+                    return src;
+                  })()}
+                  alt="Aperçu"
+                  className="max-w-xs h-auto border rounded"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (!selectedFile) {
+                      const { fallback } = getPackImageWithFallback(form);
+                      if (fallback && target.src !== fallback) {
+                        target.src = fallback;
+                      } else {
+                        target.src = "/images/placeholder.png";
+                      }
+                    } else {
+                      target.src = "/images/placeholder.png";
+                    }
+                  }}
+                />
+              </div>
+            )}
             <p className="text-sm text-gray-500">
               Vous pouvez soit saisir un chemin d&apos;image, soit télécharger un fichier
             </p>

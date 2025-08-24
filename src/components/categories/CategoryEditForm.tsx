@@ -1,12 +1,12 @@
 "use client";
 import React, { useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FaArrowLeft } from "react-icons/fa";
 import { updateCategory, deleteCategory } from "@/services/categories";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 import { Category } from "@/types/category";
+import { getCategoryImageWithFallback } from "@/utils/imageUtils";
 
 const Editor = dynamic(() => import("@/components/ui/RichTextEditor"), { ssr: false });
 
@@ -124,23 +124,18 @@ export default function CategoryEditForm({ category }: { category: Category }) {
 
   const mainImage = image
     ? URL.createObjectURL(image)
-    : // Priority 1: New uploaded images (start with /categories/)
-      form.cover && form.cover.startsWith('/categories/')
-      ? form.cover
-      // Priority 2: SVG icons by ID
-      : form.id && form.id !== ""
-      ? `/images/categories/${form.id}.svg`
-      // Priority 3: Old PNG images by cover filename
-      : form.cover && form.cover !== ""
-      ? `/images/categories/${form.cover.split('/').pop()}`
-      // Fallback: Placeholder
-      : "/images/placeholder.png";
+    : (() => {
+        const { src } = getCategoryImageWithFallback(form);
+        return src;
+      })();
 
   const mainImageListeProduits = imageListeProduits
     ? URL.createObjectURL(imageListeProduits)
-    : (form as Record<string, unknown>).cover_liste_produits
-    ? `/images/categories/${String((form as Record<string, unknown>).cover_liste_produits).split('/').pop()}`
-    : "/images/placeholder.png";
+    : (() => {
+        const categoryObj = { cover: (form as Record<string, unknown>).cover_liste_produits };
+        const { src } = getCategoryImageWithFallback(categoryObj);
+        return src;
+      })();
 
   const renderField = (field: typeof FIELD_ORDER[number]) => {
     const { key, label, type, rows } = field;
@@ -149,7 +144,7 @@ export default function CategoryEditForm({ category }: { category: Category }) {
         return (
           <div key={key} className="mb-6">
             <label className="block text-xl font-semibold mb-2">{label}</label>
-            <Image
+            <img
               src={mainImageListeProduits}
               alt={form.alt_cover || form.designation || form.title || "Category image"}
               width={200}
@@ -157,10 +152,14 @@ export default function CategoryEditForm({ category }: { category: Category }) {
               className="border rounded object-contain"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                if ((form as Record<string, unknown>).cover_liste_produits) {
-                  target.src = `/images/categories/${String((form as Record<string, unknown>).cover_liste_produits).split('/').pop()}`;
-                } else {
-                  target.src = "/images/placeholder.png";
+                if (!imageListeProduits) {
+                  const categoryObj = { cover: (form as Record<string, unknown>).cover_liste_produits };
+                  const { fallback } = getCategoryImageWithFallback(categoryObj);
+                  if (fallback && target.src !== fallback) {
+                    target.src = fallback;
+                  } else {
+                    target.src = "/images/placeholder.png";
+                  }
                 }
               }}
             />
@@ -177,7 +176,7 @@ export default function CategoryEditForm({ category }: { category: Category }) {
       return (
         <div key={key} className="mb-6">
           <label className="block text-xl font-semibold mb-2">{label}</label>
-          <Image
+          <img
             src={mainImage}
             alt={form.alt_cover || form.designation || form.title || "Category image"}
             width={200}
@@ -185,13 +184,17 @@ export default function CategoryEditForm({ category }: { category: Category }) {
             className="border rounded object-contain"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              // Try fallbacks in order
-              if (form.id && form.id !== "") {
-                target.src = `/images/categories/${form.id}.svg`;
-              } else if (form.cover && form.cover !== "") {
-                target.src = `/images/categories/${form.cover.split('/').pop()}`;
-              } else {
-                target.src = "/images/placeholder.png";
+              if (!image) {
+                const { fallback } = getCategoryImageWithFallback(form);
+                if (fallback && target.src !== fallback) {
+                  target.src = fallback;
+                } else if (form.id && form.id !== "") {
+                  target.src = `/images/categories/${form.id}.svg`;
+                } else if (form.cover && form.cover !== "") {
+                  target.src = `/images/categories/${form.cover.split('/').pop()}`;
+                } else {
+                  target.src = "/images/placeholder.png";
+                }
               }
             }}
           />

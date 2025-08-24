@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { fetchServiceById, updateService } from "@/services/services";
 import { ServiceItem } from "@/types/services";
 import RichTextEditor from "@/components/ui/RichTextEditor";
+import { getServicesImageWithFallback } from "@/utils/imageUtils";
 
 interface ServiceFormState extends Omit<ServiceItem, 'icon'> {
   icon: string | File;
@@ -28,20 +29,13 @@ export default function ServicesEditForm({ id }: { id: string }) {
   const iconInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+  
     fetchServiceById(id)
       .then((service) => {
         setForm(service);
         if (service.icon) {
-          // Handle different path formats
-          let iconPath;
-          if (service.icon.startsWith('/')) {
-            iconPath = service.icon; // New format: /produits/août2025/file.jpg
-          } else if (service.icon.includes('/')) {
-            iconPath = `/${service.icon}`; // Old format: services/September2023/file.png
-          } else {
-            iconPath = `/produits/${service.icon}`; // Just filename: file.jpg
-          }
-          setIconPreview(iconPath);
+          const { src } = getServicesImageWithFallback(service as unknown as Record<string, unknown>);
+          setIconPreview(src);
         }
       })
       .catch(() => setError("Service introuvable"))
@@ -118,7 +112,25 @@ export default function ServicesEditForm({ id }: { id: string }) {
             className="w-full border p-2 text-base"
           />
           {iconPreview && (
-            <img src={iconPreview} alt="icon preview" className="mt-2 border rounded" style={{ width: 100, height: 100, objectFit: 'contain' }} />
+            <img 
+              src={iconPreview} 
+              alt="icon preview" 
+              className="mt-2 border rounded" 
+              style={{ width: 100, height: 100, objectFit: 'contain' }}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                if (form.icon && typeof form.icon === 'string') {
+                  const { fallback } = getServicesImageWithFallback(form as unknown as Record<string, unknown>);
+                  if (fallback && target.src !== fallback) {
+                    target.src = fallback;
+                  } else {
+                    target.src = "/images/placeholder.png";
+                  }
+                } else {
+                  target.src = "/images/placeholder.png";
+                }
+              }}
+            />
           )}
           <div className="text-xs text-gray-500 mt-1">{form.icon ? (typeof form.icon === "string" ? form.icon.split("/").pop() : "") : ""}</div>
         </div>

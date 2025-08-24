@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { fetchCoordinateById, updateCoordinate } from "@/services/coordinates";
 import { Coordinates } from "@/types/coordinates";
 import RichTextEditor from "@/components/ui/RichTextEditor";
+import { getCoordinatesImageWithFallback } from "@/utils/imageUtils";
 
 const initialState: Partial<Coordinates> = {
   id: "",
@@ -70,16 +71,16 @@ export default function CoordinatesEditForm({ id }: { id: string }) {
       .then((coordinate) => {
         setForm(coordinate);
         if (coordinate.logo) {
-          const logoPath = coordinate.logo.startsWith('/') ? coordinate.logo : `/${coordinate.logo}`;
-          setLogoPreview(logoPath);
+          const { src } = getCoordinatesImageWithFallback(coordinate as unknown as Record<string, unknown>, 'logo');
+          setLogoPreview(src);
         }
         if (coordinate.logo_facture) {
-          const logoFacturePath = coordinate.logo_facture.startsWith('/') ? coordinate.logo_facture : `/${coordinate.logo_facture}`;
-          setLogoFacturePreview(logoFacturePath);
+          const { src } = getCoordinatesImageWithFallback(coordinate as unknown as Record<string, unknown>, 'logo_facture');
+          setLogoFacturePreview(src);
         }
         if (coordinate.logo_footer) {
-          const logoFooterPath = coordinate.logo_footer.startsWith('/') ? coordinate.logo_footer : `/${coordinate.logo_footer}`;
-          setLogoFooterPreview(logoFooterPath);
+          const { src } = getCoordinatesImageWithFallback(coordinate as unknown as Record<string, unknown>, 'logo_footer');
+          setLogoFooterPreview(src);
         }
       })
       .catch(() => setError("Coordonnée introuvable"))
@@ -194,19 +195,79 @@ export default function CoordinatesEditForm({ id }: { id: string }) {
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Logo</label>
           <input type="file" ref={logoInputRef} accept="image/*" onChange={e => handleLogoChange(e, "logo")} className="w-full border p-2 text-base" />
-          {logoPreview && <img src={logoPreview} alt="logo preview" className="mt-2 border rounded" style={{ width: 200, height: 100, objectFit: 'contain' }} />}
+          {logoPreview && (
+            <img 
+              src={logoPreview} 
+              alt="logo preview" 
+              className="mt-2 border rounded" 
+              style={{ width: 200, height: 100, objectFit: 'contain' }}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                if (form.logo && typeof form.logo === 'string') {
+                  const { fallback } = getCoordinatesImageWithFallback(form, 'logo');
+                  if (fallback && target.src !== fallback) {
+                    target.src = fallback;
+                  } else {
+                    target.src = "/images/placeholder.png";
+                  }
+                } else {
+                  target.src = "/images/placeholder.png";
+                }
+              }}
+            />
+          )}
         </div>
         {/* Logo Facture (upload + preview) */}
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Logo Facture</label>
           <input type="file" ref={logoFactureInputRef} accept="image/*" onChange={e => handleLogoChange(e, "logo_facture")} className="w-full border p-2 text-base" />
-          {logoFacturePreview && <img src={logoFacturePreview} alt="logo facture preview" className="mt-2 border rounded" style={{ width: 200, height: 100, objectFit: 'contain' }} />}
+          {logoFacturePreview && (
+            <img 
+              src={logoFacturePreview} 
+              alt="logo facture preview" 
+              className="mt-2 border rounded" 
+              style={{ width: 200, height: 100, objectFit: 'contain' }}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                if (form.logo_facture && typeof form.logo_facture === 'string') {
+                  const { fallback } = getCoordinatesImageWithFallback(form, 'logo_facture');
+                  if (fallback && target.src !== fallback) {
+                    target.src = fallback;
+                  } else {
+                    target.src = "/images/placeholder.png";
+                  }
+                } else {
+                  target.src = "/images/placeholder.png";
+                }
+              }}
+            />
+          )}
         </div>
         {/* Logo Footer (upload + preview) */}
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Logo Footer</label>
           <input type="file" ref={logoFooterInputRef} accept="image/*" onChange={e => handleLogoChange(e, "logo_footer")} className="w-full border p-2 text-base" />
-          {logoFooterPreview && <img src={logoFooterPreview} alt="logo footer preview" className="mt-2 border rounded" style={{ width: 200, height: 100, objectFit: 'contain' }} />}
+          {logoFooterPreview && (
+            <img 
+              src={logoFooterPreview} 
+              alt="logo footer preview" 
+              className="mt-2 border rounded" 
+              style={{ width: 200, height: 100, objectFit: 'contain' }}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                if (form.logo_footer && typeof form.logo_footer === 'string') {
+                  const { fallback } = getCoordinatesImageWithFallback(form, 'logo_footer');
+                  if (fallback && target.src !== fallback) {
+                    target.src = fallback;
+                  } else {
+                    target.src = "/images/placeholder.png";
+                  }
+                } else {
+                  target.src = "/images/placeholder.png";
+                }
+              }}
+            />
+          )}
         </div>
         {/* Short Description Footer (rich text) */}
         <div className="mb-6 col-span-1 md:col-span-2">

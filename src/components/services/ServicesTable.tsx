@@ -6,6 +6,7 @@ import { fetchServices, deleteService } from "@/services/services";
 import { ServiceItem } from "@/types/services";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 import { FaSearch } from "react-icons/fa";
+import { getServicesImageWithFallback } from "@/utils/imageUtils";
 
 const defaultItemsPerPage = 10;
 
@@ -173,18 +174,27 @@ export default function ServicesTable() {
                 </td>
                 <td className="px-4 py-2">{s.designation_fr}</td>
                 <td className="px-4 py-2">{s.description_fr}</td>
-                <td className="px-4 py-2">{s.icon ? (() => {
-                  // Handle different path formats
-                  let iconPath;
-                  if (s.icon.startsWith('/')) {
-                    iconPath = s.icon; // New format: /produits/août2025/file.jpg
-                  } else if (s.icon.includes('/')) {
-                    iconPath = `/${s.icon}`; // Old format: services/September2023/file.png
-                  } else {
-                    iconPath = `/produits/${s.icon}`; // Just filename: file.jpg
-                  }
-                  return <img src={iconPath} alt="icon" width={100} height={100} className="object-contain border rounded" />;
-                })() : "—"}</td>
+                <td className="px-4 py-2">{s.icon ? (
+                  <img 
+                    src={(() => {
+                      const { src } = getServicesImageWithFallback(s as unknown as Record<string, unknown>);
+                      return src;
+                    })()} 
+                    alt="icon" 
+                    width={100} 
+                    height={100} 
+                    className="object-contain border rounded"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      const { fallback } = getServicesImageWithFallback(s as unknown as Record<string, unknown>);
+                      if (fallback && target.src !== fallback) {
+                        target.src = fallback;
+                      } else {
+                        target.src = "/images/placeholder.png";
+                      }
+                    }}
+                  />
+                ) : "—"}</td>
                 <td className="px-4 py-2">{s.created_at ? new Date(s.created_at).toLocaleString() : "—"}</td>
                 <td className="px-4 py-2">{s.updated_at ? new Date(s.updated_at).toLocaleString() : "—"}</td>
                 <td className="px-4 py-2 space-x-1">

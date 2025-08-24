@@ -6,6 +6,7 @@ import { fetchCoordinates, deleteCoordinate } from "@/services/coordinates";
 import { Coordinates } from "@/types/coordinates";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 import { FaSearch } from "react-icons/fa";
+import { getCoordinatesImageWithFallback } from "@/utils/imageUtils";
 
 const defaultItemsPerPage = 10;
 
@@ -177,13 +178,51 @@ export default function CoordinatesTable() {
                 {/* Logo */}
                 <td className="px-4 py-2">
                   {c.logo ? (
-                    <img src={c.logo.startsWith('/') ? c.logo : `/${c.logo}`} alt="logo" width={200} height={100} style={{ objectFit: 'contain' }} className="border rounded" />
+                    <img 
+                      src={(() => {
+                        const { src } = getCoordinatesImageWithFallback(c as unknown as Record<string, unknown>, 'logo');
+                        return src;
+                      })()} 
+                      alt="logo" 
+                      width={200} 
+                      height={100} 
+                      style={{ objectFit: 'contain' }} 
+                      className="border rounded"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        const { fallback } = getCoordinatesImageWithFallback(c as unknown as Record<string, unknown>, 'logo');
+                        if (fallback && target.src !== fallback) {
+                          target.src = fallback;
+                        } else {
+                          target.src = "/images/placeholder.png";
+                        }
+                      }}
+                    />
                   ) : "—"}
                 </td>
                 {/* Logo Facture */}
                 <td className="px-4 py-2">
                   {c.logo_facture ? (
-                    <img src={c.logo_facture.startsWith('/') ? c.logo_facture : `/${c.logo_facture}`} alt="logo facture" width={200} height={100} style={{ objectFit: 'contain' }} className="border rounded" />
+                    <img 
+                      src={(() => {
+                        const { src } = getCoordinatesImageWithFallback(c as unknown as Record<string, unknown>, 'logo_facture');
+                        return src;
+                      })()} 
+                      alt="logo facture" 
+                      width={200} 
+                      height={100} 
+                      style={{ objectFit: 'contain' }} 
+                      className="border rounded"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        const { fallback } = getCoordinatesImageWithFallback(c as unknown as Record<string, unknown>, 'logo_facture');
+                        if (fallback && target.src !== fallback) {
+                          target.src = fallback;
+                        } else {
+                          target.src = "/images/placeholder.png";
+                        }
+                      }}
+                    />
                   ) : "—"}
                 </td>
                 {/* WhatsApp */}

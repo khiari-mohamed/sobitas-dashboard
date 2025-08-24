@@ -4,7 +4,7 @@ export interface Media {
   height: number | null;
   fileSize: number;
   folderId?: string | null;
-  // Optionally add more fields (e.g., type, mimetype, url) if needed
+  url?: string;
 }
 
 export interface Folder {

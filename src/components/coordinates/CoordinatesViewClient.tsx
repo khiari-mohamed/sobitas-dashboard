@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { fetchCoordinateById } from "@/services/coordinates";
 import { Coordinates } from "@/types/coordinates";
 import { FaEdit, FaArrowLeft } from "react-icons/fa";
+import { getCoordinatesImageWithFallback } from "@/utils/imageUtils";
 
 export default function CoordinatesViewClient({ id }: { id: string }) {
   const router = useRouter();
@@ -22,11 +23,30 @@ export default function CoordinatesViewClient({ id }: { id: string }) {
   if (loading) return <div className="text-center py-12">Chargement...</div>;
   if (error || !coordinate) return <div className="text-center py-12 text-red-500">{error || "Coordonnée introuvable"}</div>;
 
-  const renderField = (label: string, value: unknown, isLink = false, isImage = false, isRich = false) => (
+  const renderField = (label: string, value: unknown, isLink = false, isImage = false, isRich = false, imageField?: string) => (
     <div className="mb-6">
       <label className="block text-xl font-semibold mb-2">{label}</label>
-      {isImage && value ? (
-        <img src={String(value).startsWith('/') ? String(value) : `/${String(value)}`} alt={label} width={200} height={100} style={{ objectFit: 'contain' }} className="border rounded" />
+      {isImage && value && coordinate && imageField ? (
+        <img 
+          src={(() => {
+            const { src } = getCoordinatesImageWithFallback(coordinate as unknown as Record<string, unknown>, imageField);
+            return src;
+          })()} 
+          alt={label} 
+          width={200} 
+          height={100} 
+          style={{ objectFit: 'contain' }} 
+          className="border rounded"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            const { fallback } = getCoordinatesImageWithFallback(coordinate as unknown as Record<string, unknown>, imageField);
+            if (fallback && target.src !== fallback) {
+              target.src = fallback;
+            } else {
+              target.src = "/images/placeholder.png";
+            }
+          }}
+        />
       ) : isLink && value ? (
         <a href={String(value)} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">{String(value)}</a>
       ) : isRich && value ? (
@@ -66,10 +86,10 @@ export default function CoordinatesViewClient({ id }: { id: string }) {
         {renderField("Site web", coordinate.site_web)}
         {renderField("Facebook", coordinate.facebook_link, true)}
         {renderField("Youtube", coordinate.youtube_link, true)}
-        {renderField("Favicon", coordinate.favicon, false, true)}
-        {renderField("Logo", coordinate.logo, false, true)}
-        {renderField("Logo Facture", coordinate.logo_facture, false, true)}
-        {renderField("Logo Footer", coordinate.logo_footer, false, true)}
+        {renderField("Favicon", coordinate.favicon, false, true, false, "favicon")}
+        {renderField("Logo", coordinate.logo, false, true, false, "logo")}
+        {renderField("Logo Facture", coordinate.logo_facture, false, true, false, "logo_facture")}
+        {renderField("Logo Footer", coordinate.logo_footer, false, true, false, "logo_footer")}
         {renderField("Description Footer (court)", coordinate.short_description_fr, false, false, true)}
         {renderField("Description (longue)", coordinate.description_fr, false, false, true)}
         {renderField("Created By", coordinate.created_by)}

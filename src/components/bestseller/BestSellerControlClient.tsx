@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { fetchAllBestSellers, updateBestSeller, deleteBestSeller, getBestSellerConfig, updateBestSellerConfig, updateBestSellerOrder } from "@/services/bestseller";
 import { BestSeller, BestSellerConfig } from "@/types/bestseller";
 import dynamic from "next/dynamic";
+import { getImageSrc } from "@/utils/imageUtils";
 
 const Editor = dynamic(() => import("@/components/ui/RichTextEditor"), { ssr: false });
 
@@ -187,11 +188,7 @@ export default function BestSellerControlClient() {
     }
   };
 
-  const getImageSrc = (product: BestSeller) => {
-    if (!product.cover || product.cover === "undefined") return "/images/placeholder.png";
-    if (product.cover.startsWith('http') || product.cover.startsWith('/')) return product.cover;
-    return `https://admin.protein.tn/storage/app/public/${product.cover}`;
-  };
+
 
   if (loading) return <div className="p-8">Chargement...</div>;
 
@@ -306,7 +303,7 @@ export default function BestSellerControlClient() {
                 <div key={product._id} className="bg-white border rounded-lg p-4 shadow-sm">
                   <div className="relative aspect-square bg-gray-100 rounded mb-3 overflow-hidden">
                     <img
-                      src={getImageSrc(product)}
+                      src={getImageSrc(product as unknown as Record<string, unknown>)}
                       alt={product.designation_fr}
                       className="w-full h-full object-cover"
                     />
@@ -371,7 +368,7 @@ export default function BestSellerControlClient() {
                   </div>
                 </td>
                 <td className="border border-gray-300 px-2 py-3">
-                  <img src={getImageSrc(product)} alt="Product" className="w-12 h-12 object-cover rounded" />
+                  <img src={getImageSrc(product as unknown as Record<string, unknown>)} alt="Product" className="w-12 h-12 object-cover rounded" />
                 </td>
                 <td className="border border-gray-300 px-2 py-3">
                   <input

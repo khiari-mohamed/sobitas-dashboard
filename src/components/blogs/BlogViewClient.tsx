@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { FaEdit, FaTrash, FaArrowLeft } from "react-icons/fa";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 import { getBlogs } from "@/services/blog.service";
+import { getBlogImageWithFallback } from "@/utils/imageUtils";
 
 function renderHTML(html: string | null | undefined) {
   if (!html) return <span className="text-gray-400">—</span>;
@@ -44,18 +44,7 @@ export default function BlogViewClient({ id }: { id: string }) {
     return <div className="text-center py-12 text-red-500">Aucun blog trouvé.</div>;
   }
 
-  const coverUrl = 
-    // Priority 1: New uploaded images (start with /blogs/)
-    typeof blog.cover === "string" && blog.cover.startsWith('/blogs/')
-      ? blog.cover
-    // Priority 2: Object format with URL
-    : typeof blog.cover === "object" && blog.cover && (blog.cover as Record<string, unknown>).url
-      ? String((blog.cover as Record<string, unknown>).url).startsWith("http") ? String((blog.cover as Record<string, unknown>).url) : String((blog.cover as Record<string, unknown>).url)
-    // Priority 3: Old uploads format (articles/February2025/file.webp)
-    : typeof blog.cover === "string" && blog.cover !== ""
-      ? blog.cover.startsWith('/') ? blog.cover : `/uploads/${blog.cover}`
-    // Fallback: Placeholder
-    : "/images/placeholder.png";
+  const { src: coverUrl, fallback: coverFallback } = getBlogImageWithFallback(blog);
 
   return (
     <div className="bg-white p-8 shadow-xl w-full max-w-[1600px] mx-auto">
@@ -95,13 +84,21 @@ export default function BlogViewClient({ id }: { id: string }) {
       <h3 className="text-2xl font-bold text-gray-700 mb-3">Couverture</h3>
       <div className="flex flex-col items-center mb-6">
         <div className="flex items-center justify-center" style={{ width: 660, height: 660 }}>
-          <Image
+          <img
             src={coverUrl}
             alt={String(blog.title || blog.designation_fr || "Blog image")}
             width={660}
             height={660}
             className="object-contain border w-full h-full"
             style={{ maxWidth: 660, maxHeight: 660 }}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              if (coverFallback && target.src !== coverFallback) {
+                target.src = coverFallback;
+              } else {
+                target.src = "/images/placeholder.png";
+              }
+            }}
           />
         </div>
       </div>

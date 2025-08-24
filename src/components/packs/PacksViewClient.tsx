@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { fetchAllPacks } from "@/services/pack";
 import { Pack } from "@/types/pack";
+import { getPackImageWithFallback } from "@/utils/imageUtils";
 
 export default function PacksViewClient({ id }: { id: string }) {
   const router = useRouter();
@@ -28,11 +29,7 @@ export default function PacksViewClient({ id }: { id: string }) {
   if (loading) return <div className="p-8">Chargement...</div>;
   if (!pack) return <div className="p-8">Pack non trouvé</div>;
 
-  const getImageSrc = (pack: Pack) => {
-    if (!pack.cover || pack.cover === "undefined") return "/images/packs/pack.webp";
-    if (pack.cover.startsWith('http') || pack.cover.startsWith('/')) return pack.cover;
-    return `https://admin.protein.tn/storage/app/public/${pack.cover}`;
-  };
+  const { src: imageSrc, fallback: imageFallback } = pack ? getPackImageWithFallback(pack as unknown as Record<string, unknown>) : { src: "/images/placeholder.png", fallback: "" };
 
   const isPublished = pack.publier === "1" || pack.publier === "oui";
 
@@ -125,7 +122,19 @@ export default function PacksViewClient({ id }: { id: string }) {
 
       <div className="mt-8">
         <h3 className="text-xl font-semibold mb-2">Image de couverture</h3>
-        <img src={getImageSrc(pack)} alt={pack.alt_cover || "Pack"} className="max-w-md h-auto border rounded" />
+        <img 
+          src={imageSrc} 
+          alt={pack.alt_cover || "Pack"} 
+          className="max-w-md h-auto border rounded" 
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            if (imageFallback && target.src !== imageFallback) {
+              target.src = imageFallback;
+            } else {
+              target.src = "/images/placeholder.png";
+            }
+          }}
+        />
         {pack.alt_cover && <p className="text-sm text-gray-500 mt-2">Alt: {pack.alt_cover}</p>}
       </div>
 

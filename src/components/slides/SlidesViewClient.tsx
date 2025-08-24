@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { fetchSlideById } from "@/services/slides";
 import { Slide } from "@/types/slides";
 import { FaEdit, FaArrowLeft } from "react-icons/fa";
+import { getSlidesImageWithFallback } from "@/utils/imageUtils";
 
 export default function SlidesViewClient({ id }: { id: string }) {
   const router = useRouter();
@@ -46,7 +47,25 @@ export default function SlidesViewClient({ id }: { id: string }) {
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2">Image (cover)</label>
           {slide.cover ? (
-            <img src={slide.cover.startsWith('/') ? slide.cover : `/${slide.cover}`} alt="cover" width={200} height={100} className="object-contain border rounded" />
+            <img 
+              src={(() => {
+                const { src } = getSlidesImageWithFallback(slide as unknown as Record<string, unknown>);
+                return src;
+              })()} 
+              alt="cover" 
+              width={200} 
+              height={100} 
+              className="object-contain border rounded"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                const { fallback } = getSlidesImageWithFallback(slide as unknown as Record<string, unknown>);
+                if (fallback && target.src !== fallback) {
+                  target.src = fallback;
+                } else {
+                  target.src = "/images/placeholder.png";
+                }
+              }}
+            />
           ) : <div className="w-full border p-4 text-base bg-gray-100 rounded">—</div>}
         </div>
         <div className="mb-6">

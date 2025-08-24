@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Blog } from "@/types/blog";
 import { fetchAllBlogs } from "@/utils/fetchBlogs";
 import { FaSearch } from "react-icons/fa";
 import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
+import { getBlogImageWithFallback } from "@/utils/imageUtils";
 
 const defaultItemsPerPage = 10;
 
@@ -175,20 +175,11 @@ export default function BlogTable() {
                 </td>
                 <td className="px-4 py-2">
                   <div className="flex justify-center items-center">
-                    <Image
-                      src={
-                        // Priority 1: New uploaded images (start with /blogs/)
-                        typeof blog.cover === "string" && blog.cover.startsWith('/blogs/')
-                          ? blog.cover
-                        // Priority 2: Object format with URL
-                        : typeof blog.cover === "object" && blog.cover?.url
-                          ? blog.cover.url.startsWith("http") ? blog.cover.url : blog.cover.url
-                        // Priority 3: Old uploads format (articles/February2025/file.webp)
-                        : typeof blog.cover === "string" && blog.cover !== ""
-                          ? blog.cover.startsWith('/') ? blog.cover : `/uploads/${blog.cover}`
-                        // Fallback: Placeholder
-                        : "/images/placeholder.png"
-                      }
+                    <img
+                      src={(() => {
+                        const { src } = getBlogImageWithFallback(blog as unknown as Record<string, unknown>);
+                        return src;
+                      })()}
                       alt="cover"
                       width={100}
                       height={100}
@@ -196,7 +187,12 @@ export default function BlogTable() {
                       style={{ width: 100, height: 100 }}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.src = "/images/placeholder.png";
+                        const { fallback } = getBlogImageWithFallback(blog as unknown as Record<string, unknown>);
+                        if (fallback && target.src !== fallback) {
+                          target.src = fallback;
+                        } else {
+                          target.src = "/images/placeholder.png";
+                        }
                       }}
                     />
                   </div>

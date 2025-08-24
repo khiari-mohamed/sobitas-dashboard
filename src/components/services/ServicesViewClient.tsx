@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { fetchServiceById } from "@/services/services";
 import { ServiceItem } from "@/types/services";
 import { FaEdit, FaArrowLeft } from "react-icons/fa";
+import { getServicesImageWithFallback } from "@/utils/imageUtils";
 
 export default function ServicesViewClient({ id }: { id: string }) {
   const router = useRouter();
@@ -53,18 +54,27 @@ export default function ServicesViewClient({ id }: { id: string }) {
         </div>
         <div className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Icone</h2>
-          {service.icon ? (() => {
-            // Handle different path formats
-            let iconPath;
-            if (service.icon.startsWith('/')) {
-              iconPath = service.icon; // New format: /produits/août2025/file.jpg
-            } else if (service.icon.includes('/')) {
-              iconPath = `/${service.icon}`; // Old format: services/September2023/file.png
-            } else {
-              iconPath = `/produits/${service.icon}`; // Just filename: file.jpg
-            }
-            return <img src={iconPath} alt="icon" width={120} height={120} className="object-contain border rounded" />;
-          })() : <div className="w-full border p-4 text-lg bg-gray-100 rounded">—</div>}
+          {service.icon ? (
+            <img 
+              src={(() => {
+                const { src } = getServicesImageWithFallback(service as unknown as Record<string, unknown>);
+                return src;
+              })()} 
+              alt="icon" 
+              width={120} 
+              height={120} 
+              className="object-contain border rounded"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                const { fallback } = getServicesImageWithFallback(service as unknown as Record<string, unknown>);
+                if (fallback && target.src !== fallback) {
+                  target.src = fallback;
+                } else {
+                  target.src = "/images/placeholder.png";
+                }
+              }}
+            />
+          ) : <div className="w-full border p-4 text-lg bg-gray-100 rounded">—</div>}
         </div>
         <div className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Date de création</h2>
