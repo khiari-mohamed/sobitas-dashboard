@@ -39,7 +39,7 @@ export default function MediaManager() {
     // HTTP URLs - use directly
     if (filename.startsWith('http')) return filename;
     
-    const backendUrl = 'http://145.223.118.9:5000';
+    const backendUrl = 'https://145.223.118.9:5000';
     // Files are stored in backend's public/produits/August2025/ directory
     return `${backendUrl}/produits/August2025/${filename}`;
   };

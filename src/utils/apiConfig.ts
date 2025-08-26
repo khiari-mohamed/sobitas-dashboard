@@ -2,7 +2,7 @@
  * Auto-detect backend URL based on availability
  */
 
-const PROD_BACKEND = 'http://145.223.118.9:5000';
+const PROD_BACKEND = 'https://145.223.118.9:5000';
 const DEV_BACKEND = 'http://localhost:5000';
 
 let cachedBackendUrl: string | null = null;

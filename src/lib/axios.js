@@ -3,7 +3,7 @@ import axios from 'axios';
 // Auto-detect backend URL
 const getBaseURL = () => {
   // Try prod first, fallback to local
-  const prodUrl = 'http://145.223.118.9:5000';
+  const prodUrl = 'https://145.223.118.9:5000';
   const localUrl = 'http://localhost:5000';
   
   // Use environment variable if set, otherwise default to prod
@@ -53,7 +53,7 @@ axiosInstance.interceptors.response.use(
     // Handle network errors - try switching backend
     if (error.code === 'ERR_NETWORK' || error.code === 'ECONNREFUSED') {
       const currentBaseURL = axiosInstance.defaults.baseURL;
-      const prodUrl = 'http://145.223.118.9:5000';
+      const prodUrl = 'https://145.223.118.9:5000';
       const localUrl = 'http://localhost:5000';
       
       // Switch to alternative backend

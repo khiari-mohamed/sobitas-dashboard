@@ -27,7 +27,7 @@ export function getImageUrl(imagePath: string | null | undefined): string {
 export function getRemoteImageUrl(imagePath: string | null | undefined): string {
   if (!imagePath) return "";
   const cleanPath = imagePath.replace(/^\/+/, "");
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://145.223.118.9:5000';
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://145.223.118.9:5000';
   return `${backendUrl}/${cleanPath}`;
 }
 
